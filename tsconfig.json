@@ -1,0 +1,33 @@
+{
+  "extends": "./.nuxt/tsconfig.json",
+  "compilerOptions": {
+    "types": ["vue", "pinia", "@supabase/supabase-js", "nuxt"],
+    "strict": true,
+    "module": "ESNext",
+    "target": "ESNext",
+    "strictNullChecks": true,
+    "moduleResolution": "node",
+    "esModuleInterop": true,
+    "isolatedModules": true,
+    "jsx": "preserve",
+    "skipLibCheck": true,
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*"],
+      "~/*": ["src/*"]
+    }
+  },
+  "include": [
+    "src/types/*.d.ts",
+    "src/types/**/*.d.ts",
+    "src/**/*.ts",
+    ".nuxt/**/*",
+    "src/**/*.vue",
+    "src/plugins/*.ts",
+    "src/stores/*.ts",
+    "src/pages/**/*.vue",
+    "src/layouts/**/*.vue",
+    "src/components/**/*.vue",
+    "nuxt.config.ts"
+  ]
+}

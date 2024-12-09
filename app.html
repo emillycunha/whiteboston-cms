@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="WhiteBoston CMS - Manage your content effortlessly."
+    />
+    <meta property="og:title" content="WhiteBoston CMS" />
+    <meta
+      property="og:description"
+      content="Manage your content effortlessly with WhiteBoston CMS."
+    />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://your-site.com" />
+    <meta property="og:image" content="https://your-site.com/og-image.png" />
+    <link rel="icon" href="/favicon.ico" />
+
+    <title>WhiteBoston CMS</title>
+    <script>
+      // Apply theme before the app renders
+      try {
+        const theme = localStorage.getItem("theme") || "light";
+        document.documentElement.classList.add(
+          theme === "dark" ? "dark" : "light"
+        );
+      } catch (e) {
+        document.documentElement.classList.add("light");
+      }
+    </script>
+  </head>
+  <body>
+    <div id="__nuxt" class=""></div>
+  </body>
+</html>
