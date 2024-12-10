@@ -1,12 +1,7 @@
 <script setup>
 import { ref, computed } from "vue";
 
-import {
-  HandThumbUpIcon,
-  XMarkIcon as XMarkIconMini,
-} from "@heroicons/vue/20/solid";
-
-import { CheckIcon, UserIcon } from "@heroicons/vue/20/solid";
+import { CheckIcon, UserPlusIcon, TagIcon } from "@heroicons/vue/20/solid";
 import {
   ArrowTrendingDownIcon,
   ArrowTrendingUpIcon,
@@ -26,20 +21,6 @@ const greeting = computed(() => {
     return "Good Evening";
   }
 });
-
-// Task list
-const tasks = ref([
-  { id: 1, title: "Task 1", dueDate: "Tomorrow", completed: false },
-  { id: 2, title: "Task 2", dueDate: "Next Week", completed: false },
-  { id: 3, title: "Task 3", dueDate: "Today", completed: false },
-  { id: 4, title: "Task 4", dueDate: "Today", completed: false },
-]);
-
-// Toggle task completion
-const toggleTask = (taskId) => {
-  const task = tasks.value.find((t) => t.id === taskId);
-  if (task) task.completed = !task.completed;
-};
 
 const stats = [
   {
@@ -63,28 +44,28 @@ const stats = [
 const timeline = [
   {
     id: 1,
-    content: "Applied to",
-    target: "Front End Developer",
+    content: "New Lead",
+    target: "John Doe",
     href: "#",
     date: "Sep 20",
     datetime: "2020-09-20",
-    icon: UserIcon,
+    icon: UserPlusIcon,
     iconBackground: "bg-violet-500",
   },
   {
     id: 2,
-    content: "Advanced to phone screening by",
-    target: "Bethany Blake",
+    content: "Support Ticket Completed",
+    target: "Update home page hero image",
     href: "#",
     date: "Sep 22",
     datetime: "2020-09-22",
-    icon: HandThumbUpIcon,
+    icon: TagIcon,
     iconBackground: "bg-violet-500",
   },
   {
     id: 3,
-    content: "Completed phone screening with",
-    target: "Martha Gardner",
+    content: "Task Completed",
+    target: "Optimize database queries",
     href: "#",
     date: "Sep 28",
     datetime: "2020-09-28",
@@ -110,7 +91,7 @@ const timeline = [
           type="button"
           class="inline-flex items-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
         >
-          My Tasks
+          View Reports
           <ChevronRightIcon class="ml-2 w-5 h-5" />
         </button>
         <a
@@ -222,57 +203,7 @@ const timeline = [
 
       <!-- Tasks -->
       <div class="lg:col-start-1 lg:col-span-2 lg:row-span-2 flex-grow">
-        <h2 class="sr-only">Tasks</h2>
-        <div
-          class="rounded-lg bg-white shadow-sm ring-1 ring-gray-900/5 dark:bg-slate-700 dark:ring-slate-500"
-        >
-          <div class="p-6">
-            <h2
-              class="text-base font-semibold text-gray-900 dark:text-white"
-              id="tasks-title"
-            >
-              Tasks
-            </h2>
-            <ul class="mt-4 space-y-4">
-              <!-- Dynamically Render Tasks -->
-              <li
-                v-for="task in tasks"
-                :key="task.id"
-                class="flex items-center justify-between p-3 bg-gray-100 rounded-lg dark:bg-slate-600"
-              >
-                <div class="flex items-center space-x-3">
-                  <input
-                    type="checkbox"
-                    :checked="task.completed"
-                    @change="toggleTask(task.id)"
-                    class="h-5 w-5 text-violet-500 border-gray-300 rounded focus:ring-violet-500"
-                  />
-                  <span
-                    :class="[
-                      task.completed
-                        ? 'line-through text-gray-500'
-                        : 'text-gray-900',
-                      'text-sm dark:text-white',
-                    ]"
-                  >
-                    {{ task.title }}
-                  </span>
-                </div>
-                <span
-                  class="text-xs font-medium text-teal-500 dark:text-teal-500"
-                >
-                  Due: {{ task.dueDate }}
-                </span>
-              </li>
-            </ul>
-            <a
-              href="#"
-              class="mt-6 block text-sm font-semibold text-gray-900 hover:text-violet-500 dark:text-white dark:hover:text-violet-200"
-            >
-              View all tasks <span aria-hidden="true">&rarr;</span>
-            </a>
-          </div>
-        </div>
+        <DashboardTasks />
       </div>
 
       <!-- Activity feed -->
@@ -297,7 +228,7 @@ const timeline = [
                   <span
                     :class="[
                       event.iconBackground,
-                      'flex size-8 items-center justify-center rounded-full ring-8 ring-white dark:ring-slate-700',
+                      'flex size-8 items-center justify-center rounded-lg ring-8 ring-white dark:ring-slate-700',
                     ]"
                   >
                     <component

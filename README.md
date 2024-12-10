@@ -1,4 +1,3 @@
-- sort tables by column
 - table actions (add, edit, delete)
 - search
 - pagination

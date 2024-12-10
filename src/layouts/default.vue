@@ -23,6 +23,9 @@ import {
   UsersIcon,
   XMarkIcon,
   QueueListIcon,
+  ChartPieIcon,
+  ClipboardDocumentIcon,
+  LifebuoyIcon,
 } from "@heroicons/vue/24/outline";
 
 const navigation = [
@@ -31,6 +34,18 @@ const navigation = [
   { name: "Leads", href: "/leads", icon: UserPlusIcon, current: false },
   { name: "Posts", href: "/posts", icon: FolderIcon, current: false },
   { name: "Tasks", href: "/tasks", icon: QueueListIcon, current: false },
+  { name: "Reports", href: "/settings", icon: ChartPieIcon, current: false },
+];
+
+const navigation2 = [
+  { name: "Support", href: "/settings", icon: LifebuoyIcon, current: false },
+  {
+    name: "Submit Request",
+    href: "/ticket",
+    icon: ClipboardDocumentIcon,
+    current: false,
+  },
+  { name: "Settings", href: "/settings", icon: Cog6ToothIcon, current: false },
 ];
 
 const userNavigation = [
@@ -98,13 +113,7 @@ const version = "1.0.0"; // Update version as needed
               <div
                 class="flex grow flex-col gap-y-5 overflow-y-auto bg-gray-200 dark:bg-gray-900 px-6 pb-4 ring-1 ring-white/10"
               >
-                <div class="flex h-16 shrink-0 items-center">
-                  <img
-                    class="h-8 w-auto"
-                    src="https://tailwindui.com/plus/img/logos/mark.svg?color=indigo&shade=500"
-                    alt="Your Company"
-                  />
-                </div>
+                <div class="flex h-16 shrink-0 items-center"></div>
                 <nav class="flex flex-1 flex-col">
                   <ul role="list" class="flex flex-1 flex-col gap-y-7">
                     <li>
@@ -130,16 +139,26 @@ const version = "1.0.0"; // Update version as needed
                       </ul>
                     </li>
                     <li class="mt-10 py-5 border-t border-gray-400">
-                      <a
-                        href="/settings"
-                        class="group -mx-2 flex gap-x-3 rounded-md p-2 text-sm/6 font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-800 hover:text-white"
-                      >
-                        <Cog6ToothIcon
-                          class="size-6 shrink-0"
-                          aria-hidden="true"
-                        />
-                        Settings
-                      </a>
+                      <ul role="list" class="-mx-2 space-y-1">
+                        <li v-for="item in navigation2" :key="item.name">
+                          <a
+                            :href="item.href"
+                            :class="[
+                              item.current
+                                ? 'bg-gray-800 text-white'
+                                : 'text-gray-700 dark:text-gray-300 hover:bg-gray-800 hover:text-white',
+                              'group flex gap-x-3 rounded-md p-2 text-sm/6 font-semibold',
+                            ]"
+                          >
+                            <component
+                              :is="item.icon"
+                              class="size-6 shrink-0"
+                              aria-hidden="true"
+                            />
+                            {{ item.name }}
+                          </a>
+                        </li>
+                      </ul>
                     </li>
                     <li class="mt-auto">
                       <!-- Footer fixed at the bottom -->
@@ -167,13 +186,7 @@ const version = "1.0.0"; // Update version as needed
       <div
         class="flex grow flex-col gap-y-5 overflow-y-auto bg-white dark:bg-slate-950 px-6 pb-4 rounded-lg m-5 shadow-sm"
       >
-        <div class="flex h-16 shrink-0 items-center">
-          <img
-            class="h-8 w-auto"
-            src="https://tailwindui.com/plus/img/logos/mark.svg?color=indigo&shade=500"
-            alt="Your Company"
-          />
-        </div>
+        <div class="flex h-16 shrink-0 items-center"></div>
         <nav class="flex flex-1 flex-col">
           <ul role="list" class="flex flex-1 flex-col gap-y-7">
             <li>
@@ -199,14 +212,27 @@ const version = "1.0.0"; // Update version as needed
               </ul>
             </li>
 
-            <li class="mt-10 py-5 border-t border-gray-200">
-              <a
-                href="/settings"
-                class="group -mx-2 flex gap-x-3 rounded-md p-2 text-sm/6 font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-800 hover:text-white"
-              >
-                <Cog6ToothIcon class="size-6 shrink-0" aria-hidden="true" />
-                Settings
-              </a>
+            <li class="mt-4 py-5 border-t border-gray-200">
+              <ul role="list" class="-mx-2 space-y-1">
+                <li v-for="item in navigation2" :key="item.name">
+                  <a
+                    :href="item.href"
+                    :class="[
+                      item.current
+                        ? 'bg-gray-800 text-white'
+                        : 'text-gray-700 dark:text-gray-300 hover:bg-gray-800 hover:text-white',
+                      'group flex gap-x-3 rounded-md p-2 text-sm/6 font-semibold',
+                    ]"
+                  >
+                    <component
+                      :is="item.icon"
+                      class="size-6 shrink-0"
+                      aria-hidden="true"
+                    />
+                    {{ item.name }}
+                  </a>
+                </li>
+              </ul>
             </li>
             <li class="mt-auto">
               <!-- Footer fixed at the bottom -->

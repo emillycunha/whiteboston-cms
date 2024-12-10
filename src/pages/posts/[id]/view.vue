@@ -5,6 +5,8 @@ import { useBlogsStore } from "~/stores/blogs";
 import type { Blog } from "~/stores/blogs";
 import markdownIt from "markdown-it";
 
+import { PencilSquareIcon, ChevronLeftIcon } from "@heroicons/vue/24/outline";
+
 const route = useRoute();
 console.log(route.params.id);
 
@@ -68,43 +70,81 @@ const markdownParser = new markdownIt({
   breaks: true,
   xhtmlOut: true,
 });
+
+function editBlog(blogId: number) {
+  console.log("Edit blog:", blogId);
+  // Navigate to /blogs/[id]/edit
+  navigateTo(`/posts/${blogId}/edit`);
+}
 </script>
 
 <template>
-  <div
-    class="px-6 py-10 sm:py-16 sm:px-8 max-w-4xl border border-gray-200 rounded-lg shadow-lg mx-auto bg-white"
-  >
-    <div v-if="isLoading">Loading blog...</div>
-    <div v-else-if="error" class="text-red-500">{{ error }}</div>
-    <div v-else-if="blog">
-      <h1 class="text-3xl font-bold">{{ blog.title }}</h1>
-      <div class="mt-4 prose dark:prose-dark">
-        <!-- Render parsed Markdown content as HTML -->
-        <div v-html="parsedContent"></div>
+  <div class="p-6 space-y-10">
+    <!-- Header Section -->
+    <div class="md:flex md:items-center md:justify-between mb-20">
+      <div class="min-w-0 flex-1">
+        <h2
+          class="text-2xl/7 font-bold text-gray-900 sm:truncate sm:text-3xl sm:tracking-tight"
+        >
+          Post Preview
+        </h2>
       </div>
-      <div class="py-4 border-t border-gray-200 dark:border-slate-700"></div>
-      <p class="text-gray-600">
-        <strong>Category: </strong>
-        <span
-          v-for="category in blog.category"
-          :key="category"
-          class="bg-slate-100 px-2 py-1 mr-2 rounded"
+      <div class="mt-4 flex md:ml-4 md:mt-0">
+        <a
+          href="/posts"
+          type="button"
+          class="inline-flex items-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
         >
-          {{ category || "Uncategorized" }}
-        </span>
-      </p>
-      <p class="mt-6 text-sm text-gray-100">
-        <span
-          v-for="tag in blog.tags"
-          :key="tag"
-          class="bg-violet-500 px-2 py-1 mr-2 rounded"
+          <ChevronLeftIcon class="mr-2 w-5 h-5" />
+          Back
+        </a>
+        <a
+          href="/posts/preview-post"
+          type="button"
+          @click.prevent="editBlog(blog!.id)"
+          class="mx-3 inline-flex items-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
         >
-          {{ tag }}
-        </span>
-      </p>
+          Edit Post
+          <PencilSquareIcon class="ml-2 w-5 h-5" />
+        </a>
+      </div>
     </div>
-    <div v-else>
-      <p>Blog not found.</p>
+    <div
+      class="px-6 py-10 sm:py-16 sm:px-8 max-w-3xl border border-gray-200 rounded-lg shadow-md mx-auto bg-gray-50 dark:bg-slate-800 dark:border-slate-700"
+    >
+      <div v-if="isLoading">Loading blog...</div>
+      <div v-else-if="error" class="text-red-500">{{ error }}</div>
+      <div v-else-if="blog">
+        <h1 class="text-3xl font-bold">{{ blog.title }}</h1>
+
+        <div class="mt-4 prose dark:prose-dark">
+          <!-- Render parsed Markdown content as HTML -->
+          <div v-html="parsedContent"></div>
+        </div>
+        <div class="py-4 border-t border-gray-200 dark:border-slate-700"></div>
+        <p class="text-gray-600">
+          <strong>Category: </strong>
+          <span
+            v-for="category in blog.category"
+            :key="category"
+            class="bg-slate-100 px-2 py-1 mr-2 rounded"
+          >
+            {{ category || "Uncategorized" }}
+          </span>
+        </p>
+        <p class="mt-6 text-sm text-gray-100">
+          <span
+            v-for="tag in blog.tags"
+            :key="tag"
+            class="bg-violet-500 px-2 py-1 mr-2 rounded"
+          >
+            {{ tag }}
+          </span>
+        </p>
+      </div>
+      <div v-else>
+        <p>Blog not found.</p>
+      </div>
     </div>
   </div>
 </template>

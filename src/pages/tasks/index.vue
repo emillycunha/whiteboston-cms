@@ -2,7 +2,7 @@
 import { ref, computed, watch, onMounted } from "vue";
 
 import {
-  EllipsisHorizontalIcon,
+  ChevronLeftIcon,
   PlusIcon,
   BarsArrowUpIcon,
   BarsArrowDownIcon,
@@ -12,6 +12,9 @@ import { useTasksStore } from "~/stores/tasks";
 import type { Task } from "~/stores/tasks";
 
 const tasksStore = useTasksStore();
+
+// Track tasks that are in transition
+const fadingTasks = ref<number[]>([]);
 
 // Define columns with completed as the first column
 const columns = [
@@ -58,14 +61,30 @@ function setSort(column: string) {
 
 // Toggle the completion status of a task
 function toggleTaskCompletion(taskId: number, completed: boolean) {
-  // Find the task in tasksStore
   const idx = tasksStore.tasks.findIndex((t: Task) => t.id === taskId);
+
   if (idx !== -1) {
-    // Update local state
-    tasksStore.tasks[idx].completed = completed;
-    // TODO: Update Supabase here when ready
-    // For now, just store tasks in localStorage as a placeholder:
-    localStorage.setItem("my-tasks", JSON.stringify(tasksStore.tasks));
+    // Add the task to the fading state
+    fadingTasks.value.push(taskId);
+
+    // Apply the completed state for the line-through effect
+    setTimeout(() => {
+      tasksStore.tasks[idx].completed = completed;
+
+      // After the delay, remove the task from the fading list and hide it
+      setTimeout(() => {
+        // Remove task from tasksStore (or hide it by filtering)
+        tasksStore.tasks = tasksStore.tasks.filter(
+          (t: Task) => t.id !== taskId
+        );
+
+        // Remove task from fading list
+        fadingTasks.value = fadingTasks.value.filter((id) => id !== taskId);
+
+        // Update localStorage
+        localStorage.setItem("my-tasks", JSON.stringify(tasksStore.tasks));
+      }, 3000); // Delay for hiding after showing as completed
+    }, 2000); // Delay for showing line-through effect
   }
 }
 
@@ -110,7 +129,7 @@ function saveTask(task: Task) {
 }
 
 // Load tasks when the component is created.
-tasksStore.fetchTasks();
+tasksStore.fetchIncompleteTasks();
 </script>
 
 <template>
@@ -125,9 +144,16 @@ tasksStore.fetchTasks();
         </h2>
       </div>
       <div class="mt-4 flex md:ml-4 md:mt-0">
+        <a
+          href="/tasks/completed"
+          type="button"
+          class="inline-flex items-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
+        >
+          See Completed Tasks
+        </a>
         <button
           type="button"
-          class="inline-flex items-center rounded-md bg-violet-500 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-violet-700"
+          class="ml-3 inline-flex items-center rounded-md bg-violet-500 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-violet-700"
         >
           Create New
           <PlusIcon class="ml-2 w-5 h-5" />
@@ -173,7 +199,11 @@ tasksStore.fetchTasks();
           <tr
             v-for="task in sortedTasks"
             :key="task.id"
-            :class="task.completed ? 'text-gray-500' : ''"
+            :class="{
+              'line-through opacity-50 transition-opacity duration-1000':
+                fadingTasks.includes(task.id),
+              'opacity-100': !fadingTasks.includes(task.id),
+            }"
           >
             <!-- Completed column: clickable checkbox -->
             <td class="py-4 px-3 text-sm font-medium">
@@ -181,11 +211,7 @@ tasksStore.fetchTasks();
                 type="checkbox"
                 class="h-4 w-4 text-violet-600 border-gray-300 rounded focus:ring-violet-500"
                 :checked="task.completed"
-                @change="(e: Event) => {
-    const target = e.target as HTMLInputElement | null;
-    if (target) {
-      toggleTaskCompletion(task.id, target.checked);
-    }}"
+                @change="(event) => toggleTaskCompletion(task.id, (event.target as HTMLInputElement)?.checked || false)"
               />
             </td>
 
@@ -198,7 +224,9 @@ tasksStore.fetchTasks();
                 />
               </template>
               <template v-else>
-                <span :class="task.completed ? 'line-through' : ''">
+                <span
+                  :class="task.completed ? 'line-through duration-1000' : ''"
+                >
                   {{ task.title }}</span
                 >
               </template>
@@ -213,7 +241,7 @@ tasksStore.fetchTasks();
                 />
               </template>
               <template v-else>
-                <span :class="task.completed ? 'line-through' : ''">
+                <span>
                   {{ task.description }}
                 </span>
               </template>
@@ -229,7 +257,7 @@ tasksStore.fetchTasks();
                 />
               </template>
               <template v-else>
-                <span :class="task.completed ? 'hidden' : ''">
+                <span>
                   {{
                     task.due_date
                       ? new Date(task.due_date).toLocaleDateString()

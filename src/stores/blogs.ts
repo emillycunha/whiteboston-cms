@@ -7,6 +7,7 @@ import type { SupabaseClient, PostgrestError } from "@supabase/supabase-js";
 export interface Blog {
   id: number;
   title: string;
+  description: string | null;
   category: string[] | null;
   content_md: string;
   created_at: string;

@@ -1,7 +1,9 @@
-<script setup></script>
+<script setup>
+import Dashboard from "./dashboard.vue";
+</script>
 
 <template>
   <div>
-    <DarkModeToggle />
+    <Dashboard />
   </div>
 </template>
