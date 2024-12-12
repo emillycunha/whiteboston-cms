@@ -39,7 +39,7 @@ export default defineNuxtConfig({
     },
     publicAssets: [
       {
-        dir: "public",
+        dir: "src/public",
         baseURL: "/",
       },
     ],
