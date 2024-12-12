@@ -25,13 +25,21 @@ export default defineNuxtConfig({
   modules: ["@pinia/nuxt", "@nuxthub/core"],
   nitro: {
     preset: "cloudflare-pages",
+    externals: {
+      inline: ["node:async_hooks"],
+    },
+    rollupConfig: {
+      output: {
+        format: "es",
+      },
+    },
     logLevel: "debug",
     output: {
       publicDir: "dist",
     },
     publicAssets: [
       {
-        dir: "src/public",
+        dir: "public",
         baseURL: "/",
       },
     ],
