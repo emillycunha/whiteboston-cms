@@ -4,6 +4,7 @@ export default defineNuxtConfig({
   compatibilityDate: "2024-11-01",
   devtools: { enabled: true },
   srcDir: "src/",
+
   css: ["~/assets/css/tailwind.css"],
   postcss: {
     plugins: {
@@ -23,10 +24,11 @@ export default defineNuxtConfig({
     },
   },
   modules: ["@pinia/nuxt", "@nuxthub/core"],
+  hub: {},
   nitro: {
     preset: "cloudflare-pages",
-    externals: {
-      inline: [],
+    routeRules: {
+      "/api/**": { swr: true, headers: { "cache-control": "no-cache" } },
     },
     rollupConfig: {
       output: {

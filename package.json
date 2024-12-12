@@ -27,6 +27,7 @@
     "@cloudflare/workers-types": "^4.20241205.0",
     "@nuxthub/core": "^0.8.8",
     "@types/markdown-it": "^14.1.2",
+    "@types/node": "^22.10.2",
     "autoprefixer": "^10.4.20",
     "nuxt": "^3.14.1592",
     "postcss": "^8.4.49",
