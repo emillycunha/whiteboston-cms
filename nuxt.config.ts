@@ -27,8 +27,11 @@ export default defineNuxtConfig({
   hub: {},
   nitro: {
     preset: "cloudflare-pages",
+    experimental: {
+      openAPI: true,
+    },
     routeRules: {
-      "/api/**": { swr: true, headers: { "cache-control": "no-cache" } },
+      "/api/_hub/**": { swr: true, headers: { "cache-control": "no-cache" } },
     },
     rollupConfig: {
       output: {
