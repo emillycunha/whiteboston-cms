@@ -1,7 +1,13 @@
 name = "whiteboston"
-type = "javascript" # or 'module', depending on your project
 compatibility_flags = ["nodejs_compat"]
+
+compatibility_date = "2024-11-01"
+
+workers_dev = true
 node_compat = true
+
+# Specify the correct entry-point file generated in `.output/server/`
+main = "./.output/server/index.js"
 
 [build]
 command = "npm run build"
