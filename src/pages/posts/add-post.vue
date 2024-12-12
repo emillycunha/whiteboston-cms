@@ -1,4 +1,5 @@
 <script setup>
+import PageHeader from "@/components/PageHeader.vue";
 import {
   PhotoIcon,
   UserCircleIcon,
@@ -11,32 +12,23 @@ import {
 <template>
   <div class="p-6 space-y-10">
     <!-- Header Section -->
-    <div class="md:flex md:items-center md:justify-between mb-4">
-      <div class="min-w-0 flex-1">
-        <h2
-          class="text-2xl/7 font-bold text-gray-900 dark:text-white sm:truncate sm:text-3xl sm:tracking-tight"
-        >
-          Add Posts
-        </h2>
-      </div>
-      <div class="mt-4 flex md:ml-4 md:mt-0">
-        <button
-          type="button"
-          class="inline-flex items-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
-        >
-          <ChevronLeftIcon class="mr-2 w-5 h-5" />
-          Back
-        </button>
-        <a
-          href="/posts/add-post"
-          type="button"
-          class="ml-3 inline-flex items-center rounded-md bg-violet-500 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-violet-700"
-        >
-          Preview Blog
-          <EyeIcon class="ml-2 w-5 h-5" />
-        </a>
-      </div>
-    </div>
+    <PageHeader
+      title="Add Post"
+      :buttons="[
+        {
+          label: 'Back',
+          icon: ChevronLeftIcon,
+          variant: 'secondary',
+          onClick: handleBack,
+        },
+        {
+          label: 'Preview Blog',
+          icon: EyeIcon,
+          variant: 'primary',
+          onClick: handlePreview,
+        },
+      ]"
+    />
 
     <form>
       <div

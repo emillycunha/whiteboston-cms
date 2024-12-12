@@ -64,7 +64,7 @@ onMounted(async () => {
 async function saveBlog() {
   if (!blog.value) return;
 
-  // Implement the save logic, e.g., updating the blog in Supabase
+  // Implement the save logic, e.g., updating the blog in the database
   try {
     const updatedBlog = await blogsStore.updateBlog({
       id: blog.value.id,

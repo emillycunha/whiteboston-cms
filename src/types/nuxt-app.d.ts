@@ -1,7 +1,6 @@
 // src/types/nuxt-app.d.ts
 declare module "#app" {
   import { NuxtApp } from "nuxt/app";
-  import { SupabaseClient } from "@supabase/supabase-js";
 
   // Define Nuxt plugin
   export function defineNuxtPlugin(plugin: (nuxtApp: NuxtApp) => void): void;
@@ -9,8 +8,7 @@ declare module "#app" {
   // Runtime Config
   export function useRuntimeConfig(): {
     public: {
-      supabaseUrl: string;
-      supabaseAnonKey: string;
+      [key: string]: any;
     };
     private?: {
       [key: string]: any;
@@ -20,8 +18,8 @@ declare module "#app" {
   // Nuxt App utilities
   export function useNuxtApp(): NuxtApp;
 
-  // Extend NuxtApp with $supabase
+  // Extend NuxtApp
   interface NuxtApp {
-    $supabase: SupabaseClient;
+    [key: string]: any;
   }
 }

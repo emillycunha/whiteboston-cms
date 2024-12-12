@@ -229,14 +229,7 @@
 
 <script setup>
 import { ref } from "vue";
-import {
-  Dialog,
-  DialogPanel,
-  Switch,
-  SwitchGroup,
-  SwitchLabel,
-} from "@headlessui/vue";
-import { Bars3Icon } from "@heroicons/vue/20/solid";
+import { Switch, SwitchGroup, SwitchLabel } from "@headlessui/vue";
 import {
   BellIcon,
   CreditCardIcon,

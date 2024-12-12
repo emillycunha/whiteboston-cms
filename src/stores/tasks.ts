@@ -1,6 +1,4 @@
 import { defineStore } from "pinia";
-import { useNuxtApp } from "#app";
-import type { SupabaseClient, PostgrestError } from "@supabase/supabase-js";
 
 export interface Task {
   id: number;
@@ -19,20 +17,17 @@ export const useTasksStore = defineStore("tasks", {
   }),
 
   actions: {
+    // Fetch all tasks
     async fetchTasks() {
-      const { $supabase } = useNuxtApp();
-      const supabase = $supabase as SupabaseClient;
-
       this.error = null;
       this.loading = true;
 
       try {
-        const {
-          data,
-          error,
-        }: { data: Task[] | null; error: PostgrestError | null } =
-          await supabase.from("tasks").select("*");
-        if (error) throw error;
+        const response = await fetch("/data/tasks.json");
+        if (!response.ok) {
+          throw new Error(`Failed to fetch tasks: ${response.statusText}`);
+        }
+        const data: Task[] = await response.json();
         this.tasks = data || [];
       } catch (err) {
         this.error =
@@ -43,21 +38,18 @@ export const useTasksStore = defineStore("tasks", {
       }
     },
 
+    // Fetch only completed tasks
     async fetchCompletedTasks() {
-      const { $supabase } = useNuxtApp();
-      const supabase = $supabase as SupabaseClient;
-
       this.error = null;
       this.loading = true;
 
       try {
-        const {
-          data,
-          error,
-        }: { data: Task[] | null; error: PostgrestError | null } =
-          await supabase.from("tasks").select("*").eq("completed", true);
-        if (error) throw error;
-        this.tasks = data || [];
+        const response = await fetch("/data/tasks.json");
+        if (!response.ok) {
+          throw new Error(`Failed to fetch tasks: ${response.statusText}`);
+        }
+        const data: Task[] = await response.json();
+        this.tasks = (data || []).filter((task) => task.completed === true);
       } catch (err) {
         this.error =
           err instanceof Error ? err.message : "Unexpected error occurred.";
@@ -67,21 +59,18 @@ export const useTasksStore = defineStore("tasks", {
       }
     },
 
+    // Fetch only incomplete tasks
     async fetchIncompleteTasks() {
-      const { $supabase } = useNuxtApp();
-      const supabase = $supabase as SupabaseClient;
-
       this.error = null;
       this.loading = true;
 
       try {
-        const {
-          data,
-          error,
-        }: { data: Task[] | null; error: PostgrestError | null } =
-          await supabase.from("tasks").select("*").eq("completed", false);
-        if (error) throw error;
-        this.tasks = data || [];
+        const response = await fetch("/data/tasks.json");
+        if (!response.ok) {
+          throw new Error(`Failed to fetch tasks: ${response.statusText}`);
+        }
+        const data: Task[] = await response.json();
+        this.tasks = (data || []).filter((task) => task.completed === false);
       } catch (err) {
         this.error =
           err instanceof Error ? err.message : "Unexpected error occurred.";

@@ -1,7 +1,7 @@
 {
   "extends": "./.nuxt/tsconfig.json",
   "compilerOptions": {
-    "types": ["vue", "pinia", "@supabase/supabase-js", "nuxt"],
+    "types": ["vue", "pinia", "nuxt"],
     "strict": true,
     "module": "ESNext",
     "target": "ESNext",

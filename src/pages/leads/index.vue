@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, computed } from "vue";
+import DataTable from "@/components/DataTable.vue";
 import {
   EllipsisHorizontalIcon,
   PlusIcon,
@@ -13,19 +14,11 @@ import type { Lead } from "~/stores/leads";
 
 const leadsStore = useLeadsStore();
 
-// When dealing with JSONB fields (like `data.name`),
-// we'll need a helper to retrieve nested properties dynamically.
-function getNestedValue(obj: any, path: string): any {
-  return path.split(".").reduce((o, k) => (o ? o[k] : undefined), obj);
-}
-
-// A list of sortable columns with their respective keys.
-// Keys can be nested paths like "data.name" for jsonb fields.
 const columns = [
-  { key: "data.name", label: "Name" },
-  { key: "data.phone", label: "Phone" },
-  { key: "data.email", label: "Email" },
-  { key: "data.interest", label: "Interest" },
+  { key: "name", label: "Name" },
+  { key: "phone", label: "Phone" },
+  { key: "email", label: "Email" },
+  { key: "interest", label: "Interest" },
   { key: "submitted_at", label: "Submission Date" },
 ];
 
@@ -64,7 +57,7 @@ function exportSelectedContacts() {
   const headers = columns.map((c) => c.label);
   const rows = selected.map((lead) => {
     return columns.map((c) => {
-      let val = getNestedValue(lead, c.key) || "";
+      let val = (lead as any)[c.key] || "";
       if (c.key === "submitted_at") {
         val = new Date(val).toLocaleDateString();
       }
@@ -90,7 +83,6 @@ function exportSelectedContacts() {
 }
 
 // Sorting logic
-// We'll store just a string key now, since we are dealing with nested paths like "data.name"
 const sortKey = ref<string | null>(null);
 const sortOrder = ref<"asc" | "desc">("asc");
 
@@ -101,8 +93,8 @@ const sortedLeads = computed(() => {
   }
 
   return [...leadsStore.leads].sort((a, b) => {
-    const aVal = getNestedValue(a, sortKey.value as string);
-    const bVal = getNestedValue(b, sortKey.value as string);
+    const aVal = (a as any)[sortKey.value as string];
+    const bVal = (b as any)[sortKey.value as string];
 
     const aStr =
       aVal === null || aVal === undefined ? "" : String(aVal).toLowerCase();
@@ -117,10 +109,8 @@ const sortedLeads = computed(() => {
 
 function setSort(column: string) {
   if (sortKey.value === column) {
-    // Toggle the sort order if the same column is clicked again
     sortOrder.value = sortOrder.value === "asc" ? "desc" : "asc";
   } else {
-    // Set a new column to sort by
     sortKey.value = column;
     sortOrder.value = "asc";
   }
@@ -229,9 +219,7 @@ const viewLead = async (id: number) => {
               <span v-if="col.key === 'submitted_at'">
                 {{ new Date(lead.submitted_at).toLocaleDateString() }}
               </span>
-              <span v-else>
-                {{ getNestedValue(lead, col.key) }}
-              </span>
+              <span v-else> {{ lead[col.key] }} </span>
             </td>
             <td class="py-4 px-3 text-right text-sm font-medium">
               <a
