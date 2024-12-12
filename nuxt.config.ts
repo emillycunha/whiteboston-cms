@@ -26,12 +26,15 @@ export default defineNuxtConfig({
   nitro: {
     preset: "cloudflare-pages",
     externals: {
-      inline: ["node:async_hooks"],
+      inline: [],
     },
     rollupConfig: {
       output: {
         format: "es",
       },
+    },
+    replace: {
+      "import 'node:async_hooks';": "", // Completely strip async_hooks from output
     },
     logLevel: "debug",
     output: {
