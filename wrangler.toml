@@ -1,6 +1,7 @@
 name = "whiteboston"
 type = "javascript" # or 'module', depending on your project
 compatibility_flags = ["nodejs_compat"]
+node_compat = true
 
 [build]
 command = "npm run build"

@@ -16,10 +16,16 @@ export default defineNuxtConfig({
       include: ["@heroicons/vue", "@headlessui/vue"],
       force: true,
     },
+    resolve: {
+      alias: {
+        "node:async_hooks": "/path/to/empty.js",
+      },
+    },
   },
   modules: ["@pinia/nuxt", "@nuxthub/core"],
   nitro: {
     preset: "cloudflare-pages",
+    logLevel: "debug",
     output: {
       publicDir: "dist",
     },
