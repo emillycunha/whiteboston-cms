@@ -1,4 +1,6 @@
 name = "whiteboston"
+type = "javascript"
+
 compatibility_flags = ["nodejs_compat"]
 
 compatibility_date = "2024-11-01"
@@ -11,3 +13,7 @@ main = "./.output/server/index.js"
 
 [build]
 command = "npm run build"
+
+[site]
+bucket = "./dist" # Path to your public assets
+entry-point = "./.output/server/index.mjs"

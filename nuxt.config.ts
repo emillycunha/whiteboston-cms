@@ -33,12 +33,10 @@ export default defineNuxtConfig({
         format: "es",
       },
     },
-    replace: {
-      "import 'node:async_hooks';": "", // Completely strip async_hooks from output
-    },
     logLevel: "debug",
     output: {
-      publicDir: "dist",
+      serverDir: ".output/server",
+      publicDir: ".output/public",
     },
     publicAssets: [
       {
