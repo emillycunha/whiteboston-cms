@@ -1,11 +1,9 @@
-name = "whiteboston"
-type = "module"
+name = "cms-whiteboston"
 
 compatibility_flags = ["nodejs_compat"]
 compatibility_date = "2024-11-01"
 
 workers_dev = true
-node_compat = true
 
 # Specify the correct entry-point file generated in `.output/server/`
 main = "./.output/server/index.js"
@@ -14,5 +12,4 @@ main = "./.output/server/index.js"
 command = "npm run build"
 
 [site]
-bucket = "./dist" # Path to your public assets
-entry-point = "./.output/server/index.js"
+bucket = "./dist" 
