@@ -166,7 +166,7 @@ const postNavigation = [
           <tr v-for="blog in blogsStore.blogs" :key="blog.id">
             <td class="py-4 pl-4 pr-3 text-sm font-medium">{{ blog.title }}</td>
             <td class="px-3 py-4 text-sm">
-              {{ blog.category?.join(", ") || "N/A" }}
+              {{ blog.category }}
             </td>
             <td class="px-3 py-4 text-sm">
               {{ new Date(blog.created_at).toLocaleDateString() }}

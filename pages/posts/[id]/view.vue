@@ -17,9 +17,9 @@ const isLoading = ref<boolean>(true);
 const error = ref<string | null>(null);
 
 const title = ref<string>("");
-const category = ref<string | null>(null);
-const content_md = ref<string>("");
-const tags = ref<string | null>(null);
+const category = ref<string>("");
+const content = ref<string>("");
+const tags = ref<string>("");
 
 const parsedContent = ref<string>("");
 
@@ -45,14 +45,12 @@ onMounted(async () => {
     blog.value = await blogsStore.fetchBlogById(blogId);
     if (blog.value) {
       title.value = blog.value.title;
-      category.value = blog.value.category
-        ? blog.value.category.join(", ")
-        : null;
-      tags.value = blog.value.tags ? blog.value.tags.join(", ") : null;
-      content_md.value = blog.value.content_md;
+      category.value = blog.value.category;
+      tags.value = blog.value.tags;
+      content.value = blog.value.content;
 
       // Parse Markdown content
-      parsedContent.value = markdownParser.render(blog.value.content_md);
+      parsedContent.value = markdownParser.render(blog.value.content);
     } else {
       error.value = "Blog not found.";
     }
@@ -124,21 +122,13 @@ function editBlog(blogId: number) {
         <div class="py-4 border-t border-gray-200 dark:border-slate-700"></div>
         <p class="text-gray-600">
           <strong>Category: </strong>
-          <span
-            v-for="category in blog.category"
-            :key="category"
-            class="bg-slate-100 px-2 py-1 mr-2 rounded"
-          >
-            {{ category || "Uncategorized" }}
+          <span>
+            {{ blog.category || "Uncategorized" }}
           </span>
         </p>
         <p class="mt-6 text-sm text-gray-100">
-          <span
-            v-for="tag in blog.tags"
-            :key="tag"
-            class="bg-violet-500 px-2 py-1 mr-2 rounded"
-          >
-            {{ tag }}
+          <span>
+            {{ blog.tags }}
           </span>
         </p>
       </div>

@@ -3,11 +3,11 @@ import { defineStore } from "pinia";
 export interface Blog {
   id: number;
   title: string;
-  description: string | null;
-  category: string[] | null;
-  content_md: string;
+  description: string;
+  category: string;
+  content: string;
   created_at: string;
-  tags: string[] | null;
+  tags: string;
   slug: string;
   status?: string;
 }
@@ -22,8 +22,11 @@ export const useBlogsStore = defineStore("blogs", {
   }),
   actions: {
     async fetchBlogs() {
-      if (this.blogs.length > 0 && this.status === this.blogs[0]?.status) {
-        console.log("[Store] Using cached blogs");
+      // Check if blogs are stored in localStorage
+      const cachedBlogs = localStorage.getItem("blogs");
+      if (cachedBlogs) {
+        console.log("[Store] Using cached blogs from localStorage.");
+        this.blogs = JSON.parse(cachedBlogs);
         return;
       }
 
@@ -32,18 +35,19 @@ export const useBlogsStore = defineStore("blogs", {
       this.isLoading = true;
 
       try {
-        const response = await fetch("/data/blogs.json");
-        const data: Blog[] = await response.json();
+        console.log("[Store] Fetching blogs from /api/blogs...");
+        const response = await $fetch<Blog[]>("/api/blogs");
+        console.log("[Store] Fetched blogs:", response);
+        this.blogs = response;
+        localStorage.setItem("blogs", JSON.stringify(response));
 
-        this.blogs = data.filter((blog) => blog.status === this.status);
-        this.showNoPostsMessage = this.blogs.length === 0;
-      } catch (e) {
-        this.error =
-          e instanceof Error ? e.message : "An unknown error occurred.";
-        this.blogs = [];
-        this.showNoPostsMessage = false;
+        console.log("[Store] Blogs successfully stored:", this.blogs);
+      } catch (err) {
+        console.error("[Store] Error fetching blogs:", err);
+        this.error = "Failed to fetch blogs. Please try again.";
       } finally {
         this.isLoading = false;
+        console.log("[Store] Loading state set to false.");
       }
     },
 
@@ -66,16 +70,25 @@ export const useBlogsStore = defineStore("blogs", {
 
     async fetchBlogById(id: number): Promise<Blog> {
       try {
-        const response = await fetch("/data/blogs.json");
-        const data: Blog[] = await response.json();
-        const blog = data.find((blog) => blog.id === id);
-
-        if (!blog) throw new Error(`Blog with id ${id} not found.`);
-        return blog;
-      } catch (e) {
-        throw new Error(
-          e instanceof Error ? e.message : "An unknown error occurred."
+        console.log(
+          `[Store] Fetching blog with ID: ${id} from /api/blogs/${id}...`
         );
+
+        // Fetch the blog by ID from the API
+        const response = await $fetch<Blog>(`/api/blogs/${id}`);
+
+        console.log(`[Store] Fetched blog with ID: ${id}:`, response);
+
+        if (!response) {
+          throw new Error(`Blog with ID ${id} not found.`);
+        }
+
+        return response;
+      } catch (err) {
+        const message =
+          err instanceof Error ? err.message : "An unknown error occurred.";
+        console.error(`[Store] Error fetching blog with ID: ${id}:`, message);
+        throw new Error(message);
       }
     },
 

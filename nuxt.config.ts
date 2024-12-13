@@ -13,6 +13,18 @@ export default defineNuxtConfig({
   hub: {
     database: true,
   },
+  $development: {
+    hub: {
+      remote: true,
+      //remote: 'preview'
+    },
+  },
+
+  nitro: {
+    experimental: {
+      openAPI: true,
+    },
+  },
   app: {
     head: {
       htmlAttrs: {
