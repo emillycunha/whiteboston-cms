@@ -3,11 +3,10 @@ import forms from "@tailwindcss/forms";
 
 export default {
   content: [
-    "./src/**/*.{vue,js,ts,jsx,tsx}", // All Vue and JavaScript/TypeScript files in the src folder
-    "./components/**/*.{vue,js,ts,jsx,tsx}", // All components
-    "./layouts/**/*.{vue,js,ts,jsx,tsx}", // Layout files
-    "./pages/**/*.{vue,js,ts,jsx,tsx}", // Page files
-    "./app.html", // Root app file
+    "./pages/**/*.{vue,js,ts,jsx,tsx}", // Include all files in the pages directory
+    "./components/**/*.{vue,js,ts,jsx,tsx}", // Include all files in the components directory
+    "./layouts/**/*.{vue,js,ts,jsx,tsx}", // Include layouts if you have them
+    "./app.vue", // Include root app.vue if present
   ],
   darkMode: "selector",
   theme: {
