@@ -1,15 +1,17 @@
 name = "cms-whiteboston"
+account_id = "e74615051020fda839f9e47594cdae3b"
+main = "./.output/server/index.js"
+workers_dev = true
 
 compatibility_flags = ["nodejs_compat"]
 compatibility_date = "2024-11-01"
 
-workers_dev = true
-
-# Specify the correct entry-point file generated in `.output/server/`
-main = "./.output/server/index.js"
+[site]
+bucket = ".output/public"
 
 [build]
 command = "npm run build"
 
-[site]
-bucket = "./dist" 
+[env.production]
+project = "cms-whiteboston"
+route = "cms-whiteboston.nuxt.dev"
