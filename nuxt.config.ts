@@ -10,7 +10,9 @@ export default defineNuxtConfig({
   },
 
   modules: ["@pinia/nuxt", "@nuxthub/core"],
-  hub: {},
+  hub: {
+    database: true,
+  },
   app: {
     head: {
       htmlAttrs: {
