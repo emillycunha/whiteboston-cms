@@ -26,3 +26,4 @@ logs
 
 # Ignore secrets file
 passwords.env
+.wrangler
