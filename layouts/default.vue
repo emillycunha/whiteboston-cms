@@ -1,56 +1,5 @@
-<script setup>
-import { ref, computed } from "vue";
-import {
-  Bars3Icon,
-  HomeIcon,
-  UsersIcon,
-  UserPlusIcon,
-  FolderIcon,
-  QueueListIcon,
-  ChartPieIcon,
-  LifebuoyIcon,
-  ClipboardDocumentIcon,
-  Cog6ToothIcon,
-  UserCircleIcon,
-  XMarkIcon,
-} from "@heroicons/vue/24/outline";
-
-import {
-  Dialog,
-  DialogPanel,
-  TransitionChild,
-  TransitionRoot,
-} from "@headlessui/vue";
-
-const navigation = [
-  { name: "Dashboard", href: "/dashboard", icon: HomeIcon, current: false },
-  //{ name: "Contacts", href: "/contacts", icon: UsersIcon, current: false },
-  { name: "Leads", href: "/leads", icon: UserPlusIcon, current: false },
-  { name: "Posts", href: "/posts", icon: FolderIcon, current: false },
-  { name: "Tasks", href: "/tasks", icon: QueueListIcon, current: false },
-  //{ name: "Reports", href: "/reports", icon: ChartPieIcon, current: false },
-  { name: "Support", href: "/support", icon: LifebuoyIcon, current: false },
-  {
-    name: "Submit Request",
-    href: "/ticket",
-    icon: ClipboardDocumentIcon,
-    current: false,
-  },
-];
-
-const navigation2 = [
-  { name: "Settings", href: "/settings", icon: Cog6ToothIcon, current: false },
-  { name: "Profile", href: "/profile", icon: UserCircleIcon, current: false },
-];
-
-const sidebarOpen = ref(false);
-
-const currentYear = new Date().getFullYear();
-const version = "1.0.0";
-</script>
-
 <template>
-  <div>
+  <div class="font-mono">
     <!-- Mobile sidebar -->
     <TransitionRoot :show="sidebarOpen" as="template">
       <Dialog class="relative z-40 lg:hidden" @close="sidebarOpen = false">
@@ -160,6 +109,12 @@ const version = "1.0.0";
       <div
         class="p-4 flex flex-col grow bg-white dark:bg-gray-800 rounded-lg m-4 shadow-sm"
       >
+        <div class="flex items-center justify-start px-4 py-4 mb-4">
+          <CubeIcon class="h-6 w-6 mr-1 text-gray-700" />
+          <h3 class="text-base tracking-tighter font-bold text-gray-700">
+            WHITEBOSTON
+          </h3>
+        </div>
         <!-- Navigation -->
         <nav class="flex flex-col grow gap-y-16">
           <!-- Main navigation -->
@@ -219,3 +174,63 @@ const version = "1.0.0";
     </div>
   </div>
 </template>
+
+<script setup>
+import { ref, computed } from "vue";
+import {
+  Bars3Icon,
+  HomeIcon,
+  UsersIcon,
+  UserPlusIcon,
+  FolderIcon,
+  QueueListIcon,
+  ChartPieIcon,
+  LifebuoyIcon,
+  ClipboardDocumentIcon,
+  Cog6ToothIcon,
+  UserCircleIcon,
+  XMarkIcon,
+  ArrowRightEndOnRectangleIcon,
+} from "@heroicons/vue/24/outline";
+
+import { CubeIcon } from "@heroicons/vue/24/solid";
+
+import {
+  Dialog,
+  DialogPanel,
+  TransitionChild,
+  TransitionRoot,
+} from "@headlessui/vue";
+
+const navigation = [
+  { name: "Dashboard", href: "/dashboard", icon: HomeIcon, current: false },
+  //{ name: "Contacts", href: "/contacts", icon: UsersIcon, current: false },
+  { name: "Leads", href: "/leads", icon: UserPlusIcon, current: false },
+  { name: "Posts", href: "/posts", icon: FolderIcon, current: false },
+  { name: "Tasks", href: "/tasks", icon: QueueListIcon, current: false },
+  //{ name: "Reports", href: "/reports", icon: ChartPieIcon, current: false },
+  { name: "Support", href: "/support", icon: LifebuoyIcon, current: false },
+  {
+    name: "Submit Request",
+    href: "/ticket",
+    icon: ClipboardDocumentIcon,
+    current: false,
+  },
+];
+
+const navigation2 = [
+  { name: "Settings", href: "/settings", icon: Cog6ToothIcon, current: false },
+  { name: "Profile", href: "/profile", icon: UserCircleIcon, current: false },
+  {
+    name: "Logout",
+    href: "/logout",
+    icon: ArrowRightEndOnRectangleIcon,
+    current: false,
+  },
+];
+
+const sidebarOpen = ref(false);
+
+const currentYear = new Date().getFullYear();
+const version = "1.0.0";
+</script>

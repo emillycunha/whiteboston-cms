@@ -1,11 +1,11 @@
 <template>
   <header
-    class="flex flex-col-reverse md:flex-row md:items-center md:justify-between mb-6"
+    class="flex flex-col md:flex-row md:items-center md:justify-between mb-4"
   >
     <!-- Title -->
     <div>
       <h1
-        class="text-xl font-semibold text-gray-800 dark:text-gray-100 sm:text-2xl"
+        class="text-2xl font-semibold text-gray-800 dark:text-gray-100 sm:text-4xl"
       >
         {{ title }}
       </h1>
@@ -17,15 +17,27 @@
         v-for="(button, index) in buttons"
         :key="index"
         @click="() => button.onClick && button.onClick()"
+        :disabled="button.disabled"
         :class="[
-          'flex items-center px-4 py-2 text-sm font-medium rounded-lg shadow-sm',
+          'flex items-center justify-between py-2 px-4 text-sm font-medium rounded-lg shadow-sm',
           button.variant === 'primary'
-            ? 'text-white bg-violet-600 hover:bg-violet-700 dark:bg-violet-500 dark:hover:bg-violet-600'
-            : 'text-gray-700 bg-white border border-gray-300 hover:bg-gray-100 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600',
+            ? 'text-white bg-violet-500 hover:bg-violet-700 dark:bg-violet-500 dark:hover:bg-violet-600'
+            : 'text-gray-700 bg-white border border-gray-400 hover:bg-gray-100 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600',
+          button.disabled ? 'opacity-50 cursor-not-allowed text-gray-400' : '',
         ]"
       >
-        <component :is="button.icon" class="mr-2 w-5 h-5" v-if="button.icon" />
-        {{ button.label }}
+        <!-- Icon Before -->
+        <component
+          :is="button.icon"
+          class="mr-2 size-5"
+          v-if="button.icon && button.iconPosition === 'before'"
+        /><span class=""> {{ button.label }}</span>
+        <!-- Icon After -->
+        <component
+          :is="button.icon"
+          class="ml-2 size-5"
+          v-if="button.icon && button.iconPosition === 'after'"
+        />
       </button>
     </div>
   </header>

@@ -1,26 +1,42 @@
 <template>
-    <div class="p-6 space-y-10">
-
+  <div class="p-6 space-y-6">
     <!-- Header Section -->
     <div class="md:flex md:items-center md:justify-between mb-20">
-        <div class="min-w-0 flex-1">
-            <h2 class="text-2xl/7 font-bold text-gray-900 sm:truncate sm:text-3xl sm:tracking-tight">How to Write a Blog</h2>
-        </div>
-        <div class="mt-4 flex md:ml-4 md:mt-0">
-            <button type="button" class="inline-flex items-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50">Help</button>
-            <button type="button" class="ml-3 inline-flex items-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">Post List</button>
-        </div>
+      <div class="min-w-0 flex-1">
+        <h2
+          class="text-2xl/7 font-bold text-gray-900 sm:truncate sm:text-3xl sm:tracking-tight"
+        >
+          How to Write a Blog
+        </h2>
+      </div>
+      <div class="mt-4 flex md:ml-4 md:mt-0">
+        <button
+          type="button"
+          class="inline-flex items-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
+        >
+          Help
+        </button>
+        <button
+          type="button"
+          class="ml-3 inline-flex items-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+        >
+          Post List
+        </button>
+      </div>
     </div>
 
     <div class="prose mx-auto max-w-4xl p-6">
+      <p>
+        Blogging is a great way to share your thoughts, expertise, and
+        creativity with the world. Here's how you can write a blog using
+        Markdown.
+      </p>
 
-        <p>
-        Blogging is a great way to share your thoughts, expertise, and creativity with the world. Here's how you can write a blog using Markdown.
-        </p>
+      <h2 class="text-xl font-semibold mt-6">Markdown Blog Example</h2>
 
-        <h2 class="text-xl font-semibold mt-6">Markdown Blog Example</h2>
-
-        <pre class="whitespace-pre-wrap break-words bg-gray-100 text-gray-800 p-10 rounded-lg">
+      <pre
+        class="whitespace-pre-wrap break-words bg-gray-100 text-gray-800 p-10 rounded-lg"
+      >
             <code class="language-markdown">
                 {`# How to Write a Blog
 
@@ -112,12 +128,9 @@
             </code>
         </pre>
     </div>
-
-    </div>
+  </div>
 </template>
 
-<script setup>
-</script>
+<script setup></script>
 
-<style>
-</style>
+<style></style>
