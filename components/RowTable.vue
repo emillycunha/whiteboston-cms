@@ -1,65 +1,80 @@
 <template>
   <div class="rounded-md bg-white shadow-sm border border-gray-200">
-    <div class="flex flex-col gap-y-4 p-4 sm:p-10">
+    <div class="flex flex-wrap gap-y-4 p-4 sm:p-10">
       <div
         v-for="(field, fieldIndex) in fields"
         :key="fieldIndex"
-        class="flex flex-row items-center w-full py-2"
+        :class="['flex', field.fullRow ? 'flex-col w-full' : ' flex-row w-1/2']"
       >
-        <label :for="`${fieldIndex}-${field.key}`" class="w-1/5 font-bold">
-          {{ field.label }}:
-        </label>
-        <div class="w-1/2">
-          <!-- Render textarea -->
-          <textarea
-            v-if="editable && field.type === 'textarea'"
-            :id="`${fieldIndex}-${field.key}`"
-            v-model="field.value"
-            :rows="field.rows || 4"
-            :placeholder="field.placeholder || ''"
-            :required="field.required || false"
-            :class="[
-              'border border-gray-500 rounded-md p-2 w-full',
-              field.inputClass,
-            ]"
-          ></textarea>
-
-          <!-- Render select -->
-          <select
-            v-else-if="editable && field.type === 'select'"
-            :id="`${fieldIndex}-${field.key}`"
-            v-model="field.value"
-            :required="field.required || false"
-            :class="[
-              'border border-gray-500 rounded-md p-2 w-full',
-              field.inputClass,
-            ]"
+        <!-- Label -->
+        <div class="w-full p-2">
+          <label
+            :for="`${fieldIndex}-${field.key}`"
+            class="font-bold block mb-1"
           >
-            <option
-              v-for="(option, optionIndex) in field.options"
-              :key="optionIndex"
-              :value="option.value"
+            {{ field.label }}:
+          </label>
+          <div>
+            <slot
+              :name="`field-${field.key}`"
+              :field="field"
+              :editable="editable"
             >
-              {{ option.label }}
-            </option>
-          </select>
+              <!-- Default Input Rendering -->
+              <textarea
+                v-if="editable && field.type === 'textarea'"
+                :id="`${fieldIndex}-${field.key}`"
+                v-model="field.value"
+                :rows="field.rows || 4"
+                :placeholder="field.placeholder || ''"
+                v-bind="field.attrs || {}"
+                :class="[
+                  'border border-gray-500 rounded-md p-2 w-full',
+                  field.inputClass,
+                  field.error ? 'border-red-500' : '',
+                ]"
+              ></textarea>
 
-          <!-- Render input -->
-          <input
-            v-else-if="editable"
-            :id="`${fieldIndex}-${field.key}`"
-            v-model="field.value"
-            :type="field.type || 'text'"
-            :placeholder="field.placeholder || ''"
-            :required="field.required || false"
-            :class="[
-              'border border-gray-500 rounded-md p-2 w-full',
-              field.inputClass,
-            ]"
-          />
+              <select
+                v-else-if="editable && field.type === 'select'"
+                :id="`${fieldIndex}-${field.key}`"
+                v-model="field.value"
+                v-bind="field.attrs || {}"
+                :class="[
+                  'border border-gray-500 rounded-md p-2 w-full',
+                  field.inputClass,
+                  field.error ? 'border-red-500' : '',
+                ]"
+              >
+                <option
+                  v-for="(option, optionIndex) in field.options"
+                  :key="optionIndex"
+                  :value="option.value"
+                >
+                  {{ option.label }}
+                </option>
+              </select>
 
-          <!-- Render plain text for non-editable mode -->
-          <p v-else>{{ field.value }}</p>
+              <input
+                v-else-if="editable"
+                :id="`${fieldIndex}-${field.key}`"
+                v-model="field.value"
+                :type="field.type || 'text'"
+                :placeholder="field.placeholder || ''"
+                v-bind="field.attrs || {}"
+                :class="[
+                  'border border-gray-500 rounded-md p-2 w-full',
+                  field.inputClass,
+                  field.error ? 'border-red-500' : '',
+                ]"
+              />
+              <p v-else>{{ field.value }}</p>
+              <p v-if="field.hint" class="text-gray-500 text-xs mt-1">
+                {{ field.hint }}
+              </p>
+              <p v-if="field.error" class="text-red-500">{{ field.error }}</p>
+            </slot>
+          </div>
         </div>
       </div>
     </div>
@@ -67,8 +82,6 @@
 </template>
 
 <script setup>
-import { defineProps, defineEmits } from "vue";
-
 // Props for fields
 defineProps({
   fields: {

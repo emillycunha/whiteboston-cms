@@ -16,7 +16,7 @@
           icon: PlusIcon,
           iconPosition: 'after',
           variant: 'primary',
-          onClick: buttonHandlerTwo,
+          onClick: addPost,
         },
       ]"
     />
@@ -63,8 +63,8 @@ const buttonHandlerOne = () => {
   console.log("Save clicked!");
 };
 
-const buttonHandlerTwo = () => {
-  console.log("Cancel clicked!");
+const addPost = () => {
+  navigateTo("/posts/add-post");
 };
 
 const handleView = (row) => {

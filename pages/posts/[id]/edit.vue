@@ -1,31 +1,123 @@
-<!-- pages/posts/[id]/edit.vue -->
+<template>
+  <div class="px-6 py-4 space-y-6">
+    <!-- Header Section -->
+    <PageHeader
+      title="Post Details"
+      :buttons="[
+        {
+          label: 'Cancel',
+          icon: XCircleIcon,
+          iconPosition: 'after',
+          variant: 'secondary',
+          onClick: cancelEdit,
+        },
+        {
+          label: 'Save Post',
+          icon: CheckCircleIcon,
+          iconPosition: 'after',
+          variant: 'primary',
+          onClick: saveChanges,
+        },
+      ]"
+    />
+
+    <div class="">
+      <div v-if="isLoading">Loading blog...</div>
+      <div v-else-if="error" class="text-red-500">{{ error }}</div>
+      <div v-else-if="blog">
+        <RowTable :fields="fields" :editable="isEditing" />
+      </div>
+      <div v-else>
+        <p>Blog not found.</p>
+      </div>
+    </div>
+  </div>
+</template>
+
 <script setup lang="ts">
-import { ref, onMounted } from "vue";
+import { ref, onMounted, watch } from "vue";
 import { useBlogsStore } from "~/stores/blogs";
 import type { Blog } from "~/stores/blogs";
+import markdownIt from "markdown-it";
+import PageHeader from "~/components/PageHeader.vue";
+import RowTable from "~/components/RowTable.vue";
 
-import { EyeIcon, ChevronLeftIcon } from "@heroicons/vue/24/solid";
+import { XCircleIcon, CheckCircleIcon } from "@heroicons/vue/24/outline";
 
 const route = useRoute();
-console.log(route.params.id);
-
 const blogsStore = useBlogsStore();
 
 const blog = ref<Blog | null>(null);
 const isLoading = ref<boolean>(true);
 const error = ref<string | null>(null);
+const errors = ref({});
+const isEditing = ref(false);
 
-const title = ref<string>("");
-const category = ref<string | null>(null);
-const tags = ref<string | null>(null);
-const description = ref<string | null>(null);
-const content_md = ref<string>("");
-const slug = ref<string | null>(null);
+const slugify = (text: string): string =>
+  text
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)+/g, "");
+
+const capitalizeWords = (text: string): string =>
+  text
+    .split(" ")
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .join(" ");
+
+const fields = ref([
+  {
+    key: "title",
+    label: "Title",
+    value: "",
+    inputClass: "w-full",
+    fullRow: false,
+  },
+  {
+    key: "slug",
+    label: "Slug",
+    value: "",
+    inputClass: "w-full",
+    fullRow: false,
+  },
+  {
+    key: "description",
+    label: "Description",
+    type: "textarea",
+    rows: 4,
+    value: "",
+    fullRow: true,
+  },
+  {
+    key: "content",
+    label: "Content",
+    type: "textarea",
+    rows: 4,
+    value: "",
+    fullRow: true,
+  },
+  {
+    key: "tags",
+    label: "Tags",
+    value: "",
+    inputClass: "w-full",
+    fullRow: false,
+  },
+  {
+    key: "category",
+    label: "Category",
+    value: "",
+    inputClass: "w-full",
+    fullRow: false,
+  },
+]);
 
 onMounted(async () => {
   const idParam = route.params.id;
+  const isEditMode = route.query.edit === "true"; // Check query param
 
-  // Validate that 'id' exists and is a string
+  console.log("Is Edit Mode:", isEditMode);
+
   if (typeof idParam !== "string") {
     error.value = "Invalid blog ID.";
     isLoading.value = false;
@@ -43,17 +135,68 @@ onMounted(async () => {
   try {
     blog.value = await blogsStore.fetchBlogById(blogId);
     if (blog.value) {
-      title.value = blog.value.title;
-      category.value = blog.value.category
-        ? blog.value.category.join(", ")
-        : null;
-      content_md.value = blog.value.content_md;
-      tags.value = blog.value.tags ? blog.value.tags.join(", ") : null;
-      description.value = blog.value.description;
-      slug.value = blog.value.slug;
+      fields.value = [
+        {
+          key: "title",
+          label: "Title",
+          value: blog.value.title,
+          inputClass: "",
+          fullRow: true,
+
+          attrs: { maxlength: 100, required: true },
+        },
+        {
+          key: "slug",
+          label: "Slug",
+          value: blog.value.slug,
+          inputClass: " text-gray-500 bg-gray-100 !border-gray-100",
+          fullRow: true,
+
+          attrs: { disabled: true },
+        },
+        {
+          key: "description",
+          label: "Description",
+          type: "textarea",
+          rows: 3,
+          value: blog.value.description,
+          inputClass: "",
+          fullRow: true,
+
+          attrs: { required: true },
+        },
+        {
+          key: "content",
+          label: "Content",
+          value: blog.value.content,
+          type: "textarea",
+          rows: 10,
+          inputClass: "",
+          fullRow: true,
+
+          attrs: { required: true },
+        },
+        {
+          key: "category",
+          label: "Category",
+          value: blog.value.category,
+          inputClass: " pr-8",
+          attrs: { required: true },
+          hint: "For multiple categories, separate with commas. Best practice is to use 1-2 words per category. E.g., Website, Frontend, Web Development",
+        },
+        {
+          key: "tags",
+          label: "Tags",
+          value: blog.value.tags,
+          inputClass: "",
+          attrs: { required: true },
+          hint: "For multiple tags, separate with commas. For multiple words in a tag, separate with hyphens. Best practice is to use 1-2 words per tag. E.g., website, frontend, web-development",
+        },
+      ];
     } else {
       error.value = "Blog not found.";
     }
+    isEditing.value = isEditMode; // Set edit mode on page load
   } catch (e) {
     error.value = e instanceof Error ? e.message : "Unknown error.";
   } finally {
@@ -61,179 +204,83 @@ onMounted(async () => {
   }
 });
 
-async function saveBlog() {
-  if (!blog.value) return;
-
-  // Implement the save logic, e.g., updating the blog in the database
-  try {
-    const updatedBlog = await blogsStore.updateBlog({
-      id: blog.value.id,
-      title: title.value,
-      category: blog.value.category || null,
-      tags: blog.value.tags || null,
-      content_md: content_md.value,
-    });
-
-    if (updatedBlog) {
-      alert("Blog updated successfully!");
-      navigateTo(`/posts/${updatedBlog.id}/view`);
+watch(
+  () => fields.value.find((field) => field.key === "title")?.value,
+  (newTitle) => {
+    const slugField = fields.value.find((field) => field.key === "slug");
+    if (slugField && newTitle) {
+      slugField.value = slugify(newTitle);
     }
-  } catch (e) {
-    alert("Failed to update blog.");
-    console.error("Update Error:", e);
   }
-}
+);
+
+watch(
+  () => fields.value.find((field) => field.key === "category")?.value,
+  (newCategory) => {
+    const categoryField = fields.value.find(
+      (field) => field.key === "category"
+    );
+    if (categoryField && newCategory) {
+      categoryField.value = capitalizeWords(newCategory);
+    }
+  }
+);
+
+watch(
+  () => fields.value.find((field) => field.key === "tags")?.value,
+  (newTags) => {
+    const tagsField = fields.value.find((field) => field.key === "tags");
+    if (tagsField && newTags) {
+      tagsField.value = newTags
+        .split(",")
+        .map((tag) => tag.trim())
+        .join(", ");
+    }
+  }
+);
+
+// Validation function
+const validateFields = () => {
+  fields.value.forEach((field) => {
+    if (field.attrs?.required && (!field.value || !field.value.trim())) {
+      field.error = `${field.label} is required.`;
+    } else {
+      field.error = "";
+    }
+  });
+
+  return fields.value.every((field) => !field.error);
+};
+
+const saveChanges = async () => {
+  console.log("Before validation, errors:", errors.value);
+
+  if (!validateFields()) {
+    console.log("Validation failed:", fields.value);
+    return;
+  }
+
+  console.log("Form is valid:", fields.value);
+
+  const updatedBlog = fields.value.reduce((acc, field) => {
+    acc[field.key] = field.value;
+    return acc;
+  }, {} as Partial<Blog>);
+
+  try {
+    updatedBlog.id = blog.value?.id;
+
+    await blogsStore.updateBlog(updatedBlog);
+    console.log("Blog updated successfully", updatedBlog);
+
+    navigateTo(`/posts/${route.params.id}/view`);
+  } catch (e) {
+    error.value = e instanceof Error ? e.message : "Failed to save changes.";
+    console.error(e);
+  }
+};
+
+const cancelEdit = () => {
+  navigateTo(`/posts/${route.params.id}/view`);
+};
 </script>
-
-<template>
-  <div class="p-2 sm:p-6 space-y-10">
-    <!-- Header Section -->
-    <div class="md:flex md:items-center md:justify-between mb-4">
-      <div class="min-w-0 flex-1">
-        <h2
-          class="text-2xl/7 font-bold text-gray-900 dark:text-white sm:truncate sm:text-3xl sm:tracking-tight"
-        >
-          Editing Posts
-        </h2>
-      </div>
-      <div class="mt-4 flex md:ml-4 md:mt-0">
-        <button
-          type="button"
-          class="inline-flex items-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
-        >
-          <ChevronLeftIcon class="mr-2 w-5 h-5" />
-          Back
-        </button>
-        <a
-          href="/posts/add-post"
-          type="button"
-          class="ml-3 inline-flex items-center rounded-md bg-violet-500 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-violet-700"
-        >
-          Preview Blog
-          <EyeIcon class="ml-2 w-5 h-5" />
-        </a>
-      </div>
-    </div>
-
-    <div v-if="isLoading">Loading blog...</div>
-    <div v-else-if="error" class="text-red-500">{{ error }}</div>
-    <div v-else-if="blog">
-      <form @submit.prevent="saveBlog">
-        <div
-          class="space-y-12 mt-3 sm:mt-4 rounded-lg bg-gray-50 dark:bg-slate-800 p-4 sm:p-8 min-h-[200px] border border-gray-200 dark:border-slate-700 shadow-sm"
-        >
-          <div
-            class="mt-4 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6 border-b border-gray-900/10 pb-12"
-          >
-            <!-- Title -->
-            <div class="sm:col-span-4">
-              <label
-                class="block text-base font-medium text-gray-700 dark:text-white"
-                >Post Title</label
-              >
-              <div class="mt-2">
-                <input
-                  type="text"
-                  name="Post-title"
-                  id="Post-title"
-                  v-model="title"
-                  class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-violet-500 focus:ring-violet-500 text-base mb-1"
-                  required
-                />
-                <span class="text-sm text-gray-500 ml-1">/{{ slug }}</span>
-              </div>
-            </div>
-
-            <!-- Description -->
-            <div class="col-span-full">
-              <label
-                class="block text-base font-medium text-gray-700 dark:text-white"
-                >Description</label
-              >
-              <div class="mt-2">
-                <textarea
-                  v-model="description"
-                  name="Post-description"
-                  id="Post-description"
-                  rows="3"
-                  class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-violet-500 focus:ring-violet-500 text-base"
-                ></textarea>
-              </div>
-            </div>
-
-            <!-- Content -->
-            <div class="col-span-full">
-              <label
-                class="block text-base font-medium text-gray-700 dark:text-white"
-                >Content</label
-              >
-              <div class="mt-2">
-                <textarea
-                  v-model="content_md"
-                  id="content"
-                  name="content"
-                  rows="10"
-                  class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-violet-500 focus:ring-violet-500 text-base"
-                ></textarea>
-              </div>
-            </div>
-
-            <!-- Category -->
-            <div class="mb-4 sm:col-span-3">
-              <label
-                class="block text-base font-medium text-gray-700 dark:text-white"
-                >Category</label
-              >
-              <div class="mt-2">
-                <select
-                  id="category"
-                  name="category"
-                  class="block w-full rounded-md border-gray-300 text-sm text-gray-900 focus:ring-violet-600 focus:border-violet-600"
-                >
-                  <option value="">Select category</option>
-                  <option value="tech">Tech</option>
-                  <option value="lifestyle">Lifestyle</option>
-                  <option value="business">Business</option>
-                </select>
-              </div>
-            </div>
-
-            <!-- Tags -->
-            <div class="sm:col-span-3">
-              <label
-                for="tags"
-                class="block text-base font-medium text-gray-700 dark:text-white"
-                >Tags</label
-              >
-              <div class="mt-2">
-                <input
-                  type="text"
-                  name="tags"
-                  id="tags"
-                  placeholder="e.g., vue, tailwind, Postging"
-                  class="block w-full rounded-md border-gray-300 text-sm text-gray-900 focus:ring-violet-600 focus:border-violet-600"
-                />
-              </div>
-              <p class="mt-2 text-sm text-gray-600">
-                Separate tags with commas.
-              </p>
-            </div>
-          </div>
-
-          <!-- Submit Button -->
-          <div class="mt-6 flex items-center justify-end gap-x-6">
-            <button
-              type="submit"
-              class="inline-flex items-center rounded-md border border-transparent bg-violet-500 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-violet-700 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:ring-offset-2"
-            >
-              Save Changes
-            </button>
-          </div>
-        </div>
-      </form>
-    </div>
-    <div v-else>
-      <p>Blog not found.</p>
-    </div>
-  </div>
-</template>

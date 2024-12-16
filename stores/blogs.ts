@@ -95,16 +95,62 @@ export const useBlogsStore = defineStore("blogs", {
     async updateBlog(
       updatedBlog: Partial<Blog> & { id: number }
     ): Promise<Blog | null> {
-      const index = this.blogs.findIndex((blog) => blog.id === updatedBlog.id);
-      if (index !== -1) {
-        this.blogs[index] = { ...this.blogs[index], ...updatedBlog };
+      try {
+        console.log(`[Store] Updating blog with ID: ${updatedBlog.id}...`);
 
-        // Simulate saving changes to local file or mock backend
-        console.log(`Updated blog with id ${updatedBlog.id}`);
-        return this.blogs[index];
+        // Send the updated blog to the backend API
+        const response = await $fetch<Blog>(`/api/blogs/${updatedBlog.id}`, {
+          method: "PUT",
+          body: updatedBlog, // Pass updated fields in the request body
+        });
+
+        // Update the local store with the updated blog
+        const index = this.blogs.findIndex(
+          (blog) => blog.id === updatedBlog.id
+        );
+        if (index !== -1) {
+          this.blogs[index] = response;
+        }
+
+        console.log(
+          `[Store] Blog with ID ${updatedBlog.id} updated successfully.`
+        );
+        return response;
+      } catch (err) {
+        console.error(
+          `[Store] Failed to update blog with ID: ${updatedBlog.id}`,
+          err
+        );
+        throw new Error("Failed to update the blog. Please try again.");
       }
+    },
 
-      return null;
+    async createBlog(newBlog: Partial<Blog>) {
+      try {
+        // Make the API call to create the blog
+        const response = await $fetch<Blog>("/api/blogs", {
+          method: "POST",
+          body: newBlog,
+        });
+
+        // Ensure the response is valid and matches the Blog type
+        if (!response.id) {
+          throw new Error(
+            "Failed to create blog: Missing blog ID in response."
+          );
+        }
+
+        // Add the new blog to the store
+        this.blogs.push(response);
+
+        return response;
+      } catch (err) {
+        console.error(
+          "Error creating blog:",
+          err instanceof Error ? err.message : err
+        );
+        throw new Error("Unable to create the blog. Please try again later.");
+      }
     },
   },
 });

@@ -5,31 +5,41 @@
       title="Post Details"
       :buttons="[
         {
-          label: isEditing ? 'Cancel' : 'Back',
-          icon: isEditing ? CheckCircleIcon : ChevronLeftIcon,
+          label: 'Back',
+          icon: ChevronLeftIcon,
           iconPosition: 'before',
           variant: 'secondary',
-          onClick: isEditing ? cancelEdit : goBack,
+          onClick: goBack,
         },
         {
-          label: isEditing ? 'Save Post' : 'Edit Post',
-          icon: isEditing ? CheckCircleIcon : PencilSquareIcon,
+          label: 'Edit Post',
+          icon: PencilSquareIcon,
           iconPosition: 'after',
           variant: 'primary',
-          onClick: isEditing ? saveChanges : enableEdit,
+          onClick: enableEdit,
         },
       ]"
     />
 
-    <div class="">
-      <div v-if="isLoading">Loading blog...</div>
-      <div v-else-if="error" class="text-red-500">{{ error }}</div>
-      <div v-else-if="blog">
-        <RowTable :fields="fields" :editable="isEditing" />
+    <div v-if="isLoading">Loading blog...</div>
+    <div v-else-if="error" class="text-red-500">{{ error }}</div>
+    <div v-else-if="blog">
+      <div class="rounded-md bg-white shadow-sm border border-gray-200">
+        <div class="flex flex-col gap-y-4 p-4 sm:p-10">
+          <h2 class="text-2xl font-bold mb-4">{{ blog.title }}</h2>
+          <!-- Render Markdown as HTML -->
+          <div v-html="renderMarkdown(blog.content)" class="prose"></div>
+          <div class="mt-4 border-t border-gray-200 pt-4">
+            <p class="text-gray-700 text-base font-light">
+              {{ blog.category }}
+            </p>
+            <p class="text-gray-700 text-base font-light">{{ blog.tags }}</p>
+          </div>
+        </div>
       </div>
-      <div v-else>
-        <p>Blog not found.</p>
-      </div>
+    </div>
+    <div v-else>
+      <p>Blog not found.</p>
     </div>
   </div>
 </template>
@@ -40,33 +50,27 @@ import { useBlogsStore } from "~/stores/blogs";
 import type { Blog } from "~/stores/blogs";
 import markdownIt from "markdown-it";
 import PageHeader from "~/components/PageHeader.vue";
-import RowTable from "~/components/RowTable.vue";
-
-import {
-  PencilSquareIcon,
-  ChevronLeftIcon,
-  CheckCircleIcon,
-} from "@heroicons/vue/24/outline";
+import { PencilSquareIcon, ChevronLeftIcon } from "@heroicons/vue/24/outline";
 
 const route = useRoute();
+const navigateTo = useRouter().push;
 const blogsStore = useBlogsStore();
 
 const blog = ref<Blog | null>(null);
 const isLoading = ref<boolean>(true);
 const error = ref<string | null>(null);
-const isEditing = ref(false);
 
-const fields = ref([
-  { key: "title", label: "Title", value: "", inputClass: "w-full" },
-  { key: "category", label: "Category", value: "", inputClass: "w-1/2" },
-  { key: "tags", label: "Tags", value: "", inputClass: "w-full" },
-  { key: "content", label: "Content", value: "", inputClass: "w-full" },
-]);
+const renderMarkdown = (markdown: string) => {
+  const md = markdownIt();
+  const renderedHTML = md.render(markdown);
+  return renderedHTML;
+};
 
 onMounted(async () => {
   const idParam = route.params.id;
 
-  // Validate the blog ID
+  console.log("Route Param (ID):", idParam);
+
   if (typeof idParam !== "string") {
     error.value = "Invalid blog ID.";
     isLoading.value = false;
@@ -74,6 +78,7 @@ onMounted(async () => {
   }
 
   const blogId = Number(idParam);
+  console.log("Parsed Blog ID:", blogId);
 
   if (isNaN(blogId)) {
     error.value = "Invalid blog ID.";
@@ -83,78 +88,24 @@ onMounted(async () => {
 
   try {
     blog.value = await blogsStore.fetchBlogById(blogId);
-    if (blog.value) {
-      // Populate fields for editing
-      fields.value = [
-        {
-          key: "title",
-          label: "Title",
-          value: blog.value.title,
-          inputClass: "w-full",
-        },
-        {
-          key: "category",
-          label: "Category",
-          value: "Technology",
-          type: "select",
-          inputClass: "w-1/2",
-          options: [
-            { value: "Technology", label: "Technology" },
-            { value: "Health", label: "Health" },
-            { value: "Education", label: "Education" },
-          ],
-        },
-        {
-          key: "tags",
-          label: "Tags",
-          value: blog.value.tags,
-          inputClass: "w-full",
-        },
-        {
-          key: "content",
-          label: "Content",
-          value: blog.value.content,
-          type: "textarea",
-          rows: 6,
-          inputClass: "w-full",
-        },
-      ];
-    } else {
-      error.value = "Blog not found.";
-    }
+    console.log("Fetched Blog:", blog.value);
+    if (!blog.value) error.value = "Blog not found.";
   } catch (e) {
     error.value = e instanceof Error ? e.message : "Unknown error.";
+    console.error("Error fetching blog:", e);
   } finally {
     isLoading.value = false;
   }
 });
 
-const enableEdit = () => {
-  isEditing.value = true;
-};
-
-const cancelEdit = () => {
-  isEditing.value = false;
-};
-
-const saveChanges = async () => {
-  isEditing.value = false;
-
-  // Prepare updated data to save
-  const updatedBlog = fields.value.reduce((acc, field) => {
-    acc[field.key] = field.value;
-    return acc;
-  }, {} as Partial<Blog>);
-
-  try {
-    await blogsStore.updateBlog(updatedBlog);
-    console.log("Blog updated successfully", updatedBlog);
-  } catch (e) {
-    error.value = e instanceof Error ? e.message : "Failed to save changes.";
-  }
-};
-
 const goBack = () => {
   navigateTo("/posts");
+};
+
+const enableEdit = () => {
+  const postId = blog.value?.id;
+  if (postId) {
+    navigateTo(`/posts/${postId}/edit?edit=true`);
+  }
 };
 </script>
