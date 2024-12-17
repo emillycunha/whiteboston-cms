@@ -1,0 +1,390 @@
+[
+  {
+    "id": 1,
+    "quote": "The key to productivity is to focus on what truly matters."
+  },
+  {
+    "id": 2,
+    "quote": "Start where you are. Use what you have. Do what you can."
+  },
+  {
+    "id": 3,
+    "quote": "Productivity is not about doing more; it\u2019s about doing what matters most."
+  },
+  {
+    "id": 4,
+    "quote": "Action is the foundational key to all success."
+  },
+  {
+    "id": 5,
+    "quote": "You don\u2019t have to be great to start, but you have to start to be great."
+  },
+  {
+    "id": 6,
+    "quote": "The secret to getting ahead is getting started."
+  },
+  {
+    "id": 7,
+    "quote": "Do something today that your future self will thank you for."
+  },
+  {
+    "id": 8,
+    "quote": "Success is the sum of small efforts repeated day in and day out."
+  },
+  {
+    "id": 9,
+    "quote": "You miss 100% of the shots you don\u2019t take."
+  },
+  {
+    "id": 10,
+    "quote": "The future depends on what you do today."
+  },
+  {
+    "id": 11,
+    "quote": "It\u2019s not always that we need to do more but rather that we need to focus on less."
+  },
+  {
+    "id": 12,
+    "quote": "Work smarter, not harder."
+  },
+  {
+    "id": 13,
+    "quote": "Focus on being productive instead of busy."
+  },
+  {
+    "id": 14,
+    "quote": "The best way to predict the future is to create it."
+  },
+  {
+    "id": 15,
+    "quote": "Don\u2019t wait for opportunity. Create it."
+  },
+  {
+    "id": 16,
+    "quote": "Motivation gets you going, but discipline keeps you growing."
+  },
+  {
+    "id": 17,
+    "quote": "Productivity is never an accident. It\u2019s the result of commitment and consistent effort."
+  },
+  {
+    "id": 18,
+    "quote": "You are what you do, not what you say you\u2019ll do."
+  },
+  {
+    "id": 19,
+    "quote": "Great things are done by a series of small things brought together."
+  },
+  {
+    "id": 20,
+    "quote": "The only way to achieve the impossible is to believe it is possible."
+  },
+  {
+    "id": 21,
+    "quote": "If you want something you\u2019ve never had, you must do something you\u2019ve never done."
+  },
+  {
+    "id": 22,
+    "quote": "Big journeys begin with small steps."
+  },
+  {
+    "id": 23,
+    "quote": "Make today so awesome that yesterday gets jealous."
+  },
+  {
+    "id": 24,
+    "quote": "Plan your work and work your plan."
+  },
+  {
+    "id": 25,
+    "quote": "The harder you work for something, the greater you\u2019ll feel when you achieve it."
+  },
+  {
+    "id": 26,
+    "quote": "What seems impossible today will soon become your warm-up."
+  },
+  {
+    "id": 27,
+    "quote": "Push yourself, because no one else is going to do it for you."
+  },
+  {
+    "id": 28,
+    "quote": "Don\u2019t count the days. Make the days count."
+  },
+  {
+    "id": 29,
+    "quote": "Believe in yourself and all that you are. Know that there is something inside you that is greater than any obstacle."
+  },
+  {
+    "id": 30,
+    "quote": "Discipline is choosing between what you want now and what you want most."
+  },
+  {
+    "id": 31,
+    "quote": "Don\u2019t stop when you\u2019re tired. Stop when you\u2019re done."
+  },
+  {
+    "id": 32,
+    "quote": "Work while they sleep. Learn while they party. Save while they spend. Live like they dream."
+  },
+  {
+    "id": 33,
+    "quote": "Good things happen to those who hustle."
+  },
+  {
+    "id": 34,
+    "quote": "Stay positive, work hard, and make it happen."
+  },
+  {
+    "id": 35,
+    "quote": "Do what you have to do until you can do what you want to do."
+  },
+  {
+    "id": 36,
+    "quote": "Dream big, stay positive, and get things done."
+  },
+  {
+    "id": 37,
+    "quote": "The way to get started is to quit talking and begin doing."
+  },
+  {
+    "id": 38,
+    "quote": "Every expert was once a beginner."
+  },
+  {
+    "id": 39,
+    "quote": "Success doesn\u2019t just find you. You have to go out and get it."
+  },
+  {
+    "id": 40,
+    "quote": "Don\u2019t be afraid of hard work. Nothing worthwhile comes easily."
+  },
+  {
+    "id": 41,
+    "quote": "You can, you should, and if you\u2019re brave enough to start, you will."
+  },
+  {
+    "id": 42,
+    "quote": "Small steps every day lead to big changes over time."
+  },
+  {
+    "id": 43,
+    "quote": "Hard work beats talent when talent doesn\u2019t work hard."
+  },
+  {
+    "id": 44,
+    "quote": "Strive for progress, not perfection."
+  },
+  {
+    "id": 45,
+    "quote": "Opportunities don\u2019t happen. You create them."
+  },
+  {
+    "id": 46,
+    "quote": "Nothing will work unless you do."
+  },
+  {
+    "id": 47,
+    "quote": "Productivity is about priorities, not hours."
+  },
+  {
+    "id": 48,
+    "quote": "Don\u2019t watch the clock; do what it does. Keep going."
+  },
+  {
+    "id": 49,
+    "quote": "Success is liking yourself, liking what you do, and liking how you do it."
+  },
+  {
+    "id": 50,
+    "quote": "Winners are not people who never fail, but people who never quit."
+  },
+  {
+    "id": 51,
+    "quote": "A little progress each day adds up to big results."
+  },
+  {
+    "id": 52,
+    "quote": "Success is not the key to happiness. Happiness is the key to success."
+  },
+  {
+    "id": 53,
+    "quote": "Set goals, crush them, and repeat."
+  },
+  {
+    "id": 54,
+    "quote": "The secret of getting things done is to act!"
+  },
+  {
+    "id": 55,
+    "quote": "Stay focused and never give up."
+  },
+  {
+    "id": 56,
+    "quote": "Productivity grows when you eliminate distractions."
+  },
+  {
+    "id": 57,
+    "quote": "Hustle until you no longer have to introduce yourself."
+  },
+  {
+    "id": 58,
+    "quote": "The best time to start was yesterday. The next best time is now."
+  },
+  {
+    "id": 59,
+    "quote": "The harder you work, the luckier you get."
+  },
+  {
+    "id": 60,
+    "quote": "Your limitation\u2014it\u2019s only your imagination."
+  },
+  {
+    "id": 61,
+    "quote": "Energy and persistence conquer all things."
+  },
+  {
+    "id": 62,
+    "quote": "Success usually comes to those who are too busy to be looking for it."
+  },
+  {
+    "id": 63,
+    "quote": "What you do today can improve all your tomorrows."
+  },
+  {
+    "id": 64,
+    "quote": "Keep going. Everything you need will come to you at the perfect time."
+  },
+  {
+    "id": 65,
+    "quote": "Don\u2019t be busy, be productive."
+  },
+  {
+    "id": 66,
+    "quote": "You\u2019ve got to get up every morning with determination if you\u2019re going to go to bed with satisfaction."
+  },
+  {
+    "id": 67,
+    "quote": "The difference between ordinary and extraordinary is that little extra."
+  },
+  {
+    "id": 68,
+    "quote": "Focus on progress, not perfection."
+  },
+  {
+    "id": 69,
+    "quote": "Productivity is being able to do things you were never able to do before."
+  },
+  {
+    "id": 70,
+    "quote": "Don\u2019t limit your challenges. Challenge your limits."
+  },
+  {
+    "id": 71,
+    "quote": "The successful warrior is the average person, with laser-like focus."
+  },
+  {
+    "id": 72,
+    "quote": "Don\u2019t call it a dream. Call it a plan."
+  },
+  {
+    "id": 73,
+    "quote": "The more you focus on progress, the less you\u2019ll stress about perfection."
+  },
+  {
+    "id": 74,
+    "quote": "Every morning you have two choices: continue to sleep with your dreams, or wake up and chase them."
+  },
+  {
+    "id": 75,
+    "quote": "What gets measured gets managed."
+  },
+  {
+    "id": 76,
+    "quote": "Never let your fear decide your future."
+  },
+  {
+    "id": 77,
+    "quote": "A year from now, you will wish you had started today."
+  },
+  {
+    "id": 78,
+    "quote": "Success begins at the end of your comfort zone."
+  },
+  {
+    "id": 79,
+    "quote": "Stop doubting yourself. Work hard and make it happen."
+  },
+  {
+    "id": 80,
+    "quote": "Dream it. Wish it. Do it."
+  },
+  {
+    "id": 81,
+    "quote": "Go as far as you can see; when you get there, you\u2019ll be able to see further."
+  },
+  {
+    "id": 82,
+    "quote": "If you get tired, learn to rest, not quit."
+  },
+  {
+    "id": 83,
+    "quote": "Believe you can, and you\u2019re halfway there."
+  },
+  {
+    "id": 84,
+    "quote": "Make progress, not excuses."
+  },
+  {
+    "id": 85,
+    "quote": "Success starts with self-discipline."
+  },
+  {
+    "id": 86,
+    "quote": "Productivity is a choice you make every day."
+  },
+  {
+    "id": 87,
+    "quote": "Every accomplishment starts with the decision to try."
+  },
+  {
+    "id": 88,
+    "quote": "Be the energy you want to attract."
+  },
+  {
+    "id": 89,
+    "quote": "Work hard in silence. Let success make the noise."
+  },
+  {
+    "id": 90,
+    "quote": "Don\u2019t wait for inspiration. Be your own motivation."
+  },
+  {
+    "id": 91,
+    "quote": "The best investment you can make is in yourself."
+  },
+  {
+    "id": 92,
+    "quote": "Live less out of habit and more out of intent."
+  },
+  {
+    "id": 93,
+    "quote": "Productivity is not luck; it\u2019s a result of your daily habits."
+  },
+  {
+    "id": 94,
+    "quote": "Take the first step. You don\u2019t have to see the whole staircase."
+  },
+  {
+    "id": 95,
+    "quote": "The key to success is to start before you are ready."
+  },
+  {
+    "id": 96,
+    "quote": "Focus on solutions, not problems."
+  },
+  {
+    "id": 97,
+    "quote": "Turn your obstacles into opportunities."
+  }
+]

@@ -164,7 +164,9 @@
     </div>
 
     <!-- Main content -->
-    <div class="lg:pl-64 flex flex-col min-h-screen bg-gray-100">
+    <div
+      class="lg:pl-64 flex flex-col min-h-screen bg-gray-100 dark:bg-gray-900"
+    >
       <!-- Main section -->
       <main class="flex-grow overflow-hidden">
         <div class="px-6 py-4 sm:py-8 sm:px-8">
@@ -209,7 +211,7 @@ const navigation = [
   { name: "Posts", href: "/posts", icon: FolderIcon, current: false },
   { name: "Tasks", href: "/tasks", icon: QueueListIcon, current: false },
   //{ name: "Reports", href: "/reports", icon: ChartPieIcon, current: false },
-  { name: "Support", href: "/support", icon: LifebuoyIcon, current: false },
+  //{ name: "Support", href: "/support", icon: LifebuoyIcon, current: false },
   {
     name: "Submit Request",
     href: "/ticket",

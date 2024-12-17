@@ -32,17 +32,17 @@ const fields = ref([
     key: "title",
     label: "Title",
     value: "",
-    required: true,
-
-    inputClass: "w-full",
+    fullRow: false,
+    attrs: { maxlength: 100, required: true },
+    inputClass: "",
     placeholder: "Enter ticket title",
   },
   {
     key: "description",
     label: "Description",
     value: "",
-    required: true,
-
+    fullRow: true,
+    attrs: { required: true },
     type: "textarea",
     rows: 4,
     inputClass: "w-full",
@@ -52,7 +52,7 @@ const fields = ref([
     key: "category",
     label: "Category",
     value: "",
-    required: true,
+    attrs: { required: true },
     type: "select",
     options: [
       { value: "", label: "Choose One" },
@@ -66,8 +66,7 @@ const fields = ref([
     key: "priority",
     label: "Priority",
     value: "",
-    required: true,
-
+    attrs: { required: true },
     type: "select",
     options: [
       { value: "", label: "Choose One" },

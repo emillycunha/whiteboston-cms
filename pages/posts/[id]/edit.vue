@@ -38,11 +38,27 @@
 import { ref, onMounted, watch } from "vue";
 import { useBlogsStore } from "~/stores/blogs";
 import type { Blog } from "~/stores/blogs";
-import markdownIt from "markdown-it";
 import PageHeader from "~/components/PageHeader.vue";
 import RowTable from "~/components/RowTable.vue";
-
 import { XCircleIcon, CheckCircleIcon } from "@heroicons/vue/24/outline";
+
+interface Field {
+  key: keyof Blog;
+  label: string;
+  value: string;
+  inputClass?: string;
+  placeholder?: string;
+  fullRow?: boolean;
+  attrs?: {
+    maxlength?: number;
+    required?: boolean;
+    disabled?: boolean;
+  };
+  type?: string;
+  rows?: number;
+  hint?: string;
+  error?: string;
+}
 
 const route = useRoute();
 const blogsStore = useBlogsStore();
@@ -65,13 +81,14 @@ const capitalizeWords = (text: string): string =>
     .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
     .join(" ");
 
-const fields = ref([
+const fields = ref<Field[]>([
   {
     key: "title",
     label: "Title",
     value: "",
     inputClass: "w-full",
     fullRow: false,
+    error: "",
   },
   {
     key: "slug",
@@ -79,6 +96,7 @@ const fields = ref([
     value: "",
     inputClass: "w-full",
     fullRow: false,
+    error: "",
   },
   {
     key: "description",
@@ -87,6 +105,7 @@ const fields = ref([
     rows: 4,
     value: "",
     fullRow: true,
+    error: "",
   },
   {
     key: "content",
@@ -95,6 +114,7 @@ const fields = ref([
     rows: 4,
     value: "",
     fullRow: true,
+    error: "",
   },
   {
     key: "tags",
@@ -102,6 +122,7 @@ const fields = ref([
     value: "",
     inputClass: "w-full",
     fullRow: false,
+    error: "",
   },
   {
     key: "category",
@@ -109,12 +130,14 @@ const fields = ref([
     value: "",
     inputClass: "w-full",
     fullRow: false,
+    error: "",
   },
 ]);
 
 onMounted(async () => {
   const idParam = route.params.id;
-  const isEditMode = route.query.edit === "true"; // Check query param
+  const blogId = Number(idParam);
+  const isEditMode = route.query.edit === "true";
 
   console.log("Is Edit Mode:", isEditMode);
 
@@ -123,8 +146,6 @@ onMounted(async () => {
     isLoading.value = false;
     return;
   }
-
-  const blogId = Number(idParam);
 
   if (isNaN(blogId)) {
     error.value = "Invalid blog ID.";
@@ -142,7 +163,7 @@ onMounted(async () => {
           value: blog.value.title,
           inputClass: "",
           fullRow: true,
-
+          error: "",
           attrs: { maxlength: 100, required: true },
         },
         {
@@ -151,7 +172,7 @@ onMounted(async () => {
           value: blog.value.slug,
           inputClass: " text-gray-500 bg-gray-100 !border-gray-100",
           fullRow: true,
-
+          error: "",
           attrs: { disabled: true },
         },
         {
@@ -162,7 +183,7 @@ onMounted(async () => {
           value: blog.value.description,
           inputClass: "",
           fullRow: true,
-
+          error: "",
           attrs: { required: true },
         },
         {
@@ -173,7 +194,7 @@ onMounted(async () => {
           rows: 10,
           inputClass: "",
           fullRow: true,
-
+          error: "",
           attrs: { required: true },
         },
         {
@@ -181,7 +202,9 @@ onMounted(async () => {
           label: "Category",
           value: blog.value.category,
           inputClass: " pr-8",
+          fullRow: false,
           attrs: { required: true },
+          error: "",
           hint: "For multiple categories, separate with commas. Best practice is to use 1-2 words per category. E.g., Website, Frontend, Web Development",
         },
         {
@@ -189,14 +212,16 @@ onMounted(async () => {
           label: "Tags",
           value: blog.value.tags,
           inputClass: "",
+          fullRow: false,
           attrs: { required: true },
+          error: "",
           hint: "For multiple tags, separate with commas. For multiple words in a tag, separate with hyphens. Best practice is to use 1-2 words per tag. E.g., website, frontend, web-development",
         },
       ];
     } else {
       error.value = "Blog not found.";
     }
-    isEditing.value = isEditMode; // Set edit mode on page load
+    isEditing.value = isEditMode;
   } catch (e) {
     error.value = e instanceof Error ? e.message : "Unknown error.";
   } finally {
@@ -253,24 +278,26 @@ const validateFields = () => {
 };
 
 const saveChanges = async () => {
-  console.log("Before validation, errors:", errors.value);
-
   if (!validateFields()) {
     console.log("Validation failed:", fields.value);
     return;
   }
 
-  console.log("Form is valid:", fields.value);
-
-  const updatedBlog = fields.value.reduce((acc, field) => {
-    acc[field.key] = field.value;
+  // Reduce fields into an updated blog object
+  const updatedBlog: Partial<Blog> = fields.value.reduce((acc, field) => {
+    acc[field.key as keyof Blog] = field.value as any;
     return acc;
   }, {} as Partial<Blog>);
 
-  try {
-    updatedBlog.id = blog.value?.id;
+  // Ensure `id` exists and append it to the updated blog
+  if (!blog.value?.id) {
+    console.error("Error: Blog ID is undefined.");
+    return;
+  }
+  updatedBlog.id = blog.value.id;
 
-    await blogsStore.updateBlog(updatedBlog);
+  try {
+    await blogsStore.updateBlog(updatedBlog as Partial<Blog> & { id: number });
     console.log("Blog updated successfully", updatedBlog);
 
     navigateTo(`/posts/${route.params.id}/view`);

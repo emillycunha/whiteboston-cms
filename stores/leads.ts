@@ -5,8 +5,13 @@ export interface Lead {
   name: string;
   email: string;
   phone: string;
+  source: string;
+  status: string;
   interest: string;
+  assigned_to: string;
+  notes: string;
   submitted_at: string;
+  user_id: number;
 }
 
 export const useLeadsStore = defineStore("leads", {
@@ -74,16 +79,31 @@ export const useLeadsStore = defineStore("leads", {
     async updateLead(
       updatedLead: Partial<Lead> & { id: number }
     ): Promise<Lead | null> {
-      const index = this.leads.findIndex((lead) => lead.id === updatedLead.id);
-      if (index !== -1) {
-        this.leads[index] = { ...this.leads[index], ...updatedLead };
+      try {
+        // Send updated lead to the backend API
+        const response = await $fetch<Lead>(`/api/leads/${updatedLead.id}`, {
+          method: "PUT",
+          body: updatedLead, // Send only updated fields
+        });
 
-        // Simulate saving changes to local file or mock backend
-        console.log(`Updated lead with id ${updatedLead.id}`);
-        return this.leads[index];
+        // Update the local store with the updated lead
+        const index = this.leads.findIndex(
+          (lead) => lead.id === updatedLead.id
+        );
+        if (index !== -1) {
+          this.leads[index] = response;
+          console.log(`Updated lead with ID ${updatedLead.id} in the store.`);
+        } else {
+          console.warn(
+            `Lead with ID ${updatedLead.id} not found in the store.`
+          );
+        }
+
+        return response;
+      } catch (err) {
+        console.error(`Failed to update lead with ID: ${updatedLead.id}`, err);
+        throw new Error("Failed to update the lead. Please try again.");
       }
-
-      return null;
     },
   },
 });

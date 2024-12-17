@@ -24,6 +24,25 @@
     <div>
       <RowTable :fields="fields" :editable="true" />
     </div>
+    <PageFooter
+      title=""
+      :buttons="[
+        {
+          label: 'Cancel',
+          icon: XCircleIcon,
+          iconPosition: 'after',
+          variant: 'secondary',
+          onClick: cancelAdd,
+        },
+        {
+          label: 'Publish Post',
+          icon: CheckCircleIcon,
+          iconPosition: 'after',
+          variant: 'primary',
+          onClick: saveBlog,
+        },
+      ]"
+    />
   </div>
 </template>
 
@@ -31,8 +50,27 @@
 import { ref, watch } from "vue";
 import { useBlogsStore } from "~/stores/blogs";
 import PageHeader from "~/components/PageHeader.vue";
+import PageFooter from "~/components/PageFooter.vue";
 import RowTable from "~/components/RowTable.vue";
 import { XCircleIcon, CheckCircleIcon } from "@heroicons/vue/24/outline";
+
+interface Field {
+  key: string;
+  label: string;
+  value: string;
+  inputClass?: string;
+  placeholder?: string;
+  fullRow?: boolean;
+  attrs?: {
+    maxlength?: number;
+    required?: boolean;
+    disabled?: boolean;
+  };
+  type?: string;
+  rows?: number;
+  hint?: string;
+  error?: string;
+}
 
 const blogsStore = useBlogsStore();
 const errors = ref({});
@@ -49,7 +87,7 @@ const capitalizeWords = (text: string): string =>
     .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
     .join(" ");
 
-const fields = ref([
+const fields = ref<Field[]>([
   {
     key: "title",
     label: "Title",
@@ -58,6 +96,7 @@ const fields = ref([
     placeholder: "Add Post Title",
     fullRow: false,
     attrs: { maxlength: 100, required: true },
+    error: "",
   },
   {
     key: "slug",
@@ -67,6 +106,7 @@ const fields = ref([
     placeholder: "The URL is auto-generated based on title",
     fullRow: false,
     attrs: { disabled: true },
+    error: "",
   },
   {
     key: "description",
@@ -77,6 +117,7 @@ const fields = ref([
     value: "",
     fullRow: true,
     attrs: { required: true },
+    error: "",
   },
   {
     key: "content",
@@ -84,10 +125,12 @@ const fields = ref([
     type: "textarea",
     placeholder:
       "Write your blog content here in Markdown... e.g., # Heading, ## Subheading, ### Sub-subheading, etc.",
-    rows: 10,
+    rows: 20,
     value: "",
     fullRow: true,
     attrs: { required: true },
+    error: "",
+
     hint: "For Markdown syntax, visit https://www.markdownguide.org/cheat-sheet/",
   },
   {
@@ -98,6 +141,8 @@ const fields = ref([
     placeholder: "Frontend, Web Development",
     fullRow: false,
     attrs: { required: true },
+    error: "",
+
     hint: "For multiple categories, separate with commas. E.g., Frontend, Web Development",
   },
   {
@@ -108,6 +153,8 @@ const fields = ref([
     fullRow: false,
     placeholder: "web-development, coding",
     attrs: { required: true },
+    error: "",
+
     hint: "For multiple tags, separate with commas. Use hyphens for multiple words in a tag. E.g., web-development, coding",
   },
 ]);
@@ -170,11 +217,21 @@ const saveBlog = async () => {
     return;
   }
 
+  // Define the blog type
+  interface Blog {
+    title: string;
+    slug: string;
+    description: string;
+    content: string;
+    category: string;
+    tags: string;
+  }
+
   // Reduce fields into a new blog object
-  const newBlog = fields.value.reduce((acc, field) => {
-    acc[field.key] = field.value;
+  const newBlog: Partial<Blog> = fields.value.reduce((acc, field) => {
+    acc[field.key as keyof Blog] = field.value;
     return acc;
-  }, {});
+  }, {} as Partial<Blog>);
 
   try {
     // Save the new blog through the store
@@ -191,6 +248,6 @@ const saveBlog = async () => {
 
 // Cancel adding blog
 const cancelAdd = () => {
-  navigateTo("/posts"); // Navigate back to blog list
+  navigateTo("/posts");
 };
 </script>

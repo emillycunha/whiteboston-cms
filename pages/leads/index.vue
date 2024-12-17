@@ -27,6 +27,7 @@
       :columns="tableColumns"
       :enableCheckbox="true"
       @selection-change="updateSelectedLeads"
+      @view="handleView"
       :actionType="'view'"
       :rowsPerPage="10"
     />
@@ -39,6 +40,7 @@ import DataTable from "~/components/DataTable.vue";
 import { useLeadsStore } from "@/stores/leads";
 import { ArrowDownTrayIcon, PlusIcon } from "@heroicons/vue/24/solid";
 
+const router = useRouter();
 const leads = ref([]);
 
 const tableColumns = [
@@ -96,5 +98,14 @@ const exportToCSV = () => {
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
+};
+
+const handleView = (row) => {
+  const blogId = row.id;
+  if (blogId) {
+    router.push(`/leads/${blogId}/view`);
+  } else {
+    console.error("Lead ID not found in row:", row);
+  }
 };
 </script>

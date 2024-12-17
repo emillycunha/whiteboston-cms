@@ -5,16 +5,14 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 400, statusMessage: "Invalid blog ID" });
   }
 
-  const body = await readBody(event); // Get updated blog data from the request body
+  const body = await readBody(event);
 
   try {
     const db = hubDatabase();
-
-    // Prepare the SQL query to update the blog
     await db
       .prepare(
         `UPDATE blogs
-           SET title = ?, description = ?, content = ?, category = ?, tags = ?
+           SET title = ?, description = ?, content = ?, category = ?, tags = ?, updated_at = DATETIME('now')
            WHERE id = ?`
       )
       .bind(
@@ -23,6 +21,7 @@ export default defineEventHandler(async (event) => {
         body.content || null,
         body.category || null,
         body.tags || null,
+        body.updated_at || null,
         id
       )
       .run();

@@ -19,7 +19,11 @@
             >
               {{ column.label }}
               <span v-if="activeSortKey === column.key">
-                {{ activeSortOrder === "asc" ? "⬆️" : "⬇️" }}
+                <BarsArrowUpIcon
+                  v-if="activeSortOrder === 'asc'"
+                  class="w-4 h-4 inline-block"
+                />
+                <BarsArrowDownIcon v-else class="w-4 h-4 inline-block" />
               </span>
             </th>
             <th v-if="actionType !== 'none'" class="px-4 py-2 w-24"></th>
@@ -40,7 +44,11 @@
               />
             </td>
             <td v-for="column in columns" :key="column.key" class="px-4 py-4">
-              {{ row[column.key] }}
+              {{
+                column.formatter
+                  ? column.formatter(row[column.key])
+                  : row[column.key]
+              }}
             </td>
             <td v-if="actionType !== 'none'" class="px-4 py-2">
               <button
@@ -96,6 +104,7 @@
 
 <script setup>
 import { ref, computed } from "vue";
+import { BarsArrowUpIcon, BarsArrowDownIcon } from "@heroicons/vue/24/outline";
 
 const props = defineProps({
   data: {
@@ -120,7 +129,7 @@ const props = defineProps({
   },
 });
 
-const emit = defineEmits(["view", "edit"]);
+const emit = defineEmits(["view", "edit", "selection-change"]);
 
 const selectedRows = ref([]);
 const currentPage = ref(1);
@@ -209,9 +218,4 @@ const onEdit = (row) => {
 };
 </script>
 
-<style scoped>
-.disabled {
-  opacity: 0.5;
-  pointer-events: none;
-}
-</style>
+<style scoped></style>

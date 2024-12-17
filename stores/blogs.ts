@@ -4,12 +4,16 @@ export interface Blog {
   id: number;
   title: string;
   description: string;
-  category: string;
   content: string;
+  user_id: number;
   created_at: string;
-  tags: string;
-  slug: string;
+  updated_at: string;
+  published_at: string;
   status?: string;
+  tags: string;
+  category: string;
+  slug: string;
+  image: string;
 }
 
 export const useBlogsStore = defineStore("blogs", {
@@ -21,13 +25,14 @@ export const useBlogsStore = defineStore("blogs", {
     isLoading: false,
   }),
   actions: {
-    async fetchBlogs() {
-      // Check if blogs are stored in localStorage
-      const cachedBlogs = localStorage.getItem("blogs");
-      if (cachedBlogs) {
-        console.log("[Store] Using cached blogs from localStorage.");
-        this.blogs = JSON.parse(cachedBlogs);
-        return;
+    async fetchBlogs(forceRefresh = false) {
+      if (!forceRefresh) {
+        const cachedBlogs = localStorage.getItem("blogs");
+        if (cachedBlogs) {
+          console.log("[Store] Using cached blogs from localStorage.");
+          this.blogs = JSON.parse(cachedBlogs);
+          return;
+        }
       }
 
       this.showNoPostsMessage = false;
@@ -95,31 +100,40 @@ export const useBlogsStore = defineStore("blogs", {
     async updateBlog(
       updatedBlog: Partial<Blog> & { id: number }
     ): Promise<Blog | null> {
+      if (!updatedBlog.id) {
+        throw new Error("Blog ID is required to update the blog.");
+      }
+
       try {
         console.log(`[Store] Updating blog with ID: ${updatedBlog.id}...`);
 
         // Send the updated blog to the backend API
         const response = await $fetch<Blog>(`/api/blogs/${updatedBlog.id}`, {
           method: "PUT",
-          body: updatedBlog, // Pass updated fields in the request body
+          body: updatedBlog,
         });
 
         // Update the local store with the updated blog
         const index = this.blogs.findIndex(
           (blog) => blog.id === updatedBlog.id
         );
+
         if (index !== -1) {
           this.blogs[index] = response;
+          console.log(
+            `[Store] Blog with ID ${updatedBlog.id} successfully updated in the store.`
+          );
+        } else {
+          console.warn(
+            `[Store] Blog with ID ${updatedBlog.id} not found in the local store.`
+          );
         }
 
-        console.log(
-          `[Store] Blog with ID ${updatedBlog.id} updated successfully.`
-        );
         return response;
       } catch (err) {
         console.error(
           `[Store] Failed to update blog with ID: ${updatedBlog.id}`,
-          err
+          err instanceof Error ? err.message : err
         );
         throw new Error("Failed to update the blog. Please try again.");
       }
@@ -133,15 +147,14 @@ export const useBlogsStore = defineStore("blogs", {
           body: newBlog,
         });
 
-        // Ensure the response is valid and matches the Blog type
         if (!response.id) {
           throw new Error(
             "Failed to create blog: Missing blog ID in response."
           );
         }
 
-        // Add the new blog to the store
-        this.blogs.push(response);
+        // Force refresh the blogs list from the backend
+        await this.fetchBlogs(true);
 
         return response;
       } catch (err) {

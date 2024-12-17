@@ -8,10 +8,12 @@ Whether you're building static or dynamic Astro sites, CMS WhiteBoston offers an
 
 ## **Features**
 
-- Full-stack Nuxt.js application with server-side rendering (SSR).
-- APIs for dynamic content delivery, powered by NuxtHub.
+- Full-stack Nuxt.js application with server-side rendering (SSR) and API routes powered by Nitro.
+- Dynamic content delivery using NuxtHub for seamless hosting and deployment.
 - Cloudflare D1 database integration for content storage.
 - Automatic deployments via GitHub integration with NuxtHub.
+- Tailwind CSS for rapid UI development.
+- Pinia state management with persisted state support.
 
 ---
 
@@ -22,7 +24,7 @@ Whether you're building static or dynamic Astro sites, CMS WhiteBoston offers an
 - Node.js >= 16.x
 - NuxtHub account
 - Cloudflare account
-- Wrangler CLI (optional, for local testing)
+- GitHub account
 
 ### **Installation**
 
@@ -43,6 +45,38 @@ Whether you're building static or dynamic Astro sites, CMS WhiteBoston offers an
    ```bash
    cp .env.example .env
    ```
+
+---
+
+## **Database**
+
+The project uses Cloudflare D1 for storing content data.
+
+### **Create Tables**
+
+To set up the database schema, execute the provided `schema.sql` file:
+
+1. Review the `schema.sql` file included in the repository. Modify it if needed.
+
+2. Import the tables into your D1 database:
+   ```bash
+   wrangler d1 execute cms-whiteboston --file=schema.sql
+   ```
+
+This script creates all required tables for the CMS.
+
+### **Manage the Database**
+
+- View tables:
+
+  ```bash
+  wrangler d1 execute cms-whiteboston --command "SELECT name FROM sqlite_master WHERE type='table';" --remote
+  ```
+
+- Run migrations:
+  ```bash
+  wrangler d1 migrations apply cms-whiteboston --remote
+  ```
 
 ---
 
@@ -71,27 +105,19 @@ API endpoints are available under `/api`. For example:
 
 ### **Automatic Deployment via NuxtHub**
 
-1. Push your changes to the `main` branch.
-2. NuxtHub will automatically build and deploy your project globally.
+1. Connect your GitHub repository to NuxtHub.
+2. Push your changes to the `main` branch.
+3. NuxtHub will automatically build and deploy your project globally.
 
 ---
 
-## **Database**
+### **Environment Variables**
 
-The project uses Cloudflare D1 for storing blog data.
-
-### **Manage the Database**
-
-- View tables:
-
-  ```bash
-  wrangler d1 execute cms-whiteboston --command "SELECT name FROM sqlite_master WHERE type='table';" --remote
-  ```
-
-- Run migrations:
-  ```bash
-  wrangler d1 migrations apply cms-whiteboston --remote
-  ```
+- `NUXT_HUB_PROJECT_KEY`=NuxtHub project key for automatic deployment.
+- `CLOUDFLARE_ACCOUNT_ID`=Cloudflare D1 database credentials.
+- `D1_DATABASE_NAME`=Cloudflare D1 database credentials.
+- `D1_DATABASE_ID`=Cloudflare D1 database credentials.
+- `API_KEY`= (optional) API key for securing endpoints.
 
 ---
 

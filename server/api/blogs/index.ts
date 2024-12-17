@@ -19,20 +19,20 @@ export default defineEventHandler(async (event) => {
     }
 
     // Set defaults
-    const createdAt = new Date().toISOString();
+    const publishedAt = new Date().toISOString();
     const status = newBlog.status || "published";
 
     try {
       const result = await db
         .prepare(
-          "INSERT INTO blogs (title, description, category, content, created_at, tags, slug, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
+          "INSERT INTO blogs (title, description, category, content, published_at, tags, slug, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
         )
         .bind(
           newBlog.title,
           newBlog.description,
           newBlog.category,
           newBlog.content,
-          createdAt,
+          publishedAt,
           newBlog.tags,
           newBlog.slug,
           status
@@ -48,7 +48,7 @@ export default defineEventHandler(async (event) => {
         description: newBlog.description,
         category: newBlog.category,
         content: newBlog.content,
-        created_at: createdAt,
+        publushed_at: publishedAt,
         tags: newBlog.tags,
         slug: newBlog.slug,
         status,

@@ -2,7 +2,7 @@
   <div class="px-6 py-4 space-y-6">
     <!-- Header Section -->
     <PageHeader
-      title="Lead Details"
+      title="Contact Details"
       :buttons="[
         {
           label: 'Back',
@@ -12,7 +12,7 @@
           onClick: goBack,
         },
         {
-          label: 'Edit Lead',
+          label: 'Edit Contact',
           icon: PencilSquareIcon,
           iconPosition: 'after',
           variant: 'primary',
@@ -21,52 +21,52 @@
       ]"
     />
 
-    <div v-if="isLoading">Loading lead...</div>
+    <div v-if="isLoading">Loading contact...</div>
     <div v-else-if="error" class="text-red-500">{{ error }}</div>
-    <div v-else-if="lead">
+    <div v-else-if="contact">
       <div
         class="rounded-md bg-white dark:bg-slate-800 shadow-sm border border-gray-200"
       >
         <div class="flex flex-col gap-y-4 p-4 sm:p-10">
           <h2 class="text-2xl font-bold mb-2 dark:text-white">
-            {{ lead.name }}
+            {{ contact.name }}
           </h2>
           <div class="mt-2 border-t border-gray-200 pt-4">
             <p class="text-gray-700 dark:text-gray-400 text-base font-light">
-              {{ lead.email }}
+              {{ contact.email }}
             </p>
             <p
               class="mt-2 text-gray-700 dark:text-gray-400 text-base font-light"
             >
-              {{ lead.phone }}
+              {{ contact.phone }}
             </p>
             <p
               class="mt-2 text-gray-700 dark:text-gray-400 text-base font-light"
             >
-              <span class="font-medium">Interest:</span> {{ lead.interest }}
+              <span class="font-medium">Notes:</span> {{ contact.notes }}
             </p>
           </div>
         </div>
       </div>
     </div>
     <div v-else>
-      <p>Lead not found.</p>
+      <p>Contact not found.</p>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
-import { useLeadsStore } from "~/stores/leads";
-import type { Lead } from "~/stores/leads";
+import { useContactsStore } from "~/stores/contacts";
+import type { Contact } from "~/stores/contacts";
 import PageHeader from "~/components/PageHeader.vue";
 import { PencilSquareIcon, ChevronLeftIcon } from "@heroicons/vue/24/outline";
 
 const route = useRoute();
 const navigateTo = useRouter().push;
-const leadsStore = useLeadsStore();
+const contactsStore = useContactsStore();
 
-const lead = ref<Lead | null>(null);
+const contact = ref<Contact | null>(null);
 const isLoading = ref<boolean>(true);
 const error = ref<string | null>(null);
 
@@ -74,43 +74,43 @@ onMounted(async () => {
   const idParam = route.params.id;
 
   if (typeof idParam !== "string") {
-    error.value = "Invalid lead ID.";
+    error.value = "Invalid contact ID.";
     isLoading.value = false;
     return;
   }
 
-  const leadId = Number(idParam);
+  const contactId = Number(idParam);
 
-  if (isNaN(leadId)) {
-    error.value = "Invalid lead ID.";
+  if (isNaN(contactId)) {
+    error.value = "Invalid contact ID.";
     isLoading.value = false;
     return;
   }
 
   try {
-    lead.value = await leadsStore.fetchLeadById(leadId);
-    console.log("Fetched Lead:", lead.value);
+    contact.value = await contactsStore.fetchContactById(contactId);
+    console.log("Fetched Contact:", contact.value);
 
-    // If lead is null or undefined, set the error
-    if (!lead.value) {
-      error.value = "Lead not found.";
+    // If contact is null or undefined, set the error
+    if (!contact.value) {
+      error.value = "Contact not found.";
     }
   } catch (e) {
     error.value = e instanceof Error ? e.message : "Unknown error.";
-    console.error("Error fetching lead:", e);
+    console.error("Error fetching contact:", e);
   } finally {
     isLoading.value = false;
   }
 });
 
 const goBack = () => {
-  navigateTo("/leads");
+  navigateTo("/contacts");
 };
 
 const enableEdit = () => {
-  const postId = lead.value?.id;
+  const postId = contact.value?.id;
   if (postId) {
-    navigateTo(`/leads/${postId}/edit?edit=true`);
+    navigateTo(`/contacts/${postId}/edit?edit=true`);
   }
 };
 </script>

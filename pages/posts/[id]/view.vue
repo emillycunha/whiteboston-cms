@@ -24,16 +24,25 @@
     <div v-if="isLoading">Loading blog...</div>
     <div v-else-if="error" class="text-red-500">{{ error }}</div>
     <div v-else-if="blog">
-      <div class="rounded-md bg-white shadow-sm border border-gray-200">
+      <div
+        class="rounded-md bg-white dark:bg-slate-800 shadow-sm border border-gray-200"
+      >
         <div class="flex flex-col gap-y-4 p-4 sm:p-10">
-          <h2 class="text-2xl font-bold mb-4">{{ blog.title }}</h2>
+          <h2 class="text-2xl font-bold mb-4 dark:text-white">
+            {{ blog.title }}
+          </h2>
           <!-- Render Markdown as HTML -->
-          <div v-html="renderMarkdown(blog.content)" class="prose"></div>
+          <div
+            v-html="renderMarkdown(blog.content)"
+            class="prose max-w-full dark:prose-invert"
+          ></div>
           <div class="mt-4 border-t border-gray-200 pt-4">
-            <p class="text-gray-700 text-base font-light">
+            <p class="text-gray-700 dark:text-gray-400 text-base font-light">
               {{ blog.category }}
             </p>
-            <p class="text-gray-700 text-base font-light">{{ blog.tags }}</p>
+            <p class="text-gray-700 dark:text-gray-400 text-base font-light">
+              {{ blog.tags }}
+            </p>
           </div>
         </div>
       </div>
@@ -78,7 +87,6 @@ onMounted(async () => {
   }
 
   const blogId = Number(idParam);
-  console.log("Parsed Blog ID:", blogId);
 
   if (isNaN(blogId)) {
     error.value = "Invalid blog ID.";

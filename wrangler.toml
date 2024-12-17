@@ -6,6 +6,6 @@ compatibility_date = "2024-12-12"
 
 [[d1_databases]]
 binding = "DB"
-database_name = "cms-whiteboston"
-database_id = "5db34b16-0be0-4ebb-ad72-ea9028b74eff"
+database_name = "${D1_DATABASE_NAME}"
+database_id = "${D1_DATABASE_ID}"
 preview_database_id = "DB"

@@ -22,7 +22,7 @@
     />
 
     <DataTable
-      :data="blogs"
+      :data="latestBlogs"
       :columns="tableColumns"
       :enableCheckbox="false"
       :actionType="'view'"
@@ -33,11 +33,10 @@
 </template>
 
 <script setup>
-import { ref, watch, onMounted, computed } from "vue";
+import { ref, onMounted, computed } from "vue";
 import DataTable from "~/components/DataTable.vue";
-import { ArrowDownTrayIcon, PlusIcon } from "@heroicons/vue/24/solid";
-
 import { useBlogsStore } from "@/stores/blogs";
+import { ArrowDownTrayIcon, PlusIcon } from "@heroicons/vue/24/solid";
 
 const router = useRouter();
 const blogs = ref([]);
@@ -45,7 +44,14 @@ const blogs = ref([]);
 const tableColumns = [
   { key: "title", label: "Title" },
   { key: "category", label: "Category" },
-  { key: "created_at", label: "Created" },
+  {
+    key: "created_at",
+    label: "Created",
+    formatter: (dateString) => {
+      const options = { year: "numeric", month: "short", day: "numeric" };
+      return new Date(dateString).toLocaleDateString("en-US", options);
+    },
+  },
 ];
 
 const blogsStore = useBlogsStore();
@@ -56,6 +62,17 @@ onMounted(async () => {
     blogs.value = blogsStore.blogs;
     console.log("[Parent] blogs after fetch:", blogs.value);
   }
+});
+
+const latestBlogs = computed(() => {
+  return blogs.value
+    .slice()
+    .sort((a, b) => {
+      const dateA = new Date(a.created_at).getTime();
+      const dateB = new Date(b.created_at).getTime();
+      return dateB - dateA;
+    })
+    .slice(0, 4);
 });
 
 // Header Buttons

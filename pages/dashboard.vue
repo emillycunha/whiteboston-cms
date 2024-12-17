@@ -10,24 +10,14 @@
       >
         <!-- Greeting and Date -->
         <h2 class="text-gray-500 text-xl">{{ greeting }}, {{ userName }}</h2>
-        <p class="text-gray-700 text-sm">{{ formattedDate }}</p>
-
-        <!-- Quote of the Day -->
-        <p class="mt-4 text-base font-bold text-gray-500 italic">
-          "{{ quoteOfTheDay }}"
-        </p>
+        <p class="text-gray-700 text-sm mt-1">{{ formattedDate }}</p>
 
         <!-- Profile Section -->
-        <div class="mt-4 border-t border-gray-500 pt-4">
-          <p class="text-gray-700 text-base font-light">{{ profileSummary }}</p>
-
-          <a
-            href="#"
-            class="mt-2 flex flex-row text-sm text-violet-500 hover:underline"
-          >
-            Edit Profile
-            <ArrowRightIcon class="ml-2 w-5 h-5" />
-          </a>
+        <div class="my-4 border-t border-gray-500 pt-4">
+          <!-- Quote of the Day -->
+          <p class="text-base font-semibold p-2 text-gray-500 italic">
+            <DailyQuote />
+          </p>
         </div>
       </div>
 
@@ -44,7 +34,7 @@
                 <p class="text-2xl font-bold">120</p>
               </div>
               <div
-                class="bg-teal-100 text-violet-500 p-2 w-12 h-12 rounded flex items-center justify-center"
+                class="bg-violet-500 text-white p-2 w-12 h-12 rounded flex items-center justify-center"
               >
                 <UserIcon class="size-7" />
               </div>
@@ -57,9 +47,9 @@
                 <p class="text-2xl font-bold">12</p>
               </div>
               <div
-                class="bg-teal-100 text-violet-500 p-2 w-12 h-12 rounded flex items-center justify-center"
+                class="bg-violet-500 text-white p-2 w-12 h-12 rounded flex items-center justify-center"
               >
-                <UserIcon class="size-7" />
+                <DocumentTextIcon class="size-7" />
               </div>
             </div>
             <div
@@ -70,9 +60,9 @@
                 <p class="text-2xl font-bold">2</p>
               </div>
               <div
-                class="bg-teal-100 text-violet-500 p-2 w-12 h-12 rounded flex items-center justify-center"
+                class="bg-violet-500 text-white p-2 w-12 h-12 rounded flex items-center justify-center"
               >
-                <UserIcon class="size-7" />
+                <ListBulletIcon class="size-7" />
               </div>
             </div>
           </section>
@@ -100,29 +90,17 @@
           <div
             class="bg-violet-500 p-4 stretch shadow rounded-md text-center text-white"
           >
-            <div>
-              <h2 class="">Contacts</h2>
-              <p class="text-2xl font-bold">120</p>
-              <p class="text-sm"></p>
-            </div>
+            <p class="text based">Tips for Managing Leads</p>
           </div>
           <div
             class="bg-violet-500 p-4 shadow rounded-md text-center text-white"
           >
-            <div>
-              <h2 class="">Contacts</h2>
-              <p class="text-2xl font-bold">120</p>
-              <p class="text-sm"></p>
-            </div>
+            <p class="text based">How to Write a Blog in Markdown</p>
           </div>
           <div
             class="bg-violet-500 p-4 shadow rounded-md text-center text-white"
           >
-            <div>
-              <h2 class="">Contacts</h2>
-              <p class="text-2xl font-bold">120</p>
-              <p class="text-sm"></p>
-            </div>
+            <p class="text based">Frequently Asked Questions (FAQs)</p>
           </div>
         </section>
       </div>
@@ -134,9 +112,10 @@
 import PageHeader from "@/components/PageHeader.vue";
 import RecentLeads from "@/components/RecentLeads.vue";
 import RecentPosts from "@/components/RecentPosts.vue";
+import DailyQuote from "@/components/DailyQuote.vue";
 import {
-  PencilSquareIcon,
-  ChevronLeftIcon,
+  ListBulletIcon,
+  DocumentTextIcon,
   UserIcon,
   ArrowRightIcon,
 } from "@heroicons/vue/24/solid";
@@ -164,18 +143,6 @@ const formattedDate = computed(() => {
   });
 });
 
-// Placeholder for motivational quote
-const quoteOfTheDay = ref(
-  "The only way to do great work is to love what you do. – Steve Jobs"
-);
-
 // Placeholder for user profile information
 const userName = ref("Emilly");
-const profileSummary = ref(
-  "You're on track with your goals! Keep up the great work."
-);
 </script>
-
-<style scoped>
-/* Add any additional styling here if needed */
-</style>
