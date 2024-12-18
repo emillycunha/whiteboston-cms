@@ -1,14 +1,19 @@
 <template>
-  <div class="rounded-md bg-white shadow-sm border border-gray-200">
+  <div
+    class="rounded-md bg-white shadow-sm border border-gray-200 dark:bg-slate-800 dark:border-slate-700"
+  >
     <div class="p-2 sm:p-4">
       <table class="w-full text-base">
         <thead>
-          <tr class="bg-gray-100 text-left text-gray-700">
+          <tr
+            class="bg-gray-100 text-left text-gray-700 dark:bg-slate-900 dark:text-white"
+          >
             <th v-if="enableCheckbox" class="px-4 py-2 w-8">
               <input
                 type="checkbox"
                 @change="toggleAll"
                 :checked="allSelected"
+                class="h-4 w-4 text-violet-500 border-gray-500 rounded focus:ring-violet-500 dark:focus:ring-teal-500 dark:text-teal-500"
               />
             </th>
             <th
@@ -29,11 +34,11 @@
             <th v-if="actionType !== 'none'" class="px-4 py-2 w-24"></th>
           </tr>
         </thead>
-        <tbody class="text-sm text-gray-700">
+        <tbody class="text-sm text-gray-700 dark:text-gray-100">
           <tr
             v-for="row in paginatedAndSortedData"
             :key="row.id"
-            class="even:bg-gray-50"
+            class="even:bg-gray-50 dark:even:bg-slate-700"
           >
             <td v-if="enableCheckbox" class="px-4 py-4">
               <input
@@ -41,6 +46,7 @@
                 :value="row.id"
                 :checked="selectedRows.includes(row.id)"
                 @change="toggleRow(row.id)"
+                class="h-4 w-4 text-violet-500 border-gray-500 rounded focus:ring-violet-500 dark:focus:ring-teal-500 dark:text-teal-500"
               />
             </td>
             <td v-for="column in columns" :key="column.key" class="px-4 py-4">
@@ -54,14 +60,14 @@
               <button
                 v-if="actionType === 'view'"
                 @click="onView(row)"
-                class="px-3 py-1 font-semibold text-violet-600"
+                class="px-3 py-1 font-semibold text-violet-600 dark:text-teal-500"
               >
                 View
               </button>
               <button
                 v-if="actionType === 'edit'"
                 @click="onEdit(row)"
-                class="px-3 py-1 font-semibold text-violet-600"
+                class="px-3 py-1 font-semibold text-violet-600 dark:text-teal-500"
               >
                 Edit
               </button>
@@ -85,17 +91,17 @@
     <button
       @click="prevPage"
       :disabled="currentPage === 1"
-      class="px-4 py-2 text-sm text-violet-500 disabled:text-gray-500"
+      class="px-4 py-2 text-sm text-violet-500 dark:text-teal-500 disabled:text-gray-500 dark:disabled:text-gray-300"
     >
       Previous
     </button>
-    <span class="text-sm text-gray-600">
+    <span class="text-sm text-gray-600 dark:text-gray-200">
       Page {{ currentPage }} of {{ totalPages }}
     </span>
     <button
       @click="nextPage"
       :disabled="currentPage === totalPages"
-      class="px-4 py-2 text-sm text-violet-500 disabled:text-gray-500"
+      class="px-4 py-2 text-sm text-violet-500 dark:text-teal-500 disabled:text-gray-500 dark:disabled:text-gray-300"
     >
       Next
     </button>

@@ -5,7 +5,7 @@
     <!-- Title -->
     <div>
       <h1
-        class="text-2xl font-semibold text-gray-800 dark:text-gray-100 sm:text-4xl"
+        class="text-2xl font-semibold text-gray-800 dark:text-white sm:text-4xl"
       >
         {{ title }}
       </h1>
@@ -21,9 +21,9 @@
         :class="[
           'flex items-center justify-between py-2 px-4 text-sm font-medium rounded-lg shadow-sm',
           button.variant === 'primary'
-            ? 'text-white bg-violet-500 hover:bg-violet-700 dark:bg-violet-500 dark:hover:bg-violet-600'
-            : 'text-gray-700 bg-white border border-gray-400 hover:bg-gray-100 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600',
-          button.disabled ? 'opacity-50 cursor-not-allowed text-gray-400' : '',
+            ? 'text-white bg-violet-500 hover:bg-violet-600 dark:bg-teal-500 dark:hover:bg-teal-600'
+            : 'text-gray-700 bg-white border border-gray-400 hover:bg-gray-50 dark:bg-slate-500 dark:text-white dark:border-slate-500 dark:hover:bg-gray-600 dark:hover:border-slate-600',
+          button.disabled ? 'opacity-50 cursor-not-allowed' : '',
         ]"
       >
         <!-- Icon Before -->

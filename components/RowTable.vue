@@ -1,5 +1,7 @@
 <template>
-  <div class="rounded-md bg-white shadow-sm border border-gray-200">
+  <div
+    class="rounded-md bg-white shadow-sm border border-gray-200 dark:bg-slate-800 dark:border-slate-700"
+  >
     <div class="flex flex-wrap gap-y-4 p-4 sm:p-10">
       <div
         v-for="(field, fieldIndex) in fields"
@@ -10,7 +12,7 @@
         <div class="w-full p-2">
           <label
             :for="`${fieldIndex}-${field.key}`"
-            class="font-bold block mb-1"
+            class="font-bold block mb-1 dark:text-white"
           >
             {{ field.label }}:
           </label>
@@ -29,7 +31,7 @@
                 :placeholder="field.placeholder || ''"
                 v-bind="field.attrs || {}"
                 :class="[
-                  'border border-gray-500 rounded-md p-2 w-full',
+                  'border border-gray-500 focus:ring-violet-500  dark:bg-slate-700 dark:border-slate-600 dark:placeholder-white dark:text-white dark:focus:ring-slate-500 rounded-md p-2 w-full',
                   field.inputClass,
                   field.error ? 'border-red-500' : '',
                 ]"
@@ -41,7 +43,7 @@
                 v-model="field.value"
                 v-bind="field.attrs || {}"
                 :class="[
-                  'border border-gray-500 rounded-md p-2 w-full',
+                  'border border-gray-500 focus:ring-violet-500  dark:bg-slate-700 dark:border-slate-600 dark:placeholder-white dark:text-white dark:focus:ring-slate-500 rounded-md p-2 w-full',
                   field.inputClass,
                   field.error ? 'border-red-500' : '',
                 ]"
@@ -63,7 +65,7 @@
                 :placeholder="field.placeholder || ''"
                 v-bind="field.attrs || {}"
                 :class="[
-                  'border border-gray-500 rounded-md p-2 w-full',
+                  'border border-gray-500 focus:ring-violet-500  dark:bg-slate-700 dark:border-slate-600 dark:placeholder-white dark:text-white dark:focus:ring-slate-500 rounded-md p-2 w-full',
                   field.inputClass,
                   field.error ? 'border-red-500' : '',
                 ]"

@@ -6,18 +6,18 @@
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
       <!-- Card Welcome -->
       <div
-        class="lg:col-start-3 lg:col-span-1 lg:row-start-1 lg:row-span-2 bg-gradient-to-r from-teal-50 to-violet-100 p-4 shadow rounded-md"
+        class="lg:col-start-3 lg:col-span-1 lg:row-start-1 lg:row-span-2 bg-gradient-to-l from-teal-50 to-violet-50 p-4 shadow rounded-md"
       >
         <!-- Greeting and Date -->
-        <h2 class="text-gray-500 text-xl">{{ greeting }}, {{ userName }}</h2>
-        <p class="text-gray-700 text-sm mt-1">{{ formattedDate }}</p>
+        <h2 class="text-gray-700 text-xl">{{ greeting }}, {{ userName }}</h2>
+        <p class="text-teal-500 text-sm mt-1">{{ formattedDate }}</p>
 
         <!-- Profile Section -->
         <div class="my-4 border-t border-gray-500 pt-4">
           <!-- Quote of the Day -->
-          <p class="text-base font-semibold p-2 text-gray-500 italic">
+          <div>
             <DailyQuote />
-          </p>
+          </div>
         </div>
       </div>
 

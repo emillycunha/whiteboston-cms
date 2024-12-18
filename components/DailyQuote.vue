@@ -1,6 +1,6 @@
 <template>
   <div class="quote-card">
-    <p class="quote">{{ quote }}</p>
+    <p class="text-base font-semibold p-2 text-gray-700 italic">{{ quote }}</p>
   </div>
 </template>
 

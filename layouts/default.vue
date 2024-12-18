@@ -25,9 +25,7 @@
             leaveFrom="translate-x-0"
             leaveTo="-translate-x-full"
           >
-            <DialogPanel
-              class="relative flex w-full max-w-xs flex-col dark:bg-gray-800"
-            >
+            <DialogPanel class="relative flex w-full max-w-xs flex-col">
               <div
                 class="p-4 flex flex-col grow bg-white dark:bg-gray-800 rounded-lg m-4 shadow-sm"
               >
@@ -40,7 +38,18 @@
                   </button>
                 </div>
 
-                <nav class="flex flex-col grow gap-y-16">
+                <div class="flex items-center justify-start px-4 py-2 mb-2">
+                  <CubeIcon
+                    class="h-6 w-6 mr-1 text-gray-700 dark:text-gray-50"
+                  />
+                  <h3
+                    class="text-base tracking-tighter font-bold text-gray-700 dark:text-gray-50"
+                  >
+                    WHITEBOSTON
+                  </h3>
+                </div>
+
+                <nav class="flex flex-col grow gap-y-8">
                   <!-- Main navigation -->
                   <ul class="py-4 space-y-1">
                     <li v-for="item in navigation" :key="item.name">
@@ -93,7 +102,7 @@
 
     <!-- Mobile header -->
     <header
-      class="lg:hidden flex items-center justify-between p-4 dark:bg-gray-700"
+      class="lg:hidden flex items-center justify-between p-4 dark:bg-gray-900"
     >
       <button
         @click="sidebarOpen = true"
@@ -110,8 +119,10 @@
         class="p-4 flex flex-col grow bg-white dark:bg-gray-800 rounded-lg m-4 shadow-sm"
       >
         <div class="flex items-center justify-start px-4 py-4 mb-4">
-          <CubeIcon class="h-6 w-6 mr-1 text-gray-700" />
-          <h3 class="text-base tracking-tighter font-bold text-gray-700">
+          <CubeIcon class="h-6 w-6 mr-1 text-gray-700 dark:text-gray-50" />
+          <h3
+            class="text-base tracking-tighter font-bold text-gray-700 dark:text-gray-50"
+          >
             WHITEBOSTON
           </h3>
         </div>
@@ -122,7 +133,7 @@
             <li v-for="item in navigation" :key="item.name">
               <a
                 :href="item.href"
-                class="flex items-center px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 rounded-md hover:bg-violet-50 dark:hover:bg-violet-200"
+                class="flex items-center px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 rounded-md hover:bg-violet-50 dark:hover:bg-teal-500"
               >
                 <component
                   :is="item.icon"
@@ -139,7 +150,7 @@
             <li v-for="item in navigation2" :key="item.name">
               <a
                 :href="item.href"
-                class="flex items-center px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 rounded-md hover:bg-violet-50 dark:hover:bg-violet-200"
+                class="flex items-center px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 rounded-md hover:bg-violet-50 dark:hover:bg-teal-500"
               >
                 <component
                   :is="item.icon"
@@ -221,7 +232,6 @@ const navigation = [
 ];
 
 const navigation2 = [
-  { name: "Settings", href: "/settings", icon: Cog6ToothIcon, current: false },
   { name: "Profile", href: "/profile", icon: UserCircleIcon, current: false },
   {
     name: "Logout",
