@@ -1,14 +1,13 @@
 -- Table: blogs
--- Stores blog posts with metadata
-CREATE TABLE blogs (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
+CREATE TABLE public.blogs (
+    id SERIAL PRIMARY KEY,
     title TEXT NOT NULL,
     description TEXT NOT NULL,
     content TEXT NOT NULL,
     user_id INTEGER NOT NULL,
-    created_at TEXT DEFAULT CURRENT_TIMESTAMP,
-    updated_at TEXT DEFAULT CURRENT_TIMESTAMP,
-    published_at TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    published_at TIMESTAMP,
     status TEXT DEFAULT 'published',
     category TEXT,
     tags TEXT,
@@ -17,24 +16,23 @@ CREATE TABLE blogs (
 );
 
 -- Table: contacts
--- Stores customer or client contact information
-CREATE TABLE contacts (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
+CREATE TABLE public.contacts (
+    id SERIAL PRIMARY KEY,
     name TEXT NOT NULL,
     email TEXT NOT NULL UNIQUE,
     phone TEXT,
     address TEXT,
     company TEXT,
-    created_at TEXT DEFAULT CURRENT_TIMESTAMP,
-    updated_at TEXT DEFAULT CURRENT_TIMESTAMP,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     notes TEXT,
-    user_id INTEGER NOT NULL
+    owner_id INTEGER NOT NULL,
+    org_id INTEGER REFERENCES public.organization(id) ON DELETE SET NULL
 );
 
 -- Table: leads
--- Stores potential leads for sales or engagement
-CREATE TABLE leads (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
+CREATE TABLE public.leads (
+    id SERIAL PRIMARY KEY,
     name TEXT NOT NULL,
     email TEXT UNIQUE,
     phone TEXT,
@@ -42,61 +40,60 @@ CREATE TABLE leads (
     status TEXT DEFAULT 'new',
     interest TEXT,
     assigned_to INTEGER,
-    user_id INTEGER NOT NULL,
+    owner_id INTEGER NOT NULL,
+    org_id INTEGER REFERENCES public.organization(id) ON DELETE SET NULL,
     notes TEXT,
-    submitted_at TEXT DEFAULT CURRENT_TIMESTAMP
+    submitted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 -- Table: tasks
--- Stores tasks or to-do items
-CREATE TABLE tasks (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
+CREATE TABLE public.tasks (
+    id SERIAL PRIMARY KEY,
     title TEXT NOT NULL,
     description TEXT,
-    assigned_to INTEGER, 
-    user_id INTEGER NOT NULL,
-    due_date TEXT,
+    assigned_to INTEGER,
+    owner_id INTEGER NOT NULL,
+    org_id INTEGER REFERENCES public.organization(id) ON DELETE SET NULL,
+    due_date TIMESTAMP,
     status TEXT DEFAULT 'pending',
-    created_at TEXT DEFAULT CURRENT_TIMESTAMP,
-    updated_at TEXT DEFAULT CURRENT_TIMESTAMP,
-    priority TEXT DEFAULT 'normal' 
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    priority TEXT DEFAULT 'normal'
 );
 
 -- Table: users
--- Stores user accounts
-CREATE TABLE users (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    name TEXT NOT NULL,
-    email TEXT NOT NULL UNIQUE,
-    password_hash TEXT NOT NULL,
-    role TEXT DEFAULT 'user', 
-    created_at TEXT DEFAULT CURRENT_TIMESTAMP,
-    updated_at TEXT DEFAULT CURRENT_TIMESTAMP,
-    notes TEXT,
-    organization TEXT
+CREATE TABLE public.users (
+    id SERIAL PRIMARY KEY,
+    auth_user_id UUID NOT NULL,
+    role TEXT NOT NULL DEFAULT 'Editor',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    org_id INTEGER REFERENCES public.organization(id) ON DELETE SET NULL,
+    CONSTRAINT fk_auth_user FOREIGN KEY (auth_user_id) REFERENCES auth.users (id) ON DELETE CASCADE
 );
 
 -- Table: tickets
--- Stores support tickets for customer issues
-CREATE TABLE tickets (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
+CREATE TABLE public.tickets (
+    id SERIAL PRIMARY KEY,
     title TEXT NOT NULL,
     description TEXT NOT NULL,
     user_id INTEGER, 
     assigned_to INTEGER, 
     status TEXT DEFAULT 'open',
     priority TEXT DEFAULT 'normal', 
-    created_at TEXT DEFAULT CURRENT_TIMESTAMP,
-    updated_at TEXT DEFAULT CURRENT_TIMESTAMP,
-    resolved_at TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    resolved_at TIMESTAMP,
     organization TEXT
 );
 
--- Indexes for optimization
-CREATE INDEX idx_contacts_email ON contacts(email);
-CREATE INDEX idx_users_email ON users(email);
-CREATE INDEX idx_tasks_assigned_to ON tasks(assigned_to);
-CREATE INDEX idx_tickets_status ON tickets(status);
-
--- Enable foreign key support (only documented; not strictly enforced in D1)
-PRAGMA foreign_keys = ON;
+-- Table: organization
+CREATE TABLE public.organization (
+    id SERIAL PRIMARY KEY,
+    name TEXT NOT NULL,
+    description TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    owner_id UUID REFERENCES auth.users (id) ON DELETE SET NULL,
+    is_active BOOLEAN DEFAULT true,
+    web_domain TEXT
+);

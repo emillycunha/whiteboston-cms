@@ -1,16 +1,17 @@
 import { defineStore } from "pinia";
+import { useNuxtApp } from "#app";
 
 export interface Contact {
   id: number;
+  org_id: number;
+  owner_id: number;
   name: string;
   email: string;
   phone: string;
-  address: string;
-  company: string;
+  source: string;
+  notes: string;
   created_at: string;
   updated_at: string;
-  notes: string;
-  user_id: number;
 }
 
 export const useContactsStore = defineStore("contacts", {
@@ -22,11 +23,13 @@ export const useContactsStore = defineStore("contacts", {
   }),
   actions: {
     async fetchContacts() {
+      const { $supabase } = useNuxtApp(); // Access Supabase client
+
       // Check if contacts are stored in localStorage
-      const cachedcontacts = localStorage.getItem("contacts");
-      if (cachedcontacts) {
+      const cachedContacts = localStorage.getItem("contacts");
+      if (cachedContacts) {
         console.log("[Store] Using cached contacts from localStorage.");
-        this.contacts = JSON.parse(cachedcontacts);
+        this.contacts = JSON.parse(cachedContacts);
         return;
       }
 
@@ -35,13 +38,16 @@ export const useContactsStore = defineStore("contacts", {
       this.isLoading = true;
 
       try {
-        console.log("[Store] Fetching contacts from /api/contacts...");
-        const response = await $fetch<Contact[]>("/api/contacts");
-        console.log("[Store] Fetched contacts:", response);
-        this.contacts = response;
-        localStorage.setItem("contacts", JSON.stringify(response));
+        console.log("[Store] Fetching contacts from Supabase...");
+        const { data, error } = await $supabase.from("contacts").select("*");
 
-        console.log("[Store] contacts successfully stored:", this.contacts);
+        if (error) throw new Error(error.message);
+
+        console.log("[Store] Fetched contacts from Supabase:", data);
+        this.contacts = data || [];
+        localStorage.setItem("contacts", JSON.stringify(this.contacts));
+
+        console.log("[Store] Contacts successfully stored:", this.contacts);
       } catch (err) {
         console.error("[Store] Error fetching contacts:", err);
         this.error = "Failed to fetch contacts. Please try again.";
@@ -52,64 +58,65 @@ export const useContactsStore = defineStore("contacts", {
     },
 
     async fetchContactById(id: number): Promise<Contact> {
+      const { $supabase } = useNuxtApp();
+
       try {
-        console.log(
-          `[Store] Fetching contact with ID: ${id} from /api/contacts/${id}...`
-        );
+        console.log(`[Store] Fetching contact with ID: ${id} from Supabase...`);
 
-        // Fetch the contact by ID from the API
-        const response = await $fetch<Contact>(`/api/contacts/${id}`);
+        const { data, error } = await $supabase
+          .from("contacts")
+          .select("*")
+          .eq("id", id)
+          .single();
 
-        console.log(`[Store] Fetched contact with ID: ${id}:`, response);
+        if (error) throw new Error(error.message);
+        if (!data) throw new Error(`Contact with ID ${id} not found.`);
 
-        if (!response) {
-          throw new Error(`Contact with ID ${id} not found.`);
-        }
-
-        return response;
+        console.log(`[Store] Fetched contact with ID ${id}:`, data);
+        return data;
       } catch (err) {
-        const message =
-          err instanceof Error ? err.message : "An unknown error occurred.";
-        console.error(
-          `[Store] Error fetching contact with ID: ${id}:`,
-          message
-        );
-        throw new Error(message);
+        console.error(`[Store] Error fetching contact with ID ${id}:`, err);
+        throw new Error(err instanceof Error ? err.message : "Unknown error.");
       }
     },
 
     async updateContact(
       updatedContact: Partial<Contact> & { id: number }
     ): Promise<Contact | null> {
+      const { $supabase } = useNuxtApp();
+
       try {
-        // Send updated contact to the backend API
-        const response = await $fetch<Contact>(
-          `/api/contacts/${updatedContact.id}`,
-          {
-            method: "PUT",
-            body: updatedContact, // Send only updated fields
-          }
+        console.log(
+          `[Store] Updating contact with ID: ${updatedContact.id} in Supabase...`
         );
 
-        // Update the local store with the updated contact
+        const { data, error } = await $supabase
+          .from("contacts")
+          .update(updatedContact)
+          .eq("id", updatedContact.id)
+          .select("*")
+          .single();
+
+        if (error) throw new Error(error.message);
+
         const index = this.contacts.findIndex(
           (contact) => contact.id === updatedContact.id
         );
         if (index !== -1) {
-          this.contacts[index] = response;
+          this.contacts[index] = data;
           console.log(
-            `Updated contact with ID ${updatedContact.id} in the store.`
+            `[Store] Contact with ID ${updatedContact.id} updated locally.`
           );
         } else {
           console.warn(
-            `Contact with ID ${updatedContact.id} not found in the store.`
+            `[Store] Contact with ID ${updatedContact.id} not found in the store.`
           );
         }
 
-        return response;
+        return data;
       } catch (err) {
         console.error(
-          `Failed to update contact with ID: ${updatedContact.id}`,
+          `[Store] Failed to update contact with ID ${updatedContact.id}:`,
           err
         );
         throw new Error("Failed to update the contact. Please try again.");

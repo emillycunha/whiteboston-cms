@@ -1,4 +1,5 @@
 import { defineStore } from "pinia";
+import { useNuxtApp } from "#app";
 
 export interface Task {
   id: number;
@@ -23,11 +24,13 @@ export const useTasksStore = defineStore("tasks", {
 
   actions: {
     async fetchTasks() {
+      const { $supabase } = useNuxtApp(); // Access Supabase client
+
       // Check if tasks are stored in localStorage
-      const cachedtasks = localStorage.getItem("tasks");
-      if (cachedtasks) {
+      const cachedTasks = localStorage.getItem("tasks");
+      if (cachedTasks) {
         console.log("[Store] Using cached tasks from localStorage.");
-        this.tasks = JSON.parse(cachedtasks);
+        this.tasks = JSON.parse(cachedTasks);
         return;
       }
 
@@ -36,13 +39,16 @@ export const useTasksStore = defineStore("tasks", {
       this.isLoading = true;
 
       try {
-        console.log("[Store] Fetching tasks from /api/tasks...");
-        const response = await $fetch<Task[]>("/api/tasks");
-        console.log("[Store] Fetched tasks:", response);
-        this.tasks = response;
-        localStorage.setItem("tasks", JSON.stringify(response));
+        console.log("[Store] Fetching tasks from Supabase...");
+        const { data, error } = await $supabase.from("tasks").select("*");
 
-        console.log("[Store] tasks successfully stored:", this.tasks);
+        if (error) throw new Error(error.message);
+
+        console.log("[Store] Fetched tasks from Supabase:", data);
+        this.tasks = data || [];
+        localStorage.setItem("tasks", JSON.stringify(this.tasks));
+
+        console.log("[Store] Tasks successfully stored:", this.tasks);
       } catch (err) {
         console.error("[Store] Error fetching tasks:", err);
         this.error = "Failed to fetch tasks. Please try again.";
@@ -53,42 +59,65 @@ export const useTasksStore = defineStore("tasks", {
     },
 
     async fetchTaskById(id: number): Promise<Task> {
+      const { $supabase } = useNuxtApp();
+
       try {
-        console.log(
-          `[Store] Fetching task with ID: ${id} from /api/tasks/${id}...`
-        );
+        console.log(`[Store] Fetching task with ID: ${id} from Supabase...`);
 
-        // Fetch the task by ID from the API
-        const response = await $fetch<Task>(`/api/tasks/${id}`);
+        const { data, error } = await $supabase
+          .from("tasks")
+          .select("*")
+          .eq("id", id)
+          .single();
 
-        console.log(`[Store] Fetched task with ID: ${id}:`, response);
+        if (error) throw new Error(error.message);
+        if (!data) throw new Error(`Task with ID ${id} not found.`);
 
-        if (!response) {
-          throw new Error(`task with ID ${id} not found.`);
-        }
-
-        return response;
+        console.log(`[Store] Fetched task with ID ${id}:`, data);
+        return data;
       } catch (err) {
-        const message =
-          err instanceof Error ? err.message : "An unknown error occurred.";
-        console.error(`[Store] Error fetching task with ID: ${id}:`, message);
-        throw new Error(message);
+        console.error(`[Store] Error fetching task with ID ${id}:`, err);
+        throw new Error(err instanceof Error ? err.message : "Unknown error.");
       }
     },
 
     async updateTask(
-      updatedtask: Partial<Task> & { id: number }
+      updatedTask: Partial<Task> & { id: number }
     ): Promise<Task | null> {
-      const index = this.tasks.findIndex((task) => task.id === updatedtask.id);
-      if (index !== -1) {
-        this.tasks[index] = { ...this.tasks[index], ...updatedtask };
+      const { $supabase } = useNuxtApp();
 
-        // Simulate saving changes to local file or mock backend
-        console.log(`Updated task with id ${updatedtask.id}`);
-        return this.tasks[index];
+      try {
+        console.log(
+          `[Store] Updating task with ID: ${updatedTask.id} in Supabase...`
+        );
+
+        const { data, error } = await $supabase
+          .from("tasks")
+          .update(updatedTask)
+          .eq("id", updatedTask.id)
+          .select("*")
+          .single();
+
+        if (error) throw new Error(error.message);
+
+        const index = this.tasks.findIndex(
+          (task) => task.id === updatedTask.id
+        );
+        if (index !== -1) {
+          this.tasks[index] = data;
+          console.log(
+            `[Store] Task with ID ${updatedTask.id} updated locally.`
+          );
+        }
+
+        return data;
+      } catch (err) {
+        console.error(
+          `[Store] Failed to update task with ID ${updatedTask.id}:`,
+          err
+        );
+        throw new Error("Failed to update the task. Please try again.");
       }
-
-      return null;
     },
   },
 });

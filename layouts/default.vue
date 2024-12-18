@@ -148,9 +148,12 @@
           <!-- Secondary navigation -->
           <ul class="border-t border-gray-200 py-4 space-y-1">
             <li v-for="item in navigation2" :key="item.name">
-              <a
+              <component
+                :is="item.href ? 'a' : 'button'"
                 :href="item.href"
+                @click="item.onClick"
                 class="flex items-center px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 rounded-md hover:bg-violet-50 dark:hover:bg-teal-500"
+                :class="{ 'hover:bg-gray-100': !item.href }"
               >
                 <component
                   :is="item.icon"
@@ -158,7 +161,7 @@
                   aria-hidden="true"
                 />
                 {{ item.name }}
-              </a>
+              </component>
             </li>
           </ul>
         </nav>
@@ -189,7 +192,8 @@
 </template>
 
 <script setup>
-import { ref, computed } from "vue";
+import { ref } from "vue";
+import { useNuxtApp } from "#app";
 import {
   Bars3Icon,
   HomeIcon,
@@ -197,17 +201,12 @@ import {
   UserPlusIcon,
   FolderIcon,
   QueueListIcon,
-  ChartPieIcon,
-  LifebuoyIcon,
   ClipboardDocumentIcon,
-  Cog6ToothIcon,
   UserCircleIcon,
   XMarkIcon,
   ArrowRightEndOnRectangleIcon,
 } from "@heroicons/vue/24/outline";
-
 import { CubeIcon } from "@heroicons/vue/24/solid";
-
 import {
   Dialog,
   DialogPanel,
@@ -215,14 +214,36 @@ import {
   TransitionRoot,
 } from "@headlessui/vue";
 
+const { $supabase } = useNuxtApp();
+const router = useRouter();
+
+const handleLogout = async () => {
+  try {
+    console.log("Logging out...");
+    const { error } = await $supabase.auth.signOut();
+
+    if (error) {
+      console.error("Logout failed:", error.message);
+    } else {
+      console.log("Logout successful");
+      router.push("/auth/login");
+    }
+  } catch (err) {
+    console.error("Unexpected logout error:", err.message);
+  }
+};
+
+const sidebarOpen = ref(false);
+
+const currentYear = new Date().getFullYear();
+const version = "1.0.0";
+
 const navigation = [
   { name: "Dashboard", href: "/dashboard", icon: HomeIcon, current: false },
-  //{ name: "Contacts", href: "/contacts", icon: UsersIcon, current: false },
+  { name: "Contacts", href: "/contacts", icon: UsersIcon, current: false },
   { name: "Leads", href: "/leads", icon: UserPlusIcon, current: false },
   { name: "Posts", href: "/posts", icon: FolderIcon, current: false },
   { name: "Tasks", href: "/tasks", icon: QueueListIcon, current: false },
-  //{ name: "Reports", href: "/reports", icon: ChartPieIcon, current: false },
-  //{ name: "Support", href: "/support", icon: LifebuoyIcon, current: false },
   {
     name: "Submit Request",
     href: "/ticket",
@@ -235,14 +256,9 @@ const navigation2 = [
   { name: "Profile", href: "/profile", icon: UserCircleIcon, current: false },
   {
     name: "Logout",
-    href: "/logout",
+    onClick: handleLogout,
     icon: ArrowRightEndOnRectangleIcon,
     current: false,
   },
 ];
-
-const sidebarOpen = ref(false);
-
-const currentYear = new Date().getFullYear();
-const version = "1.0.0";
 </script>

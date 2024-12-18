@@ -36,6 +36,11 @@ export default defineNuxtConfig({
   },
 
   runtimeConfig: {
-    public: {},
+    public: {
+      supabaseUrl: process.env.NUXT_SUPABASE_URL,
+      supabaseAnonKey: process.env.NUXT_SUPABASE_ANON_KEY,
+    },
   },
+  plugins: [{ src: "~/plugins/supabase.client", mode: "client" }],
+  ssr: false, // Disable SSR globally
 });
