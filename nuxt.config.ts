@@ -8,19 +8,7 @@ export default defineNuxtConfig({
       autoprefixer: {},
     },
   },
-
-  modules: ["@pinia/nuxt", "@nuxthub/core"],
-  hub: {
-    database: true,
-    cache: true,
-  },
-  $development: {
-    hub: {
-      remote: true,
-      //remote: 'preview'
-    },
-  },
-
+  modules: ["@pinia/nuxt"],
   nitro: {
     experimental: {
       openAPI: true,
