@@ -10,9 +10,7 @@ export default defineNuxtConfig({
   },
   modules: ["@pinia/nuxt"],
   nitro: {
-    experimental: {
-      openAPI: true,
-    },
+    preset: "static",
   },
   app: {
     head: {

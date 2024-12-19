@@ -1,13 +1,10 @@
 [build]
-  command = "npm run build"
+  command = "npx nuxi build"
   publish = ".output/public"
-  functions = ".output/server"
+  environment = { NUXT_TELEMETRY_DISABLED = "1" }
 
-[dev]
-  command = "npm run dev"
-  port = 3000
+[functions]
+  node_bundler = "esbuild"
 
-[[redirects]]
-  from = "/*"
-  to = "/index.html"
-  status = 200
+[cache]
+  paths = ["node_modules", ".output"]

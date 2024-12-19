@@ -8,13 +8,6 @@ Whether you're building static or dynamic Astro sites, CMS WhiteBoston offers an
 
 ## **Features**
 
-- Full-stack Nuxt.js application with server-side rendering (SSR) and API routes powered by Nitro.
-- Dynamic content delivery using NuxtHub for seamless hosting and deployment.
-- Cloudflare D1 database integration for content storage.
-- Automatic deployments via GitHub integration with NuxtHub.
-- Tailwind CSS for rapid UI development.
-- Pinia state management with persisted state support.
-
 ---
 
 ## **Setup**
@@ -22,8 +15,8 @@ Whether you're building static or dynamic Astro sites, CMS WhiteBoston offers an
 ### **Requirements**
 
 - Node.js >= 16.x
-- NuxtHub account
-- Cloudflare account
+- Supabase account
+- Netlify account
 - GitHub account
 
 ### **Installation**
@@ -50,7 +43,7 @@ Whether you're building static or dynamic Astro sites, CMS WhiteBoston offers an
 
 ## **Database**
 
-The project uses Cloudflare D1 for storing content data.
+The project uses Supbase for storing content data.
 
 ### **Create Tables**
 
@@ -58,25 +51,9 @@ To set up the database schema, execute the provided `schema.sql` file:
 
 1. Review the `schema.sql` file included in the repository. Modify it if needed.
 
-2. Import the tables into your D1 database:
-   ```bash
-   wrangler d1 execute cms-whiteboston --file=schema.sql
-   ```
+2. Run SQL querie in Supbase.
 
 This script creates all required tables for the CMS.
-
-### **Manage the Database**
-
-- View tables:
-
-  ```bash
-  wrangler d1 execute cms-whiteboston --command "SELECT name FROM sqlite_master WHERE type='table';" --remote
-  ```
-
-- Run migrations:
-  ```bash
-  wrangler d1 migrations apply cms-whiteboston --remote
-  ```
 
 ---
 
@@ -92,32 +69,22 @@ npm run dev
 
 - Open [http://localhost:3000](http://localhost:3000) to view the site.
 
-### **Access the API**
-
-API endpoints are available under `/api`. For example:
-
-- Fetch blogs: `GET /api/blogs`
-- Fetch a blog by ID: `GET /api/blogs/:id`
-
 ---
 
 ## **Deployment**
 
 ### **Automatic Deployment via NuxtHub**
 
-1. Connect your GitHub repository to NuxtHub.
+1. Connect your GitHub repository to Netlify.
 2. Push your changes to the `main` branch.
-3. NuxtHub will automatically build and deploy your project globally.
+3. Netlify will automatically build and deploy your project globally.
 
 ---
 
 ### **Environment Variables**
 
-- `NUXT_HUB_PROJECT_KEY`=NuxtHub project key for automatic deployment.
-- `CLOUDFLARE_ACCOUNT_ID`=Cloudflare D1 database credentials.
-- `D1_DATABASE_NAME`=Cloudflare D1 database credentials.
-- `D1_DATABASE_ID`=Cloudflare D1 database credentials.
-- `API_KEY`= (optional) API key for securing endpoints.
+NUXT_SUPABASE_URL=your_supabase_url
+NUXT_SUPABASE_ANON_KEY=your_supabase_anon_key
 
 ---
 
