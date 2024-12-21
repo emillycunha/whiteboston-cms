@@ -12,7 +12,7 @@
         >
           <div class="flex items-top">
             <div class="mr-4 p-1">
-              <ChatBubbleLeftRightIcon class="size-6 text-teal-500" />
+              <ChatBubbleLeftIcon class="size-6 text-teal-500" />
             </div>
             <div class="inline-block">
               <span class="font-semibold">{{ blog.title }}</span>
@@ -30,7 +30,7 @@
 <script setup>
 import { ref, onMounted, computed } from "vue";
 import { useBlogsStore } from "@/stores/blogs";
-import { ChatBubbleLeftRightIcon } from "@heroicons/vue/24/solid";
+import { ChatBubbleLeftIcon } from "@heroicons/vue/24/solid";
 
 const blogs = ref([]);
 

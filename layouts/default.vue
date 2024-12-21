@@ -53,7 +53,7 @@
                   <!-- Main navigation -->
                   <ul class="py-4 space-y-1">
                     <li v-for="item in navigation" :key="item.name">
-                      <a
+                      <NuxtLink
                         :href="item.href"
                         class="flex items-center px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 rounded-md hover:bg-violet-50 dark:hover:bg-violet-200"
                       >
@@ -63,14 +63,14 @@
                           aria-hidden="true"
                         />
                         {{ item.name }}
-                      </a>
+                      </NuxtLink>
                     </li>
                   </ul>
 
                   <!-- Secondary navigation -->
                   <ul class="border-t border-gray-200 py-4 space-y-1">
                     <li v-for="item in navigation2" :key="item.name">
-                      <a
+                      <NuxtLink
                         :href="item.href"
                         class="flex items-center px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 rounded-md hover:bg-violet-50 dark:hover:bg-violet-200"
                       >
@@ -80,18 +80,14 @@
                           aria-hidden="true"
                         />
                         {{ item.name }}
-                      </a>
+                      </NuxtLink>
                     </li>
                   </ul>
                 </nav>
                 <!-- Sidebar footer -->
                 <footer class="mt-auto px-4 py-4 text-center">
                   <DarkModeToggle />
-
-                  <p class="mt-6 text-xs text-gray-700 dark:text-gray-300">
-                    &copy; {{ currentYear }} WhiteBoston CMS <br />
-                    Version {{ version }}
-                  </p>
+                  <BrandFooter />
                 </footer>
               </div>
             </DialogPanel>
@@ -131,7 +127,7 @@
           <!-- Main navigation -->
           <ul class="py-4 space-y-1">
             <li v-for="item in navigation" :key="item.name">
-              <a
+              <NuxtLink
                 :href="item.href"
                 class="flex items-center px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 rounded-md hover:bg-violet-50 dark:hover:bg-teal-500"
               >
@@ -141,19 +137,17 @@
                   aria-hidden="true"
                 />
                 {{ item.name }}
-              </a>
+              </NuxtLink>
             </li>
           </ul>
 
           <!-- Secondary navigation -->
           <ul class="border-t border-gray-200 py-4 space-y-1">
             <li v-for="item in navigation2" :key="item.name">
-              <component
-                :is="item.href ? 'a' : 'button'"
-                :href="item.href"
-                @click="item.onClick"
+              <NuxtLink
+                v-if="item.href"
+                :to="item.href"
                 class="flex items-center px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 rounded-md hover:bg-violet-50 dark:hover:bg-teal-500"
-                :class="{ 'hover:bg-gray-100': !item.href }"
               >
                 <component
                   :is="item.icon"
@@ -161,28 +155,34 @@
                   aria-hidden="true"
                 />
                 {{ item.name }}
-              </component>
+              </NuxtLink>
+              <button
+                v-else
+                @click="item.onClick"
+                class="flex items-center px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 rounded-md hover:bg-violet-50 dark:hover:bg-teal-500"
+              >
+                <component
+                  :is="item.icon"
+                  class="size-5 mr-2"
+                  aria-hidden="true"
+                />
+                {{ item.name }}
+              </button>
             </li>
           </ul>
         </nav>
         <!-- Sidebar footer -->
         <footer class="mt-auto px-4 py-4 text-center">
           <DarkModeToggle />
-
-          <p class="mt-6 text-xs text-gray-700 dark:text-gray-300">
-            &copy; {{ currentYear }} WhiteBoston CMS <br />
-            Version {{ version }}
-          </p>
+          <BrandFooter />
         </footer>
       </div>
     </div>
 
     <!-- Main content -->
-    <div
-      class="lg:pl-64 flex flex-col min-h-screen bg-gray-100 dark:bg-gray-900"
-    >
+    <div class="lg:pl-64 flex flex-col h-screen bg-gray-100 dark:bg-gray-900">
       <!-- Main section -->
-      <main class="flex-grow overflow-hidden">
+      <main class="flex-grow overflow-hidden bg-gray-100 dark:bg-gray-900">
         <div class="px-6 py-4 sm:py-8 sm:px-8">
           <NuxtPage />
         </div>
@@ -194,6 +194,10 @@
 <script setup>
 import { ref } from "vue";
 import { useNuxtApp } from "#app";
+
+import { useAuthStore } from "~/stores/auth";
+const authStore = useAuthStore();
+
 import {
   Bars3Icon,
   HomeIcon,
@@ -205,6 +209,8 @@ import {
   UserCircleIcon,
   XMarkIcon,
   ArrowRightEndOnRectangleIcon,
+  ChatBubbleLeftIcon,
+  Cog6ToothIcon,
 } from "@heroicons/vue/24/outline";
 import { CubeIcon } from "@heroicons/vue/24/solid";
 import {
@@ -213,6 +219,7 @@ import {
   TransitionChild,
   TransitionRoot,
 } from "@headlessui/vue";
+import BrandFooter from "~/components/BrandFooter.vue";
 
 const { $supabase } = useNuxtApp();
 const router = useRouter();
@@ -235,14 +242,11 @@ const handleLogout = async () => {
 
 const sidebarOpen = ref(false);
 
-const currentYear = new Date().getFullYear();
-const version = "1.0.0";
-
 const navigation = [
   { name: "Dashboard", href: "/dashboard", icon: HomeIcon, current: false },
   { name: "Contacts", href: "/contacts", icon: UsersIcon, current: false },
   { name: "Leads", href: "/leads", icon: UserPlusIcon, current: false },
-  { name: "Posts", href: "/posts", icon: FolderIcon, current: false },
+  { name: "Posts", href: "/posts", icon: ChatBubbleLeftIcon, current: false },
   { name: "Tasks", href: "/tasks", icon: QueueListIcon, current: false },
   {
     name: "Submit Request",
@@ -253,7 +257,9 @@ const navigation = [
 ];
 
 const navigation2 = [
+  { name: "Settings", href: "/settings", icon: Cog6ToothIcon, current: false },
   { name: "Profile", href: "/profile", icon: UserCircleIcon, current: false },
+
   {
     name: "Logout",
     onClick: handleLogout,

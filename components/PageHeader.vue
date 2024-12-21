@@ -44,8 +44,6 @@
 </template>
 
 <script setup>
-import { defineProps } from "vue";
-
 // Props for the component
 defineProps({
   title: {

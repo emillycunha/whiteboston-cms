@@ -28,14 +28,26 @@ export const useBlogsStore = defineStore("blogs", {
   }),
   actions: {
     async fetchBlogs(forceRefresh = false) {
-      const { $supabase } = useNuxtApp(); // Access Supabase client
+      const { $supabase } = useNuxtApp();
+      const authStore = useAuthStore();
+
+      if (!authStore.isAuthenticated || !authStore.role) {
+        console.warn(
+          "[Blogs Store] User is not authenticated or role is missing."
+        );
+        this.error = "You must be logged in to view blogs.";
+        return;
+      }
 
       if (!forceRefresh) {
         const cachedBlogs = localStorage.getItem("blogs");
         if (cachedBlogs) {
-          console.log("[Store] Using cached blogs from localStorage.");
-          this.blogs = JSON.parse(cachedBlogs);
-          return;
+          const parsedBlogs = JSON.parse(cachedBlogs);
+          if (Array.isArray(parsedBlogs) && parsedBlogs.length > 0) {
+            console.log("[Store] Using cached blogs from localStorage.");
+            this.blogs = parsedBlogs;
+            return;
+          }
         }
       }
 
@@ -44,17 +56,38 @@ export const useBlogsStore = defineStore("blogs", {
       this.isLoading = true;
 
       try {
-        console.log("[Store] Fetching blogs from Supabase...");
-        const { data, error } = await $supabase
-          .from("blogs") // Table name in Supabase
-          .select("*")
-          .eq("status", this.status); // Filter by status if needed
+        console.log("[Store] Fetching blogs based on role...");
+
+        let query = $supabase.from("blogs").select("*");
+
+        if (authStore.role === "SuperAdmin") {
+          console.log("[Store] SuperAdmin fetching all blogs");
+        } else if (authStore.role === "Admin") {
+          console.log(
+            "[Store] Admin fetching blogs by org_id:",
+            authStore.org_id
+          );
+          query = query.eq("org_id", authStore.org_id);
+        } else if (authStore.role === "Editor") {
+          console.log(
+            "[Store] Editor fetching blogs by author_id:",
+            authStore.userId
+          );
+          query = query.eq("author_id", authStore.userId);
+        } else {
+          throw new Error("Unsupported role. Cannot fetch blogs.");
+        }
+
+        const { data, error } = await query;
 
         if (error) throw new Error(error.message);
 
         console.log("[Store] Fetched blogs from Supabase:", data);
         this.blogs = data || [];
-        localStorage.setItem("blogs", JSON.stringify(this.blogs));
+
+        if (this.blogs.length > 0) {
+          localStorage.setItem("blogs", JSON.stringify(this.blogs));
+        }
 
         console.log("[Store] Blogs successfully stored:", this.blogs);
       } catch (err) {
@@ -66,29 +99,54 @@ export const useBlogsStore = defineStore("blogs", {
       }
     },
 
-    setStatus(newStatus: string) {
-      if (this.status !== newStatus) {
-        this.status = newStatus;
-        this.fetchBlogs();
-      }
-    },
-
     async fetchBlogById(id: number): Promise<Blog> {
       const { $supabase } = useNuxtApp();
+      const authStore = useAuthStore(); // Access the auth store for role and ID
 
       try {
+        // Check if the blog already exists in the fetched blogs
+        const existingBlog = this.blogs.find((blog) => blog.id === id);
+        if (existingBlog) {
+          console.log(`[Store] Found blog with ID ${id} in cached blogs.`);
+          return existingBlog;
+        }
+
         console.log(`[Store] Fetching blog with ID: ${id} from Supabase...`);
 
-        const { data, error } = await $supabase
-          .from("blogs") // Table name in Supabase
-          .select("*")
-          .eq("id", id)
-          .single();
+        // Start the query
+        let query = $supabase.from("blogs").select("*").eq("id", id);
+
+        // Apply role-based filters
+        if (authStore.role === "SuperAdmin") {
+          console.log("[Store] SuperAdmin fetching all blogs");
+        } else if (authStore.role === "Admin") {
+          console.log(
+            `[Store] Admin fetching blog with org_id: ${authStore.org_id}`
+          );
+          query = query.eq("org_id", authStore.org_id);
+        } else if (authStore.role === "Editor") {
+          console.log(
+            `[Store] Editor fetching blog authored by userId: ${authStore.userId}`
+          );
+          query = query.eq("author_id", authStore.userId);
+        } else {
+          throw new Error("Unsupported role. Cannot fetch blog.");
+        }
+
+        // Execute query
+        const { data, error } = await query.single();
 
         if (error) throw new Error(error.message);
-        if (!data) throw new Error(`Blog with ID ${id} not found.`);
+        if (!data)
+          throw new Error(
+            `Blog with ID ${id} not found or access is restricted.`
+          );
 
         console.log(`[Store] Fetched blog with ID ${id}:`, data);
+
+        // Optionally add the newly fetched blog to the local blogs array
+        this.blogs.push(data);
+
         return data;
       } catch (err) {
         console.error(`[Store] Error fetching blog with ID ${id}:`, err);

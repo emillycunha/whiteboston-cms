@@ -1,16 +1,16 @@
 <template>
   <div class="px-6 py-4 space-y-6">
     <!-- Page Header -->
-    <PageHeader title="Submit a Ticket" />
+    <PageHeader title="Profile" />
     <div
       class="rounded-md bg-white shadow-sm border border-gray-200 dark:bg-slate-800 dark:border-slate-700"
     >
-      <div class="p-2 sm:p-4">
-        <form class="flex flex-col gap-y-4 p-4 sm:p-10">
+      <div class="p-2 sm:p-10">
+        <form class="flex flex-col gap-y-6 p-4 sm:p-10">
           <!-- Name -->
           <div>
             <label
-              class="block text-sm font-medium text-gray-700 dark:text-gray-300"
+              class="block text-base font-semibold text-gray-700 dark:text-gray-300"
               >Name</label
             >
             <input
@@ -24,11 +24,11 @@
           <!-- Email -->
           <div>
             <label
-              class="block text-sm font-medium text-gray-700 dark:text-gray-300"
+              class="block text-base font-semibold text-gray-700 dark:text-gray-300"
               >Email</label
             >
             <input
-              v-model="email"
+              v-model="authStore.email"
               type="email"
               placeholder="Enter your email"
               class="mt-1 block w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 rounded-md shadow-sm focus:ring focus:ring-blue-500"
@@ -38,7 +38,7 @@
           <!-- Password -->
           <div>
             <label
-              class="block text-sm font-medium text-gray-700 dark:text-gray-300"
+              class="block text-base font-semibold text-gray-700 dark:text-gray-300"
               >Password</label
             >
             <input
@@ -48,29 +48,33 @@
               class="mt-1 block w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 rounded-md shadow-sm focus:ring focus:ring-blue-500"
             />
           </div>
-
-          <!-- Dark Mode Toggle -->
-          <div class="flex items-center justify-between">
-            <span class="text-sm font-medium text-gray-700 dark:text-gray-300"
-              >Dark Mode</span
-            >
-            <DarkModeToggle />
-          </div>
         </form>
+
+        <!-- Dark Mode Toggle -->
+        <div class="flex flex-col gap-x-2 p-4 sm:px-10">
+          <div
+            class="flex flex-row border-t border-gray-200 dark:border-slate-700 py-4"
+          >
+            <p class="text-sm text-violet-500">Role: {{ authStore.role }} |</p>
+            <p class="ml-2 text-sm text-violet-500">
+              Organization ID: {{ authStore.org_id }}
+            </p>
+          </div>
+        </div>
       </div>
     </div>
     <PageFooter
       title=""
       :buttons="[
         {
-          label: 'Cancel',
-          icon: XCircleIcon,
-          iconPosition: 'after',
+          label: 'Back',
+          icon: ChevronLeftIcon,
+          iconPosition: 'before',
           variant: 'secondary',
-          onClick: cancelAdd,
+          onClick: cancelProfile,
         },
         {
-          label: 'Publish Post',
+          label: 'Save Profile',
           icon: CheckCircleIcon,
           iconPosition: 'after',
           variant: 'primary',
@@ -82,19 +86,39 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { onMounted } from "vue";
 import DarkModeToggle from "@/components/DarkModeToggle.vue";
+import { useAuthStore } from "~/stores/auth";
+import { ChevronLeftIcon, CheckCircleIcon } from "@heroicons/vue/24/outline";
 
-const name = ref("John Doe");
-const email = ref("john@example.com");
-const password = ref("");
+const authStore = useAuthStore();
+
+// Fetch user metadata and log details on page load
+onMounted(async () => {
+  console.log("[Test Page] Auth Store State:", authStore.$state);
+
+  if (authStore.isAuthenticated) {
+    console.log("[Test Page] Fetching user metadata...");
+    await authStore.fetchUserMetadata();
+    console.log("[Test Page] User Metadata:", {
+      id: authStore.id,
+      email: authStore.email,
+      role: authStore.role,
+      darkmode: authStore.darkmode,
+      org_id: authStore.org_id,
+    });
+  } else {
+    console.warn("[Test Page] User is not authenticated.");
+  }
+});
+
+function cancelProfile() {
+  console.log("Settings changes discarded.");
+  alert("Settings reset!");
+}
 
 function saveProfile() {
-  console.log("Profile saved:", {
-    name: name.value,
-    email: email.value,
-    password: password.value,
-  });
+  console.log("Profile saved:", {});
   alert("Profile saved successfully!");
 }
 </script>

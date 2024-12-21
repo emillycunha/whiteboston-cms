@@ -1,12 +1,18 @@
 # **CMS WhiteBoston**
 
-CMS WhiteBoston is a lightweight, open-source Content Management System (CMS) built specifically to empower Astro sites. Designed with scalability and simplicity in mind, CMS WhiteBoston integrates seamlessly with NuxtHub, a Cloudflare-powered platform, ensuring lightning-fast performance, low cost, and full-stack capabilities.
+CMS WhiteBoston is a lightweight, open-source Content Management System (CMS) built specifically to empower Astro sites. Designed with scalability and simplicity in mind, CMS WhiteBoston integrates seamlessly with modern platforms, ensuring lightning-fast performance, low cost, and full-stack capabilities.
 
 Whether you're building static or dynamic Astro sites, CMS WhiteBoston offers an easy-to-use and flexible backend for managing your content while scaling globally.
 
 ---
 
-## **Features**
+## **Features and Tech Stack**
+
+- **Nuxt.js**: Framework for building Vue.js applications.
+- **Supabase**: Authentication and database management.
+- **Tailwind CSS**: Rapid UI development.
+- **Pinia**: State management with persisted state support.
+- **Netlify**: Hosting and continuous deployment.
 
 ---
 
@@ -35,23 +41,31 @@ Whether you're building static or dynamic Astro sites, CMS WhiteBoston offers an
    ```
 
 3. Copy the `.env` file and update with your environment variables:
+
    ```bash
    cp .env.example .env
    ```
+
+4. Add your environment variables to Netlify:
+   - Go to your site settings in Netlify.
+   - Navigate to "Environment Variables".
+   - Add the following keys with your values:
+     - `NUXT_SUPABASE_URL`
+     - `NUXT_SUPABASE_ANON_KEY`
 
 ---
 
 ## **Database**
 
-The project uses Supbase for storing content data.
+The project uses Supabase for storing content data.
 
 ### **Create Tables**
 
-To set up the database schema, execute the provided `schema.sql` file:
+To set up the database schema:
 
-1. Review the `schema.sql` file included in the repository. Modify it if needed.
-
-2. Run SQL querie in Supbase.
+1. Open the `schema.sql` file included in the repository.
+2. Copy the SQL commands from the file.
+3. Paste and run the commands in the SQL editor of your Supabase project.
 
 This script creates all required tables for the CMS.
 
@@ -71,17 +85,27 @@ npm run dev
 
 ---
 
+## **Build**
+
+To create a production build:
+
+```bash
+npm run build
+```
+
+---
+
 ## **Deployment**
 
-### **Automatic Deployment via NuxtHub**
+### **Automatic Deployment**
 
 1. Connect your GitHub repository to Netlify.
 2. Push your changes to the `main` branch.
 3. Netlify will automatically build and deploy your project globally.
 
----
-
 ### **Environment Variables**
+
+Make sure to add your environment variables to Netlify as described in the setup section.
 
 NUXT_SUPABASE_URL=your_supabase_url
 NUXT_SUPABASE_ANON_KEY=your_supabase_anon_key
@@ -90,7 +114,7 @@ NUXT_SUPABASE_ANON_KEY=your_supabase_anon_key
 
 ## **Contributing**
 
-Feel free to submit issues or pull requests for improvements and new features.
+Feel free to fork this repository and submit a pull request with any improvements or fixes. Please ensure all changes are thoroughly tested before submitting.
 
 ---
 

@@ -19,15 +19,15 @@
 
     <title>WhiteBoston CMS</title>
     <script>
-      // Apply theme before the app renders
-      try {
-        const theme = localStorage.getItem("theme") || "light";
-        document.documentElement.classList.add(
-          theme === "dark" ? "dark" : "light"
-        );
-      } catch (e) {
-        document.documentElement.classList.add("light");
-      }
+      // Apply the dark class dynamically before the app renders
+      (function () {
+        try {
+          const isDark = localStorage.getItem("darkmode") === "true";
+          document.documentElement.classList.toggle("dark", isDark);
+        } catch (e) {
+          console.error("Failed to set theme class:", e);
+        }
+      })();
     </script>
   </head>
   <body>

@@ -63,7 +63,7 @@ CREATE TABLE public.tasks (
 
 -- Table: users
 CREATE TABLE public.users (
-    id SERIAL PRIMARY KEY,
+    userId SERIAL PRIMARY KEY,
     auth_user_id UUID NOT NULL,
     role TEXT NOT NULL DEFAULT 'Editor',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,

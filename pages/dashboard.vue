@@ -1,5 +1,5 @@
 <template>
-  <div class="p-6 space-y-10">
+  <div class="px-6 py-4 space-y-6">
     <!-- Header Section -->
     <PageHeader title="WB Dashboard" />
 

@@ -16,7 +16,9 @@ export default defineNuxtConfig({
     head: {
       htmlAttrs: {
         lang: "en",
-        class: "bg-gray-100 dark:bg-gray-900",
+      },
+      bodyAttrs: {
+        class: "bg-gray-100 dark:bg-gray-900 transition-colors duration-300",
       },
     },
   },
@@ -28,5 +30,5 @@ export default defineNuxtConfig({
     },
   },
   plugins: [{ src: "~/plugins/supabase.client", mode: "client" }],
-  ssr: false, // Disable SSR globally
+  ssr: false,
 });
