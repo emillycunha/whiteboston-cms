@@ -15,11 +15,13 @@
               <UserIcon class="size-5 text-teal-500" />
             </div>
             <div class="inline-block">
-              <span class="font-semibold text-sm">{{ lead.name }}</span>
-              <span class="mx-2 text-teal-400">•</span
-              ><span class="text-sm font-medium text-gray-800">
-                {{ formatDate(lead.submitted_at) }}</span
-              >
+              <span class="font-semibold text-sm">
+                {{ lead.name || "Unnamed Lead" }}
+              </span>
+              <span class="mx-2 text-teal-400">•</span>
+              <span class="text-sm font-medium text-gray-800">
+                {{ formatDate(lead.created_at) }}
+              </span>
             </div>
           </div>
         </li>
@@ -27,33 +29,46 @@
     </div>
   </section>
 </template>
+
 <script setup>
 import { ref, onMounted, computed } from "vue";
-import { useLeadsStore } from "@/stores/leads";
+import { useContentStore } from "~/stores/content";
 import { UserIcon } from "@heroicons/vue/24/solid";
 
-const leads = ref([]);
+// Define the slug for leads collection
+const collectionSlug = "leads";
 
-const leadsStore = useLeadsStore();
+// Content store
+const contentStore = useContentStore();
+const content = ref([]);
+
+// Fetch leads content on mount
 onMounted(async () => {
-  console.log("[Parent] Fetching leads...");
   if (process.client) {
-    await leadsStore.fetchLeads();
-    leads.value = leadsStore.leads;
-    console.log("[Parent] leads after fetch:", leads.value);
+    try {
+      await contentStore.fetchContentAndFields(collectionSlug);
+      content.value = contentStore.content; // Fetches content with created_at
+    } catch (error) {}
   }
 });
 
-// Compute the latest 3 leads based on submission date
+// Compute the latest leads based on `created_at`
 const latestLeads = computed(() => {
-  return leads.value
+  return content.value
     .slice()
-    .sort((a, b) => new Date(b.submitted_at) - new Date(a.submitted_at)) // Sort by date (descending)
-    .slice(0, 5); // Take the first 3
+    .sort((a, b) => {
+      const dateA = new Date(a.created_at).getTime();
+      const dateB = new Date(b.created_at).getTime();
+      return dateB - dateA;
+    })
+    .slice(0, 5);
 });
 
-// Format date for display
+// Format `created_at` date for display
 const formatDate = (dateString) => {
+  if (!dateString) {
+    return "Unknown Date"; // Provide a fallback date string
+  }
   const options = {
     year: "numeric",
     month: "short",

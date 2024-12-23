@@ -15,9 +15,9 @@
               <ChatBubbleLeftIcon class="size-6 text-teal-500" />
             </div>
             <div class="inline-block">
-              <span class="font-semibold">{{ blog.title }}</span>
+              <span class="font-semibold">{{ blog.Title || "Untitled" }}</span>
               <span class="mx-2 text-teal-400">•</span>
-              <span>{{ blog.description }}</span>
+              <span>{{ blog.Excerpt || "No excerpt available" }}</span>
               <span class="mx-2 text-teal-400">•</span>
               <span>{{ formatDate(blog.created_at) }}</span>
             </div>
@@ -27,26 +27,32 @@
     </div>
   </section>
 </template>
+
 <script setup>
 import { ref, onMounted, computed } from "vue";
-import { useBlogsStore } from "@/stores/blogs";
+import { useContentStore } from "~/stores/content";
 import { ChatBubbleLeftIcon } from "@heroicons/vue/24/solid";
 
-const blogs = ref([]);
+// Define the slug for blogs collection
+const collectionSlug = "blogs";
 
-const blogsStore = useBlogsStore();
+// Content store
+const contentStore = useContentStore();
+const content = ref([]);
+
+// Fetch blogs content on mount
 onMounted(async () => {
-  console.log("[Parent] Fetching blogs...");
   if (process.client) {
-    await blogsStore.fetchBlogs();
-    blogs.value = blogsStore.blogs;
-    console.log("[Parent] blogs after fetch:", blogs.value);
+    try {
+      await contentStore.fetchContentAndFields(collectionSlug);
+      content.value = contentStore.content;
+    } catch (error) {}
   }
 });
 
-// Compute the latest 3 leads based on submission date
+// Compute the latest blogs based on submission date
 const latestBlogs = computed(() => {
-  return blogs.value
+  return content.value
     .slice()
     .sort((a, b) => {
       const dateA = new Date(a.created_at).getTime();

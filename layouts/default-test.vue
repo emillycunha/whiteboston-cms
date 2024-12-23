@@ -123,67 +123,14 @@
           </h3>
         </div>
         <!-- Navigation -->
-        <nav class="flex flex-col grow gap-y-2">
-          <!-- Primary Navigation -->
-          <ul class="space-y-1">
-            <li
-              v-for="item in navigation"
-              :key="item.name"
-              class="flex items-center px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 rounded-md hover:bg-violet-50 dark:hover:bg-teal-500"
-            >
-              <NuxtLink :to="item.href" class="flex items-center w-full">
-                <component
-                  :is="item.icon"
-                  class="size-5 mr-2"
-                  aria-hidden="true"
-                />
-                {{ item.name }}
-              </NuxtLink>
-            </li>
-          </ul>
-          <!-- Collections nagivation -->
-          <ul class="space-y-1">
-            <li
-              v-for="item in visibleCollections"
-              :key="item.slug"
-              class="flex items-center px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 rounded-md hover:bg-violet-50 dark:hover:bg-teal-500"
-            >
+        <nav class="flex flex-col grow gap-y-16">
+          <!-- Main navigation -->
+          <ul class="py-4 space-y-1">
+            <li v-for="item in navigation" :key="item.name">
               <NuxtLink
-                :to="`/collections/${item.slug}`"
-                class="flex items-center w-full"
-              >
-                <component
-                  :is="getIcon(item.name)"
-                  class="size-5 mr-2"
-                  aria-hidden="true"
-                />
-                {{ item.name }}
-              </NuxtLink>
-            </li>
-          </ul>
-
-          <!-- More Collections -->
-          <ul class="space-y-1">
-            <li v-if="extraCollections.length">
-              <NuxtLink
-                to="/collections"
+                :href="item.href"
                 class="flex items-center px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 rounded-md hover:bg-violet-50 dark:hover:bg-teal-500"
               >
-                <FolderPlusIcon class="size-5 mr-2" aria-hidden="true" />
-                See More
-              </NuxtLink>
-            </li>
-          </ul>
-
-          <div class="border-t border-gray-200 my-4"></div>
-          <!-- Secondary Navigation -->
-          <ul class="space-y-1">
-            <li
-              v-for="item in navigation2"
-              :key="item.name"
-              class="flex items-center px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 rounded-md hover:bg-violet-50 dark:hover:bg-teal-500"
-            >
-              <NuxtLink :to="item.href" class="flex items-center w-full">
                 <component
                   :is="item.icon"
                   class="size-5 mr-2"
@@ -194,16 +141,35 @@
             </li>
           </ul>
 
-          <button
-            @click="handleLogout"
-            class="flex items-center px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 rounded-md hover:bg-violet-50 dark:hover:bg-teal-500"
-          >
-            <ArrowRightEndOnRectangleIcon
-              class="size-5 mr-2 block"
-              aria-hidden="true"
-            />
-            Logout
-          </button>
+          <!-- Secondary navigation -->
+          <ul class="border-t border-gray-200 py-4 space-y-1">
+            <li v-for="item in navigation2" :key="item.name">
+              <NuxtLink
+                v-if="item.href"
+                :to="item.href"
+                class="flex items-center px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 rounded-md hover:bg-violet-50 dark:hover:bg-teal-500"
+              >
+                <component
+                  :is="item.icon"
+                  class="size-5 mr-2"
+                  aria-hidden="true"
+                />
+                {{ item.name }}
+              </NuxtLink>
+              <button
+                v-else
+                @click="item.onClick"
+                class="flex items-center px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 rounded-md hover:bg-violet-50 dark:hover:bg-teal-500"
+              >
+                <component
+                  :is="item.icon"
+                  class="size-5 mr-2"
+                  aria-hidden="true"
+                />
+                {{ item.name }}
+              </button>
+            </li>
+          </ul>
         </nav>
         <!-- Sidebar footer -->
         <footer class="mt-auto px-4 py-4 text-center">
@@ -228,8 +194,9 @@
 <script setup>
 import { ref } from "vue";
 import { useNuxtApp } from "#app";
+
 import { useAuthStore } from "~/stores/auth";
-import { useCollectionsStore } from "~/stores/collections";
+const authStore = useAuthStore();
 
 import {
   Bars3Icon,
@@ -244,7 +211,6 @@ import {
   ArrowRightEndOnRectangleIcon,
   ChatBubbleLeftIcon,
   Cog6ToothIcon,
-  FolderPlusIcon,
 } from "@heroicons/vue/24/outline";
 import { CubeIcon } from "@heroicons/vue/24/solid";
 import {
@@ -256,45 +222,7 @@ import {
 import BrandFooter from "~/components/BrandFooter.vue";
 
 const { $supabase } = useNuxtApp();
-const collectionsStore = useCollectionsStore();
 const router = useRouter();
-
-// State for collections
-const collections = ref([]);
-const maxVisibleItems = 4;
-
-// Fetch collections on sidebar load
-onMounted(async () => {
-  try {
-    collections.value = await collectionsStore.fetchCollectionsForCurrentOrg();
-  } catch (err) {
-    console.error("Failed to fetch collections for sidebar:", err.message);
-  }
-});
-
-// Dynamic navigation
-const visibleCollections = computed(() =>
-  collections.value.slice(0, maxVisibleItems)
-);
-const extraCollections = computed(() =>
-  collections.value.slice(maxVisibleItems)
-);
-
-// Dynamic Icon Assignment
-const getIcon = (name) => {
-  const lowerName = name.toLowerCase();
-  if (lowerName.includes("blog") || lowerName.includes("post")) {
-    return ChatBubbleLeftIcon;
-  } else if (lowerName.includes("lead")) {
-    return UserPlusIcon;
-  } else if (lowerName.includes("task")) {
-    return QueueListIcon;
-  } else if (lowerName.includes("contacts")) {
-    return UsersIcon;
-  } else {
-    return FolderIcon; // Default icon
-  }
-};
 
 const handleLogout = async () => {
   try {
@@ -316,16 +244,27 @@ const sidebarOpen = ref(false);
 
 const navigation = [
   { name: "Dashboard", href: "/dashboard", icon: HomeIcon, current: false },
-];
-
-const navigation2 = [
+  { name: "Contacts", href: "/contacts", icon: UsersIcon, current: false },
+  { name: "Leads", href: "/leads", icon: UserPlusIcon, current: false },
+  { name: "Posts", href: "/posts", icon: ChatBubbleLeftIcon, current: false },
+  { name: "Tasks", href: "/tasks", icon: QueueListIcon, current: false },
   {
     name: "Submit Request",
     href: "/ticket",
     icon: ClipboardDocumentIcon,
     current: false,
   },
+];
+
+const navigation2 = [
   { name: "Settings", href: "/settings", icon: Cog6ToothIcon, current: false },
   { name: "Profile", href: "/profile", icon: UserCircleIcon, current: false },
+
+  {
+    name: "Logout",
+    onClick: handleLogout,
+    icon: ArrowRightEndOnRectangleIcon,
+    current: false,
+  },
 ];
 </script>

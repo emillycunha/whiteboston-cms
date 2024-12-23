@@ -3,18 +3,18 @@ import { defineStore } from "pinia";
 export const useAuthStore = defineStore("auth", {
   state: () => ({
     id: null as string | null, // Auth user ID from `auth.users`
-    userId: null as string | null, // User ID from `public.users`
-    email: null as string | null,
-    role: null as string | null,
-    darkmode: false,
-    org_id: null as string | null,
-    isAuthenticated: false,
-    error: null as string | null,
+    email: null as string | null, // User's email
+    org_id: null as string | null, // Organization ID
+    preferences: {} as Record<string, any>, // Store preferences (e.g., darkmode)
+    role: null as string | null, // User role from `organization_members`
+    isAuthenticated: false, // Authentication status
+    error: null as string | null, // Error message
   }),
 
   persist: true, // Persist state across reloads
+
   actions: {
-    // Fetch and set user metadata from `public.users`
+    // Fetch and set user metadata from `public.users` and `organization_members`
     async fetchUserMetadata() {
       const { $supabase } = useNuxtApp();
       if (!this.id) {
@@ -23,21 +23,34 @@ export const useAuthStore = defineStore("auth", {
       }
 
       try {
-        const { data, error } = await $supabase
-          .from("users") // public.users table
-          .select("userId, role, darkmode, org_id")
-          .eq("auth_user_id", this.id)
+        // Fetch user metadata from `public.users`
+        const { data: userData, error: userError } = await $supabase
+          .from("users")
+          .select("preferences")
+          .eq("id", this.id)
           .single();
 
-        if (error) throw error;
+        if (userError) throw userError;
 
-        // Set user metadata
-        this.role = data.role;
-        this.darkmode = data.darkmode;
-        this.userId = data.userId;
-        this.org_id = data.org_id;
+        // Fetch organization and role from `organization_members`
+        const { data: memberData, error: memberError } = await $supabase
+          .from("organization_members")
+          .select("organization_id, role")
+          .eq("user_id", this.id)
+          .single();
 
-        console.log("[Auth Store] User metadata fetched:", data);
+        if (memberError) throw memberError;
+
+        // Update store state
+        this.preferences = userData.preferences || {};
+        this.org_id = memberData.organization_id;
+        this.role = memberData.role;
+
+        console.log("[Auth Store] User metadata fetched:", {
+          preferences: this.preferences,
+          org_id: this.org_id,
+          role: this.role,
+        });
       } catch (err) {
         console.error("[Auth Store] Failed to fetch user metadata:", err);
         this.error = "Failed to load user metadata.";
@@ -129,7 +142,8 @@ export const useAuthStore = defineStore("auth", {
 
     // Apply dark mode theme
     applyDarkMode() {
-      const theme = this.darkmode ? "dark" : "light";
+      const darkmode = this.preferences?.darkmode ?? false;
+      const theme = darkmode ? "dark" : "light";
       document.documentElement.classList.remove("dark", "light");
       document.documentElement.classList.add(theme);
     },
@@ -138,15 +152,16 @@ export const useAuthStore = defineStore("auth", {
     async toggleDarkMode() {
       const { $supabase } = useNuxtApp();
 
-      this.darkmode = !this.darkmode;
+      const darkmode = !(this.preferences?.darkmode ?? false); // Toggle dark mode
+      this.preferences = { ...this.preferences, darkmode }; // Update locally
       this.applyDarkMode();
 
       if (this.id) {
         try {
           const { error } = await $supabase
             .from("users")
-            .update({ darkmode: this.darkmode })
-            .eq("auth_user_id", this.id);
+            .update({ preferences: this.preferences }) // Update preferences in Supabase
+            .eq("id", this.id);
 
           if (error) throw error;
 
@@ -161,9 +176,9 @@ export const useAuthStore = defineStore("auth", {
     resetState() {
       this.id = null;
       this.email = null;
-      this.role = null;
-      this.darkmode = false;
       this.org_id = null;
+      this.preferences = {};
+      this.role = null;
       this.isAuthenticated = false;
       this.error = null;
 
