@@ -1,170 +1,78 @@
 <template>
-  <div class="px-6 py-4 space-y-6">
-    <!-- Page Header -->
-    <PageHeader title="Settings" />
+  <div class="p-6">
+    <h1 class="text-2xl font-bold mb-4">Collections</h1>
 
-    <!-- Profile Settings -->
-    <div
-      class="rounded-md bg-white shadow-sm border border-gray-200 dark:bg-slate-800 dark:border-slate-700"
-    >
-      <div class="p-4 sm:p-10">
-        <form class="flex flex-col gap-y-8 p-4 sm:p-10">
-          <!-- Feature Toggles -->
-          <div>
-            <h2
-              class="text-lg font-semibold mb-4 text-gray-800 dark:text-gray-200"
-            >
-              Feature Toggles
-            </h2>
-            <div class="space-y-4">
-              <div
-                v-for="feature in features"
-                :key="feature.name"
-                class="flex items-center justify-between"
-              >
-                <div class="flex flex-col items-left">
-                  <span
-                    class="text-base font-medium text-gray-700 dark:text-gray-300"
-                    >{{ feature.label }}</span
-                  >
-                  <span
-                    class="text-sm font-medium text-gray-500 dark:text-gray-300"
-                  >
-                    {{ feature.hint }}
-                  </span>
-                </div>
-                <input
-                  type="checkbox"
-                  v-model="feature.enabled"
-                  class="h-4 w-4 text-violet-500 border-gray-500 rounded focus:ring-violet-500 dark:focus:ring-teal-500 dark:text-teal-500"
-                />
-              </div>
-            </div>
-          </div>
-          <div class="border-t border-gray-200 dark:border-slate-700"></div>
-          <div>
-            <h2
-              class="text-lg font-semibold mb-4 text-gray-800 dark:text-gray-200"
-            >
-              Add Collections
-            </h2>
-            <div class="space-y-4">
-              <form
-                @submit.prevent="createCollection"
-                class="flex gap-4 items-center"
-              >
-                <input
-                  v-model="newCollection"
-                  type="text"
-                  placeholder="Enter collection name (e.g., Events, FAQs)"
-                  class="flex-1 border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 rounded-md shadow-sm focus:ring focus:ring-blue-500 p-2"
-                />
-                <button
-                  type="submit"
-                  class="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white font-medium rounded-md shadow-sm"
-                >
-                  Add Collection
-                </button>
-              </form>
-              <p v-if="collectionError" class="text-sm text-red-500 mt-2">
-                {{ collectionError }}
-              </p>
-            </div>
-          </div>
-        </form>
-      </div>
-    </div>
+    <!-- Loading State -->
+    <div v-if="isLoading" class="text-center">Loading collections...</div>
 
-    <!-- Page Footer -->
-    <PageFooter
-      title=""
-      :buttons="[
-        {
-          label: 'Back',
-          icon: ChevronLeftIcon,
-          iconPosition: 'before',
-          variant: 'secondary',
-          onClick: cancelSettings,
-        },
-        {
-          label: 'Save Settings',
-          icon: CheckCircleIcon,
-          iconPosition: 'after',
-          variant: 'primary',
-          onClick: saveSettings,
-        },
-      ]"
+    <!-- Error State -->
+    <div v-if="error" class="text-red-500">{{ error }}</div>
+
+    <!-- List of Collections -->
+    <DataTable
+      v-if="!isLoading && !error && collections.length"
+      :data="collections"
+      :columns="columns"
+      :actionType="'view'"
+      @view="handleOpenCollection"
     />
+
+    <!-- Empty State -->
+    <div
+      v-else-if="!isLoading && !error && !collections.length"
+      class="text-center"
+    >
+      No collections found.
+    </div>
   </div>
 </template>
 
 <script setup>
-import { ref } from "vue";
-import { ChevronLeftIcon, CheckCircleIcon } from "@heroicons/vue/24/outline";
+import { ref, onMounted, computed } from "vue";
+import { useCollectionsStore } from "~/stores/collections";
+import { useRouter } from "vue-router";
 
-// Form data
-const name = ref("John Doe");
-const email = ref("john@example.com");
-const password = ref("");
+// Pinia Store
+const collectionsStore = useCollectionsStore();
 
-// Feature toggles
-const features = ref([
+// Router for navigation
+const router = useRouter();
+
+// State
+const isLoading = computed(() => collectionsStore.isLoading);
+const error = computed(() => collectionsStore.error);
+const collections = computed(() => collectionsStore.collections);
+
+// Table Columns
+const columns = [
+  { key: "name", label: "Collection Name" },
+  { key: "slug", label: "Slug" },
+  { key: "description", label: "Description" },
   {
-    name: "contacts",
-    label: "Contacts",
-    hint: "Manage and organize all your customer and business contact information in one place.",
-    enabled: true,
+    key: "position",
+    label: "Position",
+    formatter: (value) => (value !== null ? value : "Not Set"),
   },
   {
-    name: "leads",
-    label: "Leads",
-    hint: "Track and manage website inquiries or potential client opportunities effectively.",
-    enabled: false,
+    key: "is_hidden",
+    label: "Hidden",
+    formatter: (value) => (value ? "Yes" : "No"),
   },
   {
-    name: "blogs",
-    label: "Blogs",
-    hint: "Create, update, and manage blog posts to keep your audience engaged.",
-    enabled: true,
+    key: "created_at",
+    label: "Created At",
+    formatter: (date) => new Date(date).toLocaleDateString(),
   },
-  {
-    name: "tasks",
-    label: "Tasks",
-    hint: "Stay organized by assigning and tracking tasks to complete your goals efficiently.",
-    enabled: true,
-  },
-]);
+];
 
-function saveSettings() {
-  console.log("Settings saved:", {
-    name: name.value,
-    email: email.value,
-    password: password.value,
-    features: features.value,
-  });
-  alert("Settings saved successfully!");
-}
+// Fetch Collections on Mount
+onMounted(async () => {
+  await collectionsStore.fetchCollectionsForCurrentOrg();
+});
 
-function cancelSettings() {
-  console.log("Settings changes discarded.");
-  alert("Settings reset!");
-}
-
-// New collection input
-const newCollection = ref("");
-const collectionError = ref(null);
-
-function createCollection() {
-  if (!newCollection.value.trim()) {
-    collectionError.value = "Collection name cannot be empty.";
-    return;
-  }
-
-  console.log("New collection added:", newCollection.value);
-  alert(`Collection "${newCollection.value}" created successfully!`);
-
-  // Reset input and error
-  newCollection.value = "";
-  collectionError.value = null;
-}
+// Handle Open Collection
+const handleOpenCollection = (collection) => {
+  console.log("Opening collection:", collection);
+  router.push(`/collections/${collection.slug}`);
+};
 </script>

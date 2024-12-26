@@ -38,7 +38,7 @@
                   </button>
                 </div>
 
-                <div class="flex items-center justify-start px-4 py-2 mb-2">
+                <div class="flex items-center justify-start px-2 py-2 mb-4">
                   <CubeIcon
                     class="h-6 w-6 mr-1 text-gray-700 dark:text-gray-50"
                   />
@@ -49,13 +49,75 @@
                   </h3>
                 </div>
 
-                <nav class="flex flex-col grow gap-y-8">
-                  <!-- Main navigation -->
-                  <ul class="py-4 space-y-1">
-                    <li v-for="item in navigation" :key="item.name">
+                <nav class="flex flex-col grow gap-y-2">
+                  <!-- Primary Navigation -->
+                  <ul class="space-y-1">
+                    <li
+                      v-for="item in navigation"
+                      :key="item.name"
+                      class="flex items-center px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 rounded-md hover:bg-violet-50 dark:hover:bg-teal-500"
+                    >
                       <NuxtLink
-                        :href="item.href"
-                        class="flex items-center px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 rounded-md hover:bg-violet-50 dark:hover:bg-violet-200"
+                        :to="item.href"
+                        class="flex items-center w-full"
+                      >
+                        <component
+                          :is="item.icon"
+                          class="size-5 mr-2"
+                          aria-hidden="true"
+                        />
+                        {{ item.name }}
+                      </NuxtLink>
+                    </li>
+                  </ul>
+                  <!-- Collections nagivation -->
+                  <ul class="space-y-1">
+                    <li
+                      v-for="item in visibleCollections"
+                      :key="item.slug"
+                      class="flex items-center px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 rounded-md hover:bg-violet-50 dark:hover:bg-teal-500"
+                    >
+                      <NuxtLink
+                        :to="`/collections/${item.slug}`"
+                        class="flex items-center w-full"
+                      >
+                        <component
+                          :is="getIcon(item.name)"
+                          class="size-5 mr-2"
+                          aria-hidden="true"
+                        />
+                        {{ item.name }}
+                      </NuxtLink>
+                    </li>
+                  </ul>
+
+                  <!-- More Collections -->
+                  <ul class="space-y-1">
+                    <li v-if="extraCollections.length">
+                      <NuxtLink
+                        to="/collections"
+                        class="flex items-center px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 rounded-md hover:bg-violet-50 dark:hover:bg-teal-500"
+                      >
+                        <FolderPlusIcon
+                          class="size-5 mr-2"
+                          aria-hidden="true"
+                        />
+                        See More
+                      </NuxtLink>
+                    </li>
+                  </ul>
+
+                  <div class="border-t border-gray-200 my-4"></div>
+                  <!-- Secondary Navigation -->
+                  <ul class="space-y-1">
+                    <li
+                      v-for="item in navigation2"
+                      :key="item.name"
+                      class="flex items-center px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 rounded-md hover:bg-violet-50 dark:hover:bg-teal-500"
+                    >
+                      <NuxtLink
+                        :to="item.href"
+                        class="flex items-center w-full"
                       >
                         <component
                           :is="item.icon"
@@ -67,22 +129,16 @@
                     </li>
                   </ul>
 
-                  <!-- Secondary navigation -->
-                  <ul class="border-t border-gray-200 py-4 space-y-1">
-                    <li v-for="item in navigation2" :key="item.name">
-                      <NuxtLink
-                        :href="item.href"
-                        class="flex items-center px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 rounded-md hover:bg-violet-50 dark:hover:bg-violet-200"
-                      >
-                        <component
-                          :is="item.icon"
-                          class="size-5 mr-2"
-                          aria-hidden="true"
-                        />
-                        {{ item.name }}
-                      </NuxtLink>
-                    </li>
-                  </ul>
+                  <button
+                    @click="handleLogout"
+                    class="flex items-center px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 rounded-md hover:bg-violet-50 dark:hover:bg-teal-500"
+                  >
+                    <ArrowRightEndOnRectangleIcon
+                      class="size-5 mr-2 block"
+                      aria-hidden="true"
+                    />
+                    Logout
+                  </button>
                 </nav>
                 <!-- Sidebar footer -->
                 <footer class="mt-auto px-4 py-4 text-center">
@@ -114,7 +170,7 @@
       <div
         class="p-4 flex flex-col grow bg-white dark:bg-gray-800 rounded-lg m-4 shadow-sm"
       >
-        <div class="flex items-center justify-start px-4 py-4 mb-4">
+        <div class="flex items-center justify-start px-2 py-4 mb-4">
           <CubeIcon class="h-6 w-6 mr-1 text-gray-700 dark:text-gray-50" />
           <h3
             class="text-base tracking-tighter font-bold text-gray-700 dark:text-gray-50"
@@ -228,8 +284,8 @@
 <script setup>
 import { ref } from "vue";
 import { useNuxtApp } from "#app";
-import { useAuthStore } from "~/stores/auth";
 import { useCollectionsStore } from "~/stores/collections";
+import BrandFooter from "~/components/BrandFooter.vue";
 
 import {
   Bars3Icon,
@@ -253,7 +309,6 @@ import {
   TransitionChild,
   TransitionRoot,
 } from "@headlessui/vue";
-import BrandFooter from "~/components/BrandFooter.vue";
 
 const { $supabase } = useNuxtApp();
 const collectionsStore = useCollectionsStore();
@@ -266,7 +321,13 @@ const maxVisibleItems = 4;
 // Fetch collections on sidebar load
 onMounted(async () => {
   try {
-    collections.value = await collectionsStore.fetchCollectionsForCurrentOrg();
+    const fetchedCollections =
+      await collectionsStore.fetchCollectionsForCurrentOrg();
+    // Sort collections by `position` or `order` field
+    collections.value = fetchedCollections
+      .filter((collection) => !collection.is_hidden)
+
+      .sort((a, b) => a.position - b.position);
   } catch (err) {
     console.error("Failed to fetch collections for sidebar:", err.message);
   }

@@ -6,8 +6,10 @@ export interface Collection {
   name: string;
   slug: string;
   description?: string;
+  is_hidden: boolean;
   organization_id: string;
   created_at: string;
+  position: number;
 }
 
 export const useCollectionsStore = defineStore("collections", {
@@ -48,12 +50,13 @@ export const useCollectionsStore = defineStore("collections", {
         const { data, error } = await $supabase
           .from("collections")
           .select("*")
-          .eq("organization_id", organizationId);
+          .eq("organization_id", organizationId)
+          .order("position", { ascending: true });
 
         if (error) throw error;
 
         if (data) {
-          this.collections.push(...data); // Cache collections
+          this.collections = [...data]; // Cache collections
         }
         return data;
       } catch (err) {
@@ -96,6 +99,26 @@ export const useCollectionsStore = defineStore("collections", {
         return null;
       } finally {
         this.isLoading = false;
+      }
+    },
+
+    // In collections store
+    async toggleCollectionVisibility(slug: string, isHidden: boolean) {
+      const { $supabase } = useNuxtApp();
+      try {
+        const { error } = await $supabase
+          .from("collections")
+          .update({ is_hidden: isHidden })
+          .eq("slug", slug);
+        if (error) throw error;
+
+        // Update local state
+        const collection = this.collections.find((c) => c.slug === slug);
+        if (collection) {
+          collection.is_hidden = isHidden;
+        }
+      } catch (err) {
+        console.error("[Collections Store] Failed to update visibility:", err);
       }
     },
 
