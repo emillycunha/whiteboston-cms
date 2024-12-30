@@ -9,7 +9,7 @@
           icon: ArrowDownTrayIcon,
           iconPosition: 'after',
           variant: 'secondary',
-          onClick: exportToCSV,
+          onClick: exportSelectedToCSV,
           disabled: selectedItems.length === 0,
         },
         {
@@ -17,7 +17,7 @@
           icon: PlusIcon,
           iconPosition: 'after',
           variant: 'primary',
-          onClick: buttonHandlerTwo,
+          onClick: addNew,
         },
       ]"
     />
@@ -66,16 +66,29 @@ const collectionName = computed(
 // Content Store
 const contentStore = useContentStore();
 const content = computed(() => contentStore.content);
-const fields = computed(() => contentStore.fields);
+const allFields = computed(() => contentStore.fields); // Fetch all fields
 const isLoading = computed(() => contentStore.isLoading);
 const error = computed(() => contentStore.error);
+
+// Filter to get the top 5 fields based on their position
+const fields = computed(() => {
+  return allFields.value
+    .filter((field) => typeof field.position === "number" && field.position > 0)
+    .sort((a, b) => a.position - b.position)
+    .slice(0, 4);
+});
 
 // Track selected items
 const selectedItems = ref([]);
 
 // Fetch Content and Fields on Mount
 onMounted(async () => {
+  console.log("[Mounted] Lifecycle triggered");
+
   await contentStore.fetchContentAndFields(collectionSlug);
+  console.log("All Fields:", allFields.value); // Log all fields for debugging
+  console.log("Filtered Fields:", fields.value); // Log the top 5 fields
+  console.log("Content:", content.value); // Ensure content has values for fields
 });
 
 // Handle Edit
@@ -123,5 +136,15 @@ const exportSelectedToCSV = () => {
   document.body.removeChild(link);
 
   console.log("Selected items exported to CSV.");
+};
+
+// Add New Item
+const addNew = () => {
+  navigateTo({
+    path: `/collections/${collectionSlug}/add-item`,
+    query: {
+      collection: collectionName.value,
+    },
+  });
 };
 </script>

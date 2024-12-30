@@ -58,14 +58,14 @@
             </td>
             <td v-if="actionType !== 'none'" class="px-4 py-2">
               <button
-                v-if="actionType === 'view'"
+                v-if="actionType === 'view' || actionType === 'both'"
                 @click="onView(row)"
                 class="px-3 py-1 font-semibold text-violet-600 dark:text-teal-500"
               >
                 View
               </button>
               <button
-                v-if="actionType === 'edit'"
+                v-if="actionType === 'edit' || actionType === 'both'"
                 @click="onEdit(row)"
                 class="px-3 py-1 font-semibold text-violet-600 dark:text-teal-500"
               >

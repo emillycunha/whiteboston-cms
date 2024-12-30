@@ -1,6 +1,4 @@
 export default defineNuxtRouteMiddleware(async (to) => {
-  console.log("[Auth Middleware] Checking authentication...");
-
   // Skip the middleware for the login page
   if (to.path === "/auth/login") {
     console.log("[Auth Middleware] Skipping for /auth/login");
@@ -30,7 +28,7 @@ export default defineNuxtRouteMiddleware(async (to) => {
     return navigateTo("/auth/login");
   }
 
-  console.log("[Auth Middleware] User:", user);
+  //console.log("[Auth Middleware] User:", user);
 
   // Redirect to login if not authenticated
   if (!user) {
@@ -43,7 +41,6 @@ export default defineNuxtRouteMiddleware(async (to) => {
   authStore.email = user.email ?? null;
   authStore.isAuthenticated = true;
 
-  console.log("[Auth Middleware] Initializing user session...");
   await authStore.fetchUserMetadata(); // Fetch from public.users
   authStore.applyDarkMode();
 });

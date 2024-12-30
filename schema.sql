@@ -36,10 +36,10 @@ CREATE TABLE organizations (
 -- Links users to organizations, with role-based access
 -- ============================
 CREATE TABLE organization_members (
-    id SERIAL PRIMARY KEY, -- Unique ID for each membership
-    organization_id UUID NOT NULL REFERENCES organizations(id) ON DELETE CASCADE, -- Linked to the organization
-    user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE, -- Linked to the user
-    role TEXT NOT NULL DEFAULT 'member', -- Role in the organization (e.g., admin, editor, member)
+    id SERIAL PRIMARY KEY, 
+    organization_id UUID NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
+    user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    role TEXT NOT NULL DEFAULT 'member', 
     created_at TIMESTAMP DEFAULT NOW()
 );
 
@@ -48,12 +48,14 @@ CREATE TABLE organization_members (
 -- Stores dynamic collections (e.g., Blogs, Tasks, Leads)
 -- ============================
 CREATE TABLE collections (
-    id SERIAL PRIMARY KEY, -- Unique ID for each collection
-    name TEXT NOT NULL, -- Collection name (e.g., Blog, Tasks)
-    slug TEXT UNIQUE NOT NULL, -- URL-safe identifier for the collection
-    description TEXT, -- Optional description of the collection
-    organization_id UUID NOT NULL REFERENCES organizations(id) ON DELETE CASCADE, -- Linked to the organization
-    created_at TIMESTAMP DEFAULT NOW()
+    id SERIAL PRIMARY KEY, 
+    name TEXT NOT NULL, 
+    slug TEXT UNIQUE NOT NULL, 
+    description TEXT,
+    organization_id UUID NOT NULL REFERENCES organizations(id) ON DELETE CASCADE, 
+    created_at TIMESTAMP DEFAULT NOW(),
+    is_hidden BOOLEAN DEFAULT FALSE,
+    position integer NULL DEFAULT 0
 );
 
 -- ============================
@@ -61,13 +63,14 @@ CREATE TABLE collections (
 -- Defines the schema (fields) for each collection
 -- ============================
 CREATE TABLE fields (
-    id SERIAL PRIMARY KEY, -- Unique ID for each field
-    collection_id INT NOT NULL REFERENCES collections(id) ON DELETE CASCADE, -- Linked to the collection
-    name TEXT NOT NULL, -- Field name (e.g., title, status)
-    type TEXT NOT NULL, -- Field type (e.g., text, number, boolean, date)
-    is_required BOOLEAN DEFAULT FALSE, -- Whether the field is required
-    default_value TEXT DEFAULT NULL, -- Optional default value
-    created_at TIMESTAMP DEFAULT NOW()
+    id SERIAL PRIMARY KEY, 
+    collection_id INT NOT NULL REFERENCES collections(id) ON DELETE CASCADE, 
+    name TEXT NOT NULL, 
+    type TEXT NOT NULL, 
+    is_required BOOLEAN DEFAULT FALSE, 
+    default_value TEXT DEFAULT NULL,
+    created_at TIMESTAMP DEFAULT NOW(),
+    options JSONB NULL,
 );
 
 -- ============================
@@ -76,10 +79,10 @@ CREATE TABLE fields (
 -- ============================
 CREATE TABLE content (
     id SERIAL PRIMARY KEY, -- Unique ID for each content item
-    collection_id INT NOT NULL REFERENCES collections(id) ON DELETE CASCADE, -- Linked to the collection
-    organization_id UUID NOT NULL REFERENCES organizations(id) ON DELETE CASCADE, -- Linked to the organization
-    user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE, -- Linked to the user who created this content
-    data JSONB NOT NULL, -- Dynamic content data stored in JSONB format
+    collection_id INT NOT NULL REFERENCES collections(id) ON DELETE CASCADE, 
+    organization_id UUID NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
+    user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE, 
+    data JSONB NOT NULL,
     created_at TIMESTAMP DEFAULT NOW(),
     updated_at TIMESTAMP DEFAULT NOW()
 );

@@ -67,18 +67,35 @@ onMounted(async () => {
 
 // Save Changes
 const saveChanges = async () => {
+  // Prepare updated data from fields
   const updatedData = fields.value.reduce((acc, field) => {
     acc[field.key] = field.value;
     return acc;
   }, {});
 
-  const success = await contentStore.updateContentItem(
-    collectionSlug,
-    itemId,
-    updatedData
-  );
-  if (success) {
-    router.push(`/collections/${collectionSlug}`);
+  // If collections need to be updated as part of the save
+  const updatedCollections = updatedData.collections || []; // Assuming collections are stored as part of the data
+
+  try {
+    // Update content item
+    const success = await contentStore.updateContentItem(
+      collectionSlug,
+      itemId,
+      updatedData
+    );
+
+    if (success) {
+      // If collections are linked in a separate table, update them here
+      if (updatedCollections.length > 0) {
+        await contentStore.updateCollectionsForItem(itemId, updatedCollections);
+      }
+      // Navigate back to the collection list
+      router.push(`/collections/${collectionSlug}`);
+    } else {
+      console.error("Failed to save changes.");
+    }
+  } catch (err) {
+    console.error("Error saving changes:", err);
   }
 };
 

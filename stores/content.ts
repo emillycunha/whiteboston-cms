@@ -1,11 +1,33 @@
 import { defineStore } from "pinia";
 import { useAuthStore } from "~/stores/auth";
 
+interface Field {
+  key: string;
+  label: string;
+  type: string;
+  options?: Array<{ value: string; label: string }>;
+  position?: number;
+}
+
+interface ContentItem {
+  id: number;
+  created_at: string;
+  updated_at: string;
+  data: Record<string, any>;
+}
+
+interface ContentStoreState {
+  content: ContentItem[];
+  fields: Field[];
+  error: string | null;
+  isLoading: boolean;
+}
+
 export const useContentStore = defineStore("content", {
-  state: () => ({
-    content: [] as Array<Record<string, any>>, // Content data
-    fields: [] as Array<{ key: string; label: string }>, // Table fields
-    error: null as string | null,
+  state: (): ContentStoreState => ({
+    content: [],
+    fields: [],
+    error: null,
     isLoading: false,
   }),
 
@@ -25,6 +47,7 @@ export const useContentStore = defineStore("content", {
           .from("collections")
           .select("id")
           .eq("slug", collectionSlug)
+          .eq("organization_id", authStore.org_id)
           .single();
 
         if (collectionError) {
@@ -45,7 +68,7 @@ export const useContentStore = defineStore("content", {
         // Step 2: Fetch the fields of the collection
         const { data: fieldsData, error: fieldsError } = await $supabase
           .from("fields")
-          .select("name, type")
+          .select("name, type, options, position")
           .eq("collection_id", collectionId);
 
         if (fieldsError) {
@@ -53,13 +76,36 @@ export const useContentStore = defineStore("content", {
           throw fieldsError;
         }
 
-        console.log("[Content Store] Fetched fields:", fieldsData);
-
         // Map fields into table column format
-        this.fields = fieldsData.map((field) => ({
-          key: field.name, // Use field name as the key
-          label: field.name.charAt(0).toUpperCase() + field.name.slice(1), // Capitalize for display
-        }));
+        this.fields = fieldsData.map((field: any): Field => {
+          let parsedOptions = null;
+
+          if (field.options) {
+            if (typeof field.options === "string") {
+              try {
+                // Parse only if it's a JSON string
+                parsedOptions = JSON.parse(field.options);
+              } catch (err) {
+                console.error(
+                  `[Content Store] Failed to parse options for field: ${field.name}`,
+                  field.options,
+                  err
+                );
+              }
+            } else if (Array.isArray(field.options)) {
+              // Use the array directly if it's already parsed
+              parsedOptions = field.options;
+            }
+          }
+
+          return {
+            key: field.name,
+            label: field.name.charAt(0).toUpperCase() + field.name.slice(1),
+            type: field.type,
+            options: parsedOptions,
+            position: field.position,
+          };
+        });
 
         // Step 3: Fetch the content of the collection
         let query = $supabase
@@ -82,8 +128,6 @@ export const useContentStore = defineStore("content", {
           throw contentError;
         }
 
-        console.log("[Content Store] Fetched content:", contentData);
-
         // Map the content's `data` field to include dynamic fields
         this.content = contentData.map((item) => ({
           id: item.id,
@@ -104,23 +148,32 @@ export const useContentStore = defineStore("content", {
 
     async fetchContentItem(collectionSlug: string, itemId: number) {
       const { $supabase } = useNuxtApp();
+      const authStore = useAuthStore();
       this.isLoading = true;
 
       try {
+        // Step 1: Validate the collection and organization
         const { data: collectionData, error: collectionError } = await $supabase
           .from("collections")
           .select("id")
           .eq("slug", collectionSlug)
+          .eq("organization_id", authStore.org_id)
           .single();
 
         if (collectionError) throw collectionError;
 
-        const { data, error } = await $supabase
+        // Step 2: Fetch the specific content item
+        let query = $supabase
           .from("content")
           .select("id, data")
           .eq("id", itemId)
-          .eq("collection_id", collectionData.id)
-          .single();
+          .eq("collection_id", collectionData.id);
+
+        if (authStore.role === "editor") {
+          query = query.eq("user_id", authStore.id);
+        }
+
+        const { data, error } = await query.single();
 
         if (error) throw error;
         return data;
@@ -140,6 +193,92 @@ export const useContentStore = defineStore("content", {
       updatedData: Record<string, any>
     ) {
       const { $supabase } = useNuxtApp();
+      const authStore = useAuthStore();
+      this.isLoading = true;
+
+      try {
+        // Step 1: Validate the collection and organization
+        const { data: collectionData, error: collectionError } = await $supabase
+          .from("collections")
+          .select("id")
+          .eq("slug", collectionSlug)
+          .eq("organization_id", authStore.org_id)
+          .single();
+
+        if (collectionError) throw collectionError;
+
+        // Step 2: Update the content item
+        let query = $supabase
+          .from("content")
+          .update({ data: updatedData })
+          .eq("id", itemId)
+          .eq("collection_id", collectionData.id);
+
+        if (authStore.role === "editor") {
+          query = query.eq("user_id", authStore.id);
+        }
+
+        const { error } = await query;
+
+        if (error) throw error;
+
+        return true;
+      } catch (err) {
+        console.error("[Content Store] Failed to update item:", err);
+        this.error = "Failed to update item.";
+        return false;
+      } finally {
+        this.isLoading = false;
+      }
+    },
+
+    async addContentItem(
+      collectionSlug: string,
+      newItemData: Record<string, any>
+    ) {
+      const { $supabase } = useNuxtApp();
+      const authStore = useAuthStore();
+      this.isLoading = true;
+
+      try {
+        // Step 1: Validate the collection and organization
+        const { data: collectionData, error: collectionError } = await $supabase
+          .from("collections")
+          .select("id")
+          .eq("slug", collectionSlug)
+          .eq("organization_id", authStore.org_id)
+          .single();
+
+        if (collectionError) throw collectionError;
+
+        // Step 2: Insert the new item
+        const { error } = await $supabase.from("content").insert({
+          collection_id: collectionData.id,
+          organization_id: authStore.org_id,
+          user_id: authStore.id, // Assign the current user
+          data: newItemData, // Store the dynamic fields
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        });
+
+        if (error) throw error;
+
+        return true;
+      } catch (err) {
+        console.error("[Content Store] Failed to add new item:", err);
+        this.error = "Failed to add new item.";
+        return false;
+      } finally {
+        this.isLoading = false;
+      }
+    },
+
+    async updateCollectionFields(
+      collectionSlug: string,
+      updatedFields: Field[]
+    ) {
+      const { $supabase } = useNuxtApp();
+      const authStore = useAuthStore();
       this.isLoading = true;
 
       try {
@@ -151,18 +290,22 @@ export const useContentStore = defineStore("content", {
 
         if (collectionError) throw collectionError;
 
-        const { error } = await $supabase
-          .from("content")
-          .update({ data: updatedData })
-          .eq("id", itemId)
-          .eq("collection_id", collectionData.id);
+        const { error } = await $supabase.from("fields").upsert(
+          updatedFields.map((field) => ({
+            collection_id: collectionData.id,
+            name: field.key,
+            type: field.type,
+            position: field.position,
+            options:
+              field.type === "select" ? JSON.stringify(field.options) : null,
+          }))
+        );
 
         if (error) throw error;
 
         return true;
       } catch (err) {
-        console.error("[Content Store] Failed to update item:", err);
-        this.error = "Failed to update item.";
+        console.error("Failed to update collection fields:", err);
         return false;
       } finally {
         this.isLoading = false;

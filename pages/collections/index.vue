@@ -13,8 +13,9 @@
       v-if="!isLoading && !error && collections.length"
       :data="collections"
       :columns="columns"
-      :actionType="'view'"
-      @view="handleOpenCollection"
+      :actionType="'both'"
+      @view="handleView"
+      @edit="handleEdit"
     />
 
     <!-- Empty State -->
@@ -61,8 +62,22 @@ onMounted(async () => {
 });
 
 // Handle Open Collection
-const handleOpenCollection = (collection) => {
-  console.log("Opening collection:", collection);
-  router.push(`/collections/${collection.slug}`);
+const handleView = (collection) => {
+  navigateTo({
+    path: `/collections/${collection.slug}`,
+    query: {
+      collection: collection.name,
+    },
+  });
+};
+
+const handleEdit = (collection) => {
+  navigateTo({
+    path: `/collections/${collection.slug}/edit`,
+    query: {
+      collection: collection.name,
+      edit: "true",
+    },
+  });
 };
 </script>

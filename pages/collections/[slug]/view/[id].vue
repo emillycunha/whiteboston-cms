@@ -72,11 +72,10 @@ onMounted(async () => {
 });
 
 const enableEdit = (row) => {
-  console.log("Viewing row:", row);
-
   navigateTo({
     path: `/collections/${collectionSlug}/edit/${itemId}`,
     query: {
+      collection: collectionName.value,
       edit: "true",
     },
   });
