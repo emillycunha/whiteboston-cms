@@ -1,6 +1,25 @@
 <template>
-  <div class="p-6">
-    <h1 class="text-2xl font-bold mb-4">Collections</h1>
+  <div class="px-6 py-4 space-y-6">
+    <!-- Header Section -->
+    <PageHeader
+      title="Collections"
+      :buttons="[
+        {
+          label: 'Reorder',
+          icon: ArrowDownTrayIcon,
+          iconPosition: 'after',
+          variant: 'secondary',
+          onClick: addNew,
+        },
+        {
+          label: 'Add',
+          icon: PlusIcon,
+          iconPosition: 'after',
+          variant: 'primary',
+          onClick: addNew,
+        },
+      ]"
+    />
 
     <!-- Loading State -->
     <div v-if="isLoading" class="text-center">Loading collections...</div>
@@ -32,6 +51,7 @@
 import { ref, onMounted, computed } from "vue";
 import { useCollectionsStore } from "~/stores/collections";
 import { useRouter } from "vue-router";
+import { ArrowDownTrayIcon, PlusIcon } from "@heroicons/vue/24/outline";
 
 // Pinia Store
 const collectionsStore = useCollectionsStore();
@@ -49,11 +69,8 @@ const columns = [
   { key: "name", label: "Collection Name" },
   { key: "slug", label: "Slug" },
   { key: "description", label: "Description" },
-  {
-    key: "created_at",
-    label: "Created At",
-    formatter: (date) => new Date(date).toLocaleDateString(),
-  },
+  { key: "position", label: "Position" },
+  { key: "is_hidden", label: "Hidden?" },
 ];
 
 // Fetch Collections on Mount
@@ -79,5 +96,9 @@ const handleEdit = (collection) => {
       edit: "true",
     },
   });
+};
+
+const addNew = () => {
+  navigateTo({ path: `/collections/new/add/collections` });
 };
 </script>

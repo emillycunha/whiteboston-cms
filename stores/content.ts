@@ -4,7 +4,10 @@ import { useAuthStore } from "~/stores/auth";
 interface Field {
   key: string;
   label: string;
+  id: number;
+  name: string;
   type: string;
+  is_required: boolean;
   options?: Array<{ value: string; label: string }>;
   position?: number;
 }
@@ -35,8 +38,12 @@ export const useContentStore = defineStore("content", {
     async fetchContentAndFields(collectionSlug: string) {
       const { $supabase } = useNuxtApp();
       const authStore = useAuthStore();
-      this.isLoading = true;
+      if (this.isLoading) {
+        console.log("[Content Store] Fetch already in progress. Skipping...");
+        return;
+      }
 
+      this.isLoading = true;
       try {
         console.log(
           `[Content Store] Fetching fields and content for: ${collectionSlug}`
@@ -68,8 +75,13 @@ export const useContentStore = defineStore("content", {
         // Step 2: Fetch the fields of the collection
         const { data: fieldsData, error: fieldsError } = await $supabase
           .from("fields")
-          .select("name, type, options, position")
+          .select("id, name, type, options, position, is_required")
           .eq("collection_id", collectionId);
+
+        // Sort the fieldsData by position before mapping
+        if (fieldsData) {
+          fieldsData.sort((a, b) => (a.position || 99) - (b.position || 99));
+        }
 
         if (fieldsError) {
           console.error("[Content Store] Failed to fetch fields:", fieldsError);
@@ -99,9 +111,12 @@ export const useContentStore = defineStore("content", {
           }
 
           return {
+            id: field.id,
             key: field.name,
             label: field.name.charAt(0).toUpperCase() + field.name.slice(1),
+            name: field.name,
             type: field.type,
+            is_required: field.is_required,
             options: parsedOptions,
             position: field.position,
           };
@@ -186,7 +201,6 @@ export const useContentStore = defineStore("content", {
       }
     },
 
-    // Update a single item in the content table
     async updateContentItem(
       collectionSlug: string,
       itemId: number,
@@ -292,13 +306,17 @@ export const useContentStore = defineStore("content", {
 
         const { error } = await $supabase.from("fields").upsert(
           updatedFields.map((field) => ({
+            id: field.id,
             collection_id: collectionData.id,
-            name: field.key,
+            name: field.name,
             type: field.type,
             position: field.position,
+            is_required: field.is_required,
             options:
               field.type === "select" ? JSON.stringify(field.options) : null,
-          }))
+          })),
+
+          { onConflict: "id" }
         );
 
         if (error) throw error;
@@ -314,10 +332,7 @@ export const useContentStore = defineStore("content", {
 
     resetContent() {
       console.log("[Content Store] Resetting content and fields.");
-      this.content = [];
-      this.fields = [];
-      this.error = null;
-      this.isLoading = false;
+      this.$reset();
     },
   },
 });

@@ -18,6 +18,7 @@
         :key="index"
         @click="() => button.onClick && button.onClick()"
         :disabled="button.disabled"
+        :type="button.type || 'button'"
         :class="[
           'flex items-center justify-between py-2 px-4 text-sm font-medium rounded-lg shadow-sm',
           button.variant === 'primary'

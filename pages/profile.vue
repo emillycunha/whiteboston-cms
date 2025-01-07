@@ -5,48 +5,50 @@
     <div
       class="rounded-md bg-white shadow-sm border border-gray-200 dark:bg-slate-800 dark:border-slate-700"
     >
-      <div class="p-2 sm:p-10">
-        <form class="flex flex-col gap-y-6 p-4 sm:p-10">
-          <!-- Name -->
-          <div>
-            <label
-              class="block text-base font-semibold text-gray-700 dark:text-gray-300"
-              >Name</label
-            >
-            <input
-              v-model="name"
-              type="text"
-              placeholder="Enter your name"
-              class="mt-1 block w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 rounded-md shadow-sm focus:ring focus:ring-blue-500"
-            />
-          </div>
+      <div class="p-4 sm:p-8">
+        <form class="">
+          <div class="flex flex-wrap gap-y-4">
+            <!-- Name -->
+            <div class="w-1/2 p-2">
+              <label
+                class="block text-base font-semibold text-gray-700 dark:text-gray-300"
+                >Name</label
+              >
+              <input
+                v-model="name"
+                type="text"
+                placeholder="Enter your name"
+                class="mt-1 w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 rounded-md shadow-sm focus:ring focus:ring-blue-500"
+              />
+            </div>
 
-          <!-- Email -->
-          <div>
-            <label
-              class="block text-base font-semibold text-gray-700 dark:text-gray-300"
-              >Email</label
-            >
-            <input
-              v-model="authStore.email"
-              type="email"
-              placeholder="Enter your email"
-              class="mt-1 block w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 rounded-md shadow-sm focus:ring focus:ring-blue-500"
-            />
-          </div>
+            <!-- Email -->
+            <div class="w-full p-2">
+              <label
+                class="block text-base font-semibold text-gray-700 dark:text-gray-300"
+                >Email</label
+              >
+              <input
+                v-model="authStore.email"
+                type="email"
+                placeholder="Enter your email"
+                class="mt-1 w-1/2 border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 rounded-md shadow-sm focus:ring focus:ring-blue-500"
+              />
+            </div>
 
-          <!-- Password -->
-          <div>
-            <label
-              class="block text-base font-semibold text-gray-700 dark:text-gray-300"
-              >Password</label
-            >
-            <input
-              v-model="password"
-              type="password"
-              placeholder="Update your password"
-              class="mt-1 block w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 rounded-md shadow-sm focus:ring focus:ring-blue-500"
-            />
+            <!-- Password -->
+            <div class="w-full p-2">
+              <label
+                class="block text-base font-semibold text-gray-700 dark:text-gray-300"
+                >Password</label
+              >
+              <input
+                v-model="password"
+                type="password"
+                placeholder="Update your password"
+                class="mt-1 w-1/2 border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 rounded-md shadow-sm focus:ring focus:ring-blue-500"
+              />
+            </div>
           </div>
         </form>
 

@@ -386,7 +386,12 @@ const navigation2 = [
     icon: ClipboardDocumentIcon,
     current: false,
   },
-  { name: "Settings", href: "/settings", icon: Cog6ToothIcon, current: false },
+  {
+    name: "Settings",
+    href: "/collections",
+    icon: Cog6ToothIcon,
+    current: false,
+  },
   { name: "Profile", href: "/profile", icon: UserCircleIcon, current: false },
 ];
 </script>

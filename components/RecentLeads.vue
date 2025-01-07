@@ -16,7 +16,7 @@
             </div>
             <div class="inline-block">
               <span class="font-semibold text-sm">
-                {{ lead.name || "Unnamed Lead" }}
+                {{ lead.Name || "Unnamed Lead" }}
               </span>
               <span class="mx-2 text-teal-400">•</span>
               <span class="text-sm font-medium text-gray-800">
@@ -47,28 +47,25 @@ onMounted(async () => {
   if (process.client) {
     try {
       await contentStore.fetchContentAndFields(collectionSlug);
-      content.value = contentStore.content; // Fetches content with created_at
+      content.value = contentStore.content;
     } catch (error) {}
   }
 });
 
 // Compute the latest leads based on `created_at`
 const latestLeads = computed(() => {
-  return content.value
-    .slice()
-    .sort((a, b) => {
-      const dateA = new Date(a.created_at).getTime();
-      const dateB = new Date(b.created_at).getTime();
-      return dateB - dateA;
-    })
-    .slice(0, 5);
+  const sortedLeads = content.value.slice().sort((a, b) => {
+    const dateA = new Date(a.created_at).getTime();
+    const dateB = new Date(b.created_at).getTime();
+    return dateB - dateA;
+  });
+
+  console.log("[Sorted Leads]:", sortedLeads); // Debug sorted leads
+  return sortedLeads.slice(0, 5);
 });
 
 // Format `created_at` date for display
 const formatDate = (dateString) => {
-  if (!dateString) {
-    return "Unknown Date"; // Provide a fallback date string
-  }
   const options = {
     year: "numeric",
     month: "short",

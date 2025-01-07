@@ -71,6 +71,7 @@ CREATE TABLE fields (
     default_value TEXT DEFAULT NULL,
     created_at TIMESTAMP DEFAULT NOW(),
     options JSONB NULL,
+    position integer NULL DEFAULT 0
 );
 
 -- ============================

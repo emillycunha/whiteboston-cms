@@ -6,75 +6,81 @@
     <div v-if="error" class="text-red-500">{{ error }}</div>
 
     <form v-if="!isLoading && fields.length" @submit.prevent="addItem">
-      <div class="space-y-4">
-        <div
-          v-for="field in fields"
-          :key="field.key"
-          class="flex flex-col space-y-1"
-        >
-          <label
-            :for="field.key"
-            class="font-bold text-gray-700 dark:text-white"
-          >
-            {{ field.label }}
-          </label>
-
-          <!-- Date Picker -->
-          <input
-            v-if="field.type === 'date'"
-            type="date"
-            v-model="formData[field.key]"
-            :id="field.key"
-            class="border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 rounded-md shadow-sm focus:ring focus:ring-blue-500 p-2 w-full"
-          />
-
-          <!-- Select Field -->
-          <select
-            v-else-if="field.type === 'select' && field.options"
-            v-model="formData[field.key]"
-            :id="field.key"
-            class="border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 rounded-md shadow-sm focus:ring focus:ring-blue-500 p-2 w-full"
-          >
-            <option
-              v-for="option in field.options"
-              :key="option.value"
-              :value="option.value"
+      <div
+        class="rounded-md bg-white shadow-sm border border-gray-200 dark:bg-slate-800 dark:border-slate-700 mb-6"
+      >
+        <div class="p-4 sm:p-8">
+          <div class="flex flex-wrap gap-y-4">
+            <div
+              v-for="field in fields"
+              :key="field.key"
+              class="flex flex-col w-1/2 space-y-1"
             >
-              {{ option.label }}
-            </option>
-          </select>
+              <label
+                :for="field.key"
+                class="font-bold text-gray-700 dark:text-white"
+              >
+                {{ field.label }}
+              </label>
 
-          <!-- Textarea Field -->
-          <textarea
-            v-else-if="field.type === 'textarea'"
-            v-model="formData[field.key]"
-            :id="field.key"
-            class="border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 rounded-md shadow-sm focus:ring focus:ring-blue-500 p-2 w-full"
-            :placeholder="`Enter ${field.label}`"
-          ></textarea>
+              <!-- Date Picker -->
+              <input
+                v-if="field.type === 'date'"
+                type="date"
+                v-model="formData[field.key]"
+                :id="field.key"
+                class="border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 rounded-md shadow-sm focus:ring focus:ring-blue-500 p-2 w-1/2"
+              />
 
-          <!-- Checkbox for Boolean -->
-          <div
-            v-else-if="field.type === 'boolean'"
-            class="flex items-center space-x-2"
-          >
-            <input
-              type="checkbox"
-              v-model="formData[field.key]"
-              :id="field.key"
-              class="h-5 w-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-            />
+              <!-- Select Field -->
+              <select
+                v-else-if="field.type === 'select' && field.options"
+                v-model="formData[field.key]"
+                :id="field.key"
+                class="border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 rounded-md shadow-sm focus:ring focus:ring-blue-500 p-2 w-1/2"
+              >
+                <option
+                  v-for="option in field.options"
+                  :key="option.value"
+                  :value="option.value"
+                >
+                  {{ option.label }}
+                </option>
+              </select>
+
+              <!-- Textarea Field -->
+              <textarea
+                v-else-if="field.type === 'textarea'"
+                v-model="formData[field.key]"
+                :id="field.key"
+                class="border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 rounded-md shadow-sm focus:ring focus:ring-blue-500 p-2 w-full"
+                :placeholder="`Enter ${field.label}`"
+              ></textarea>
+
+              <!-- Checkbox for Boolean -->
+              <div
+                v-else-if="field.type === 'boolean'"
+                class="flex items-center space-x-2"
+              >
+                <input
+                  type="checkbox"
+                  v-model="formData[field.key]"
+                  :id="field.key"
+                  class="h-5 w-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                />
+              </div>
+
+              <!-- Default Input -->
+              <input
+                v-else
+                :type="field.type"
+                v-model="formData[field.key]"
+                :id="field.key"
+                class="border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 rounded-md shadow-sm focus:ring focus:ring-blue-500 p-2 w-full"
+                :placeholder="`Enter ${field.label}`"
+              />
+            </div>
           </div>
-
-          <!-- Default Input -->
-          <input
-            v-else
-            :type="field.type"
-            v-model="formData[field.key]"
-            :id="field.key"
-            class="border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 rounded-md shadow-sm focus:ring focus:ring-blue-500 p-2 w-full"
-            :placeholder="`Enter ${field.label}`"
-          />
         </div>
       </div>
 

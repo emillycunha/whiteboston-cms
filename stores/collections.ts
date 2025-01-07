@@ -102,6 +102,117 @@ export const useCollectionsStore = defineStore("collections", {
       }
     },
 
+    // Fetch a collection by slug
+    async fetchCollectionBySlug(slug: string) {
+      const { $supabase } = useNuxtApp();
+      const authStore = useAuthStore();
+      const organizationId = authStore.org_id;
+
+      if (!organizationId) {
+        console.error("[Collections Store] Missing organization ID.");
+        this.error = "User is not associated with any organization.";
+        return null;
+      }
+
+      try {
+        const { data, error } = await $supabase
+          .from("collections")
+          .select("*")
+          .eq("slug", slug)
+          .eq("organization_id", organizationId)
+          .single();
+
+        if (error) throw error;
+
+        return data;
+      } catch (err) {
+        console.error(
+          "[Collections Store] Failed to fetch collection by slug:",
+          err
+        );
+        this.error = "Failed to fetch collection.";
+        return null;
+      }
+    },
+
+    // Update a collection
+    async updateCollection(updatedCollection: Collection) {
+      const { $supabase } = useNuxtApp();
+      try {
+        const { error } = await $supabase
+          .from("collections")
+          .update({
+            name: updatedCollection.name,
+            slug: updatedCollection.slug,
+            description: updatedCollection.description,
+            is_hidden: updatedCollection.is_hidden,
+            position: updatedCollection.position,
+          })
+          .eq("id", updatedCollection.id);
+
+        if (error) throw error;
+
+        // Update the local state
+        const index = this.collections.findIndex(
+          (c) => c.id === updatedCollection.id
+        );
+        if (index !== -1) {
+          this.collections[index] = updatedCollection;
+        }
+
+        return true;
+      } catch (err) {
+        console.error("[Collections Store] Failed to update collection:", err);
+        this.error = "Failed to update collection.";
+        return false;
+      }
+    },
+
+    // Add a new collection
+    async addCollection(newCollection: {
+      name: string;
+      slug: string;
+      description?: string;
+      is_hidden: boolean;
+      position: number;
+    }) {
+      const { $supabase } = useNuxtApp();
+      const authStore = useAuthStore();
+      const organizationId = authStore.org_id;
+
+      if (!organizationId) {
+        this.error = "Organization ID is missing.";
+        console.error("[Collections Store] Organization ID is missing.");
+        return false;
+      }
+
+      try {
+        const { data, error } = await $supabase.from("collections").insert({
+          ...newCollection,
+          organization_id: organizationId,
+        });
+
+        if (error) {
+          console.error("[Collections Store] Failed to add collection:", error);
+          this.error = error.message;
+          return false;
+        }
+
+        if (data) {
+          this.collections.push(data[0]);
+          console.log(
+            "[Collections Store] Collection added successfully:",
+            data[0]
+          );
+        }
+        return true;
+      } catch (err) {
+        console.error("[Collections Store] Unexpected error:", err);
+        this.error = "An unexpected error occurred.";
+        return false;
+      }
+    },
+
     // In collections store
     async toggleCollectionVisibility(slug: string, isHidden: boolean) {
       const { $supabase } = useNuxtApp();

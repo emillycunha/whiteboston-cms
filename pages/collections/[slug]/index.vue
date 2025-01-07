@@ -32,7 +32,7 @@
     <DataTable
       v-if="!isLoading && !error && content.length"
       :data="content"
-      :columns="fields"
+      :columns="fieldsWithCreatedAt"
       :enableCheckbox="true"
       :actionType="'view'"
       @view="handleView"
@@ -66,16 +66,36 @@ const collectionName = computed(
 // Content Store
 const contentStore = useContentStore();
 const content = computed(() => contentStore.content);
-const allFields = computed(() => contentStore.fields); // Fetch all fields
+const allFields = computed(() => contentStore.fields);
 const isLoading = computed(() => contentStore.isLoading);
 const error = computed(() => contentStore.error);
 
-// Filter to get the top 5 fields based on their position
+// Filter to get the top 3 fields based on their position
 const fields = computed(() => {
   return allFields.value
     .filter((field) => typeof field.position === "number" && field.position > 0)
     .sort((a, b) => a.position - b.position)
-    .slice(0, 4);
+    .slice(0, 3);
+});
+
+const formatDate = (dateString) => {
+  if (!dateString) return "";
+  const date = new Date(dateString);
+  return date.toISOString().split("T")[0];
+};
+
+// Add created_at to the fields dynamically
+const fieldsWithCreatedAt = computed(() => {
+  return [
+    ...fields.value,
+    {
+      key: "created_at",
+      label: "Created At",
+      type: "date",
+      position: 999,
+      formatter: (value) => formatDate(value),
+    },
+  ];
 });
 
 // Track selected items
@@ -83,12 +103,7 @@ const selectedItems = ref([]);
 
 // Fetch Content and Fields on Mount
 onMounted(async () => {
-  console.log("[Mounted] Lifecycle triggered");
-
   await contentStore.fetchContentAndFields(collectionSlug);
-  console.log("All Fields:", allFields.value); // Log all fields for debugging
-  console.log("Filtered Fields:", fields.value); // Log the top 5 fields
-  console.log("Content:", content.value); // Ensure content has values for fields
 });
 
 // Handle Edit
@@ -141,7 +156,7 @@ const exportSelectedToCSV = () => {
 // Add New Item
 const addNew = () => {
   navigateTo({
-    path: `/collections/${collectionSlug}/add-item`,
+    path: `/collections/${collectionSlug}/add/fields`,
     query: {
       collection: collectionName.value,
     },

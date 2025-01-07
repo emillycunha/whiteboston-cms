@@ -3,10 +3,10 @@
     class="rounded-md bg-white shadow-sm border border-gray-200 dark:bg-slate-800 dark:border-slate-700"
   >
     <div class="p-2 sm:p-4">
-      <table class="w-full text-base">
+      <table class="w-full text-sm table-auto">
         <thead>
           <tr
-            class="bg-gray-100 text-left text-gray-700 dark:bg-slate-900 dark:text-white"
+            class="bg-gray-100 text-left text-gray-700 dark:bg-slate-900 dark:text-white text-sm whitespace-nowrap"
           >
             <th v-if="enableCheckbox" class="px-4 py-2 w-8">
               <input
@@ -31,7 +31,7 @@
                 <BarsArrowDownIcon v-else class="w-4 h-4 inline-block" />
               </span>
             </th>
-            <th v-if="actionType !== 'none'" class="px-4 py-2 w-24"></th>
+            <th v-if="actionType !== 'none'" class="px-2 py-2 w-24"></th>
           </tr>
         </thead>
         <tbody class="text-sm text-gray-700 dark:text-gray-100">
@@ -86,6 +86,7 @@
       </table>
     </div>
   </div>
+
   <!-- Pagination -->
   <div class="flex justify-between items-center px-2">
     <button
@@ -127,7 +128,7 @@ const props = defineProps({
   },
   actionType: {
     type: String,
-    default: "none", // 'view', 'edit', or 'none'
+    default: "none",
   },
   rowsPerPage: {
     type: Number,
