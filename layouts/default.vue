@@ -105,6 +105,18 @@
                         See More
                       </NuxtLink>
                     </li>
+                    <li v-else>
+                      <NuxtLink
+                        to="/collections"
+                        class="flex items-center px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 rounded-md hover:bg-violet-50 dark:hover:bg-teal-500"
+                      >
+                        <AdjustmentsHorizontalIcon
+                          class="size-5 mr-2"
+                          aria-hidden="true"
+                        />
+                        Collections
+                      </NuxtLink>
+                    </li>
                   </ul>
 
                   <div class="border-t border-gray-200 my-4"></div>
@@ -229,6 +241,18 @@
                 See More
               </NuxtLink>
             </li>
+            <li v-else>
+              <NuxtLink
+                to="/collections"
+                class="flex items-center px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 rounded-md hover:bg-violet-50 dark:hover:bg-teal-500"
+              >
+                <AdjustmentsHorizontalIcon
+                  class="size-5 mr-2"
+                  aria-hidden="true"
+                />
+                Collections
+              </NuxtLink>
+            </li>
           </ul>
 
           <div class="border-t border-gray-200 my-4"></div>
@@ -301,6 +325,9 @@ import {
   ChatBubbleLeftIcon,
   Cog6ToothIcon,
   FolderPlusIcon,
+  AdjustmentsHorizontalIcon,
+  StarIcon,
+  ShoppingCartIcon,
 } from "@heroicons/vue/24/outline";
 import { CubeIcon } from "@heroicons/vue/24/solid";
 import {
@@ -316,7 +343,7 @@ const router = useRouter();
 
 // State for collections
 const collections = ref([]);
-const maxVisibleItems = 4;
+const maxVisibleItems = 3;
 
 // Fetch collections on sidebar load
 onMounted(async () => {
@@ -342,18 +369,27 @@ const extraCollections = computed(() =>
 );
 
 // Dynamic Icon Assignment
-const getIcon = (name) => {
-  const lowerName = name.toLowerCase();
-  if (lowerName.includes("blog") || lowerName.includes("post")) {
-    return ChatBubbleLeftIcon;
-  } else if (lowerName.includes("lead")) {
-    return UserPlusIcon;
-  } else if (lowerName.includes("task")) {
-    return QueueListIcon;
-  } else if (lowerName.includes("contacts")) {
-    return UsersIcon;
+const getIcon = (slug) => {
+  const lowerSlug = slug.toLowerCase();
+
+  if (["blogs", "posts", "blog", "post"].includes(lowerSlug)) {
+    return ChatBubbleLeftIcon; // Chat/Comment Icon
+  } else if (["leads", "lead"].includes(lowerSlug)) {
+    return UserPlusIcon; // Icon for Leads
+  } else if (["contacts", "contact"].includes(lowerSlug)) {
+    return UsersIcon; // Icon for Contacts
+  } else if (["tasks", "lists", "task", "list"].includes(lowerSlug)) {
+    return QueueListIcon; // Icon for Tasks/Lists
+  } else if (["reviews", "feedback", "review"].includes(lowerSlug)) {
+    return StarIcon; // Icon for Reviews
+  } else if (["products", "items", "product", "item"].includes(lowerSlug)) {
+    return ShoppingCartIcon; // Icon for Products/Items
+  } else if (["files", "documents", "file", "document"].includes(lowerSlug)) {
+    return DocumentIcon; // Icon for Files/Documents
+  } else if (["calendar", "events", "schedule", "event"].includes(lowerSlug)) {
+    return CalendarDaysIcon; // Icon for Calendar/Events
   } else {
-    return FolderIcon; // Default icon
+    return FolderIcon; // Default Folder Icon
   }
 };
 
@@ -388,7 +424,7 @@ const navigation2 = [
   },
   {
     name: "Settings",
-    href: "/collections",
+    href: "/settings",
     icon: Cog6ToothIcon,
     current: false,
   },

@@ -5,11 +5,11 @@
       title="Collections"
       :buttons="[
         {
-          label: 'Reorder',
-          icon: ArrowDownTrayIcon,
+          label: 'Settings',
+          icon: Cog6ToothIcon,
           iconPosition: 'after',
           variant: 'secondary',
-          onClick: addNew,
+          onClick: goToSettings,
         },
         {
           label: 'Add',
@@ -32,6 +32,7 @@
       v-if="!isLoading && !error && collections.length"
       :data="collections"
       :columns="columns"
+      :rowsPerPage="5"
       :actionType="'both'"
       @view="handleView"
       @edit="handleEdit"
@@ -51,7 +52,7 @@
 import { ref, onMounted, computed } from "vue";
 import { useCollectionsStore } from "~/stores/collections";
 import { useRouter } from "vue-router";
-import { ArrowDownTrayIcon, PlusIcon } from "@heroicons/vue/24/outline";
+import { Cog6ToothIcon, PlusIcon } from "@heroicons/vue/24/outline";
 
 // Pinia Store
 const collectionsStore = useCollectionsStore();
@@ -99,6 +100,10 @@ const handleEdit = (collection) => {
 };
 
 const addNew = () => {
-  navigateTo({ path: `/collections/new/add/collections` });
+  navigateTo({ path: `/collections/new/add/collection` });
+};
+
+const goToSettings = () => {
+  navigateTo({ path: "/settings" });
 };
 </script>

@@ -3,12 +3,13 @@ import { defineStore } from "pinia";
 export const useAuthStore = defineStore("auth", {
   state: () => ({
     id: null as string | null, // Auth user ID from `auth.users`
-    email: null as string | null, // User's email
-    org_id: null as string | null, // Organization ID
-    preferences: {} as Record<string, any>, // Store preferences (e.g., darkmode)
-    role: null as string | null, // User role from `organization_members`
-    isAuthenticated: false, // Authentication status
-    error: null as string | null, // Error message
+    email: null as string | null,
+    name: null as string | null,
+    org_id: null as string | null,
+    preferences: {} as Record<string, any>,
+    role: null as string | null,
+    isAuthenticated: false,
+    error: null as string | null,
   }),
 
   persist: true, // Persist state across reloads
@@ -26,7 +27,7 @@ export const useAuthStore = defineStore("auth", {
         // Fetch user metadata from `public.users`
         const { data: userData, error: userError } = await $supabase
           .from("users")
-          .select("preferences")
+          .select("*")
           .eq("id", this.id)
           .single();
 
@@ -42,11 +43,13 @@ export const useAuthStore = defineStore("auth", {
         if (memberError) throw memberError;
 
         // Update store state
+        this.name = userData.name;
         this.preferences = userData.preferences || {};
         this.org_id = memberData.organization_id;
         this.role = memberData.role;
 
         console.log("[Auth Store] User metadata fetched:", {
+          name: this.name,
           preferences: this.preferences,
           org_id: this.org_id,
           role: this.role,

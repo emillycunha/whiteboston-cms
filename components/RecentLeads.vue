@@ -42,26 +42,26 @@ const collectionSlug = "leads";
 const contentStore = useContentStore();
 const content = ref([]);
 
-// Fetch leads content on mount
+// Fetch blogs content on mount
 onMounted(async () => {
-  if (process.client) {
-    try {
-      await contentStore.fetchContentAndFields(collectionSlug);
-      content.value = contentStore.content;
-    } catch (error) {}
+  try {
+    await contentStore.fetchContentAndFields(collectionSlug);
+    content.value = contentStore.content;
+  } catch (error) {
+    console.error("[Error Fetching Content]:", error);
   }
 });
 
 // Compute the latest leads based on `created_at`
 const latestLeads = computed(() => {
-  const sortedLeads = content.value.slice().sort((a, b) => {
-    const dateA = new Date(a.created_at).getTime();
-    const dateB = new Date(b.created_at).getTime();
-    return dateB - dateA;
-  });
-
-  console.log("[Sorted Leads]:", sortedLeads); // Debug sorted leads
-  return sortedLeads.slice(0, 5);
+  return content.value
+    .slice()
+    .sort((a, b) => {
+      const dateA = new Date(a.created_at).getTime();
+      const dateB = new Date(b.created_at).getTime();
+      return dateB - dateA;
+    })
+    .slice(0, 4);
 });
 
 // Format `created_at` date for display

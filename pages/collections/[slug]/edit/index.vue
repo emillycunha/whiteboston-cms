@@ -125,7 +125,6 @@
                       <input
                         type="text"
                         v-model="field.name"
-                        disabled
                         class="w-full border border-gray-200 dark:border-gray-600 rounded-md px-2 py-1 disabled:opacity-50"
                       />
                     </td>
@@ -249,30 +248,41 @@ onMounted(async () => {
     // Fetch fields
     await contentStore.fetchContentAndFields(collectionSlug);
 
-    // Initialize fields for editing
-    fields.value = (contentStore.fields || []).map((field) => ({
-      id: field.id,
-      key:
-        field.key ||
-        (field.name
-          ? field.name.toLowerCase().replace(/\s+/g, "_")
-          : `field_${Math.random().toString(36).substr(2, 5)}`),
-      name: field.label || field.name || "Unnamed Field",
-      type: [
-        "text",
-        "number",
-        "date",
-        "select",
-        "boolean",
-        "textarea",
-      ].includes(field.type)
-        ? field.type
-        : "text",
-      position: typeof field.position === "number" ? field.position : 99,
-      options: Array.isArray(field.options)
-        ? field.options.map((opt) => opt.label || "").join(", ")
-        : null,
-    }));
+    // If no fields exist, add a default one
+    if (!contentStore.fields.length) {
+      fields.value.push({
+        key: "new_field_1",
+        name: "New Field",
+        type: "text",
+        position: 1,
+        options: null,
+      });
+    } else {
+      // Initialize fields for editing
+      fields.value = (contentStore.fields || []).map((field) => ({
+        id: field.id,
+        key:
+          field.key ||
+          (field.name
+            ? field.name.toLowerCase().replace(/\s+/g, "_")
+            : `field_${Math.random().toString(36).substr(2, 5)}`),
+        name: field.label || field.name || "Unnamed Field",
+        type: [
+          "text",
+          "number",
+          "date",
+          "select",
+          "boolean",
+          "textarea",
+        ].includes(field.type)
+          ? field.type
+          : "text",
+        position: typeof field.position === "number" ? field.position : 99,
+        options: Array.isArray(field.options)
+          ? field.options.map((opt) => opt.label || "").join(", ")
+          : null,
+      }));
+    }
   } catch (err) {
     error.value = "Failed to load collection details.";
   }
@@ -291,6 +301,18 @@ const addField = () => {
 
 // Save changes
 const saveChanges = async () => {
+  // Check if any field names are still set to the default
+  const hasInvalidNames = fields.value.some(
+    (field) => field.name === "New Field"
+  );
+
+  if (hasInvalidNames) {
+    alert(
+      "Please rename all fields with the default name ('New Field') before saving."
+    );
+    return; // Prevent saving
+  }
+
   const updatedFields = fields.value.map((field) => ({
     id: field.id || undefined,
     name: field.name,

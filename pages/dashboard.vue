@@ -23,52 +23,13 @@
 
       <!-- Card Stats -->
       <div class="lg:col-start-1 lg:col-span-2 lg:row-span-1 lg:row-start-1">
-        <div class="grid grid-cols-1 gap-6">
-          <!-- Statistics Section -->
-          <section class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div
-              class="bg-white p-4 shadow rounded-md flex items-center justify-between"
-            >
-              <div>
-                <h2 class="text-gray-600">Contacts</h2>
-                <p class="text-2xl font-bold">120</p>
-              </div>
-              <div
-                class="bg-violet-500 text-white p-2 w-12 h-12 rounded flex items-center justify-center"
-              >
-                <UserIcon class="size-7" />
-              </div>
-            </div>
-            <div
-              class="bg-white p-4 shadow rounded-md flex items-center justify-between"
-            >
-              <div>
-                <h2 class="text-gray-600">Posts</h2>
-                <p class="text-2xl font-bold">12</p>
-              </div>
-              <div
-                class="bg-violet-500 text-white p-2 w-12 h-12 rounded flex items-center justify-center"
-              >
-                <DocumentTextIcon class="size-7" />
-              </div>
-            </div>
-            <div
-              class="bg-white p-4 shadow rounded-md flex items-center justify-between"
-            >
-              <div>
-                <h2 class="text-gray-600">Tasks</h2>
-                <p class="text-2xl font-bold">2</p>
-              </div>
-              <div
-                class="bg-violet-500 text-white p-2 w-12 h-12 rounded flex items-center justify-center"
-              >
-                <ListBulletIcon class="size-7" />
-              </div>
-            </div>
-          </section>
+        <div class="flex flex-row gap-x-2">
+          <DashboardStats
+            v-for="stat in selectedStats"
+            :key="stat"
+            :collectionSlug="stat"
+          />
         </div>
-
-        <!-- Post Seciton-->
       </div>
 
       <!-- Post Section -->
@@ -113,6 +74,8 @@ import PageHeader from "@/components/PageHeader.vue";
 import RecentLeads from "@/components/RecentLeads.vue";
 import RecentPosts from "@/components/RecentPosts.vue";
 import DailyQuote from "@/components/DailyQuote.vue";
+import DashboardStats from "@/components/DashboardStats.vue";
+
 import {
   ListBulletIcon,
   DocumentTextIcon,
@@ -120,7 +83,27 @@ import {
   ArrowRightIcon,
 } from "@heroicons/vue/24/solid";
 
-import { ref, computed } from "vue";
+import { ref, computed, onMounted } from "vue";
+import { useUsersStore } from "~/stores/users";
+import { useAuthStore } from "~/stores/auth";
+
+const authStore = useAuthStore();
+const usersStore = useUsersStore();
+
+const selectedStats = ref([]);
+
+onMounted(async () => {
+  // Ensure users are loaded
+  if (!usersStore.users.length) {
+    await usersStore.fetchUsers();
+  }
+
+  // Fetch and assign user preferences
+  const userId = authStore.id;
+  if (userId) {
+    selectedStats.value = usersStore.getUserDashboardPreferences(userId);
+  }
+});
 
 // Get current date and time
 const currentDate = new Date();

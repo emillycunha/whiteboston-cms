@@ -56,7 +56,7 @@ export const useCollectionsStore = defineStore("collections", {
         if (error) throw error;
 
         if (data) {
-          this.collections = [...data]; // Cache collections
+          this.collections = [...data];
         }
         return data;
       } catch (err) {
@@ -230,6 +230,85 @@ export const useCollectionsStore = defineStore("collections", {
         }
       } catch (err) {
         console.error("[Collections Store] Failed to update visibility:", err);
+      }
+    },
+
+    // Fetch content count for a collection
+    async fetchContentCount(collectionId: number) {
+      const { $supabase } = useNuxtApp();
+      try {
+        const { count, error } = await $supabase
+          .from("content")
+          .select("id", { count: "exact" })
+          .eq("collection_id", collectionId);
+
+        if (error) {
+          console.error(
+            "[Collections Store] Failed to fetch content count:",
+            error
+          );
+          return 0;
+        }
+
+        return count || 0;
+      } catch (err) {
+        console.error("[Collections Store] Error fetching content count:", err);
+        return 0;
+      }
+    },
+
+    // Check if a slug already exists
+    async checkSlugExists(slug: string) {
+      const { $supabase } = useNuxtApp();
+      const authStore = useAuthStore();
+      const organizationId = authStore.org_id;
+
+      try {
+        const { data, error } = await $supabase
+          .from("collections")
+          .select("id")
+          .eq("slug", slug)
+          .eq("organization_id", organizationId)
+          .single();
+
+        if (error && error.code !== "PGRST116") {
+          // Ignore "Row not found" errors
+          throw error;
+        }
+
+        return !!data; // Return true if the slug exists, false otherwise
+      } catch (err) {
+        console.error("[Collections Store] Error checking slug:", err);
+        return false;
+      }
+    },
+
+    async updateCollectionPositions(updatedCollections: Collection[]) {
+      const { $supabase } = useNuxtApp();
+      const authStore = useAuthStore();
+
+      try {
+        const updates = updatedCollections.map((collection) => ({
+          id: collection.id,
+          position: collection.position,
+          name: collection.name,
+          slug: collection.slug,
+          organization_id: collection.organization_id,
+        }));
+
+        console.log("[Update Positions] Payload:", updates);
+
+        const { data, error } = await $supabase
+          .from("collections")
+          .upsert(updates, { onConflict: "id" });
+
+        if (error) throw error;
+
+        console.log("[Update Positions] Collections updated:", data);
+        return data;
+      } catch (err) {
+        console.error("[Update Positions] Failed to update positions:", err);
+        throw err;
       }
     },
 

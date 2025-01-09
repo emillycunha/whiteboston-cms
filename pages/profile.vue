@@ -15,7 +15,7 @@
                 >Name</label
               >
               <input
-                v-model="name"
+                v-model="authStore.name"
                 type="text"
                 placeholder="Enter your name"
                 class="mt-1 w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 rounded-md shadow-sm focus:ring focus:ring-blue-500"
@@ -51,20 +51,9 @@
             </div>
           </div>
         </form>
-
-        <!-- Dark Mode Toggle -->
-        <div class="flex flex-col gap-x-2 p-4 sm:px-10">
-          <div
-            class="flex flex-row border-t border-gray-200 dark:border-slate-700 py-4"
-          >
-            <p class="text-sm text-violet-500">Role: {{ authStore.role }} |</p>
-            <p class="ml-2 text-sm text-violet-500">
-              Organization ID: {{ authStore.org_id }}
-            </p>
-          </div>
-        </div>
       </div>
     </div>
+
     <PageFooter
       title=""
       :buttons="[
@@ -105,6 +94,7 @@ onMounted(async () => {
     console.log("[Test Page] User Metadata:", {
       id: authStore.id,
       email: authStore.email,
+      name: authStore.name,
       role: authStore.role,
       darkmode: authStore.darkmode,
       org_id: authStore.org_id,

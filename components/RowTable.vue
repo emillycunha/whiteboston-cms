@@ -2,7 +2,7 @@
   <div
     class="rounded-md bg-white shadow-sm border border-gray-200 dark:bg-slate-800 dark:border-slate-700"
   >
-    <div class="flex flex-wrap gap-y-4 p-4 sm:p-10">
+    <div class="flex flex-wrap gap-y-4 p-4 sm:p-8">
       <div
         v-for="(field, fieldIndex) in fields"
         :key="fieldIndex"

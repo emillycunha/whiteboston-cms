@@ -140,12 +140,11 @@ const emit = defineEmits(["view", "edit", "selection-change"]);
 
 const selectedRows = ref([]);
 const currentPage = ref(1);
-const itemsPerPage = ref(10);
 const activeSortKey = ref("");
 const activeSortOrder = ref("asc");
 
 const totalPages = computed(() => {
-  return Math.ceil(props.data.length / itemsPerPage.value);
+  return Math.ceil(props.data.length / props.rowsPerPage); // Use the rowsPerPage prop
 });
 
 const allSelected = computed(() => {
@@ -168,8 +167,8 @@ const paginatedAndSortedData = computed(() => {
       return 0;
     });
   }
-  const start = (currentPage.value - 1) * itemsPerPage.value;
-  const end = start + itemsPerPage.value;
+  const start = (currentPage.value - 1) * props.rowsPerPage; // Use the rowsPerPage prop
+  const end = start + props.rowsPerPage; // Use the rowsPerPage prop
   return sortedData.slice(start, end);
 });
 
@@ -224,5 +223,3 @@ const onEdit = (row) => {
   emit("edit", row);
 };
 </script>
-
-<style scoped></style>

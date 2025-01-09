@@ -50,7 +50,7 @@ CREATE TABLE organization_members (
 CREATE TABLE collections (
     id SERIAL PRIMARY KEY, 
     name TEXT NOT NULL, 
-    slug TEXT UNIQUE NOT NULL, 
+    slug TEXT NOT NULL, 
     description TEXT,
     organization_id UUID NOT NULL REFERENCES organizations(id) ON DELETE CASCADE, 
     created_at TIMESTAMP DEFAULT NOW(),
@@ -87,6 +87,24 @@ CREATE TABLE content (
     created_at TIMESTAMP DEFAULT NOW(),
     updated_at TIMESTAMP DEFAULT NOW()
 );
+
+-- ============================
+-- TICKET TABLE
+-- Stores user ticket requests
+-- ============================
+CREATE TABLE tickets (
+    id SERIAL PRIMARY KEY, 
+    title VARCHAR(100) NOT NULL, 
+    description TEXT NOT NULL, 
+    category VARCHAR(50) NOT NULL, 
+    priority VARCHAR(20) NOT NULL, 
+    status VARCHAR(20) DEFAULT 'open',
+    created_at TIMESTAMP DEFAULT NOW(), 
+    updated_at TIMESTAMP DEFAULT NOW(), 
+    user_id UUID NOT NULL, 
+    FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
+);
+
 
 -- ============================
 -- NOTES:

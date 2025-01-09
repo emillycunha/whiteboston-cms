@@ -1,7 +1,7 @@
 import { defineStore } from "pinia";
 
 export interface User {
-  id: number;
+  id: string;
   name: string;
   created_at?: string;
   preferences?: Record<string, any>;
@@ -15,9 +15,16 @@ export const useUsersStore = defineStore("users", {
   }),
   getters: {
     // Get a user by ID
-    getUserById: (state) => (id: number) =>
+    getUserById: (state) => (id: string) =>
       state.users.find((user) => user.id === id),
+
+    // Get user dashboard preferences
+    getUserDashboardPreferences: (state) => (id: string) => {
+      const user = state.users.find((user) => user.id === id);
+      return user?.preferences?.dashboard?.stats || [];
+    },
   },
+
   actions: {
     // Fetch all users if not already loaded
     async fetchUsers() {
@@ -34,10 +41,11 @@ export const useUsersStore = defineStore("users", {
         if (error) throw error;
 
         this.users = data || []; // Cache the fetched users
+        console.log("[Debug] Users successfully fetched:", this.users);
         return this.users;
       } catch (err) {
         this.error = "Failed to fetch users.";
-        console.error(err);
+        console.error("[Debug] Fetch Users Error:", err);
         return [];
       } finally {
         this.isLoading = false;
@@ -45,7 +53,7 @@ export const useUsersStore = defineStore("users", {
     },
 
     // Fetch a single user by ID
-    async fetchUserById(id: number) {
+    async fetchUserById(id: string) {
       const { $supabase } = useNuxtApp();
 
       // Check if user is already cached
@@ -73,6 +81,40 @@ export const useUsersStore = defineStore("users", {
         return null;
       } finally {
         this.isLoading = false;
+      }
+    },
+
+    async updateUserPreferences(
+      userId: string,
+      preferences: Record<string, any>
+    ) {
+      const { $supabase } = useNuxtApp();
+
+      try {
+        const { data, error } = await $supabase
+          .from("users")
+          .update({ preferences })
+          .eq("id", userId)
+          .select("*");
+
+        if (error) throw error;
+
+        if (!data || data.length === 0) {
+          console.warn("Update successful, but no data returned.");
+          return true;
+        }
+
+        // Update the local store
+        const user = this.getUserById(userId);
+        if (user) {
+          user.preferences = preferences;
+        }
+
+        console.log("Preferences updated successfully:", data);
+        return true;
+      } catch (err) {
+        console.error("Failed to update preferences:", err);
+        return false;
       }
     },
 

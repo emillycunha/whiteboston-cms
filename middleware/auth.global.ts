@@ -13,7 +13,7 @@ export default defineNuxtRouteMiddleware(async (to) => {
 
   // If the session is already initialized, skip re-fetching
   if (authStore.isAuthenticated) {
-    console.log("[Auth Middleware] User already authenticated.");
+    //console.log("[Auth Middleware] User already authenticated.");
     return;
   }
 

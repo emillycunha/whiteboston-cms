@@ -141,7 +141,6 @@ const form = ref({
 // Get Organization ID
 const authStore = useAuthStore();
 const organizationId = authStore.org_id;
-console.log("[Add Collection] Retrieved organizationId:", organizationId);
 
 // Initialize Form
 onMounted(() => {
@@ -190,6 +189,13 @@ const validateForm = () => {
 // Add New Collection
 const addCollection = async () => {
   if (!validateForm()) return;
+
+  // Check for existing slug
+  const existingSlug = await collectionsStore.checkSlugExists(form.value.slug);
+  if (existingSlug) {
+    error.value = "Collection slug already exists. Please use a unique slug.";
+    return;
+  }
 
   const success = await collectionsStore.addCollection({
     name: form.value.name,

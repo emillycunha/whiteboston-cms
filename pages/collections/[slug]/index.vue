@@ -43,9 +43,14 @@
     <!-- Empty State -->
     <div
       v-else-if="!isLoading && !error && !content.length"
-      class="text-center"
+      class="text-center text-gray-600 dark:text-gray-300"
     >
-      No data found for this collection.
+      <p>No data found for this collection.</p>
+      <p>
+        Add content by clicking
+        <a :href="addContent" class="text-violet-500 hover:underline">here</a>
+        or the "Add" button above.
+      </p>
     </div>
   </div>
 </template>
@@ -156,10 +161,13 @@ const exportSelectedToCSV = () => {
 // Add New Item
 const addNew = () => {
   navigateTo({
-    path: `/collections/${collectionSlug}/add/fields`,
+    path: `/collections/${collectionSlug}/add/content`,
     query: {
       collection: collectionName.value,
     },
   });
 };
+
+// Add Content Link
+const addContent = `/collections/${collectionSlug}/add/content?collection=${collectionSlug}`;
 </script>

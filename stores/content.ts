@@ -24,6 +24,7 @@ interface ContentStoreState {
   fields: Field[];
   error: string | null;
   isLoading: boolean;
+  isLoadingBySlug: Record<string, boolean>;
 }
 
 export const useContentStore = defineStore("content", {
@@ -32,23 +33,21 @@ export const useContentStore = defineStore("content", {
     fields: [],
     error: null,
     isLoading: false,
+    isLoadingBySlug: {},
   }),
 
   actions: {
     async fetchContentAndFields(collectionSlug: string) {
       const { $supabase } = useNuxtApp();
       const authStore = useAuthStore();
-      if (this.isLoading) {
+      if (this.isLoadingBySlug[collectionSlug]) {
         console.log("[Content Store] Fetch already in progress. Skipping...");
         return;
       }
 
-      this.isLoading = true;
-      try {
-        console.log(
-          `[Content Store] Fetching fields and content for: ${collectionSlug}`
-        );
+      this.isLoadingBySlug[collectionSlug] = true;
 
+      try {
         // Step 1: Fetch the collection ID using the slug
         const { data: collectionData, error: collectionError } = await $supabase
           .from("collections")
@@ -129,8 +128,8 @@ export const useContentStore = defineStore("content", {
           .eq("collection_id", collectionId)
           .eq("organization_id", authStore.org_id);
 
-        if (authStore.role === "editor") {
-          query = query.eq("user_id", authStore.id); // Restrict to user's content for editors
+        if (authStore.role === "viewer") {
+          query = query.eq("user_id", authStore.id);
         }
 
         const { data: contentData, error: contentError } = await query;
@@ -157,7 +156,7 @@ export const useContentStore = defineStore("content", {
             ? err.message
             : "Failed to fetch content and fields.";
       } finally {
-        this.isLoading = false;
+        this.isLoadingBySlug[collectionSlug] = false;
       }
     },
 
@@ -184,7 +183,7 @@ export const useContentStore = defineStore("content", {
           .eq("id", itemId)
           .eq("collection_id", collectionData.id);
 
-        if (authStore.role === "editor") {
+        if (authStore.role === "viewer") {
           query = query.eq("user_id", authStore.id);
         }
 
@@ -228,7 +227,7 @@ export const useContentStore = defineStore("content", {
           .eq("id", itemId)
           .eq("collection_id", collectionData.id);
 
-        if (authStore.role === "editor") {
+        if (authStore.role === "viewer") {
           query = query.eq("user_id", authStore.id);
         }
 

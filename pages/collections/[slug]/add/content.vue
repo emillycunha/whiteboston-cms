@@ -5,6 +5,17 @@
     <div v-if="isLoading" class="text-center">Loading collection fields...</div>
     <div v-if="error" class="text-red-500">{{ error }}</div>
 
+    <!-- No Fields Message -->
+    <div v-if="!isLoading && !fields.length" class="text-center">
+      <p class="text-gray-600 dark:text-gray-200">
+        This collection currently has no fields.<br />
+        You can add fields to this collection by clicking
+        <a :href="editFieldsLink" class="text-violet-500 hover:underline"
+          >here</a
+        >.
+      </p>
+    </div>
+
     <form v-if="!isLoading && fields.length" @submit.prevent="addItem">
       <div
         class="rounded-md bg-white shadow-sm border border-gray-200 dark:bg-slate-800 dark:border-slate-700 mb-6"
@@ -139,17 +150,17 @@ const slugify = (text) => {
     .toString()
     .toLowerCase()
     .trim()
-    .replace(/\s+/g, "-") // Replace spaces with -
-    .replace(/[^\w\-]+/g, "") // Remove all non-word chars
-    .replace(/\-\-+/g, "-"); // Replace multiple - with single -
+    .replace(/\s+/g, "-")
+    .replace(/[^\w\-]+/g, "")
+    .replace(/\-\-+/g, "-");
 };
 
 // Watch the title field and auto-generate slug
 watch(
-  () => formData.value["Title"], // Watch the "title" field
+  () => formData.value["Title"],
   (newTitle) => {
     if (newTitle) {
-      formData.value["Slug"] = slugify(newTitle); // Generate slug
+      formData.value["Slug"] = slugify(newTitle);
     }
   }
 );
@@ -163,11 +174,9 @@ const addItem = async () => {
 
   // Extract the actual values from formData
   const dataToSubmit = Object.keys(formData.value).reduce((acc, key) => {
-    acc[key] = formData.value[key]; // Directly assign the value
+    acc[key] = formData.value[key];
     return acc;
   }, {});
-
-  console.log("Data to Submit:", dataToSubmit); // Debug the data being submitted
 
   const success = await contentStore.addContentItem(
     collectionSlug,
@@ -196,7 +205,7 @@ const validateField = (field, value) => {
   ) {
     return `${field.label} must be one of the predefined options.`;
   }
-  return null; // No errors
+  return null;
 };
 
 // Validate the entire form
@@ -240,4 +249,7 @@ onMounted(async () => {
 const cancelAdd = () => {
   router.push(`/collections/${collectionSlug}`);
 };
+
+// Edit Fields Link
+const editFieldsLink = `/collections/${collectionSlug}/edit?collection=${collectionSlug}&edit=true`;
 </script>

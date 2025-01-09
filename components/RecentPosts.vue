@@ -42,11 +42,11 @@ const content = ref([]);
 
 // Fetch blogs content on mount
 onMounted(async () => {
-  if (process.client) {
-    try {
-      await contentStore.fetchContentAndFields(collectionSlug);
-      content.value = contentStore.content;
-    } catch (error) {}
+  try {
+    await contentStore.fetchContentAndFields(collectionSlug);
+    content.value = contentStore.content;
+  } catch (error) {
+    console.error("[Error Fetching Content]:", error);
   }
 });
 
