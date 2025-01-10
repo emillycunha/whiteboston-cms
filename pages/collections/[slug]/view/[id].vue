@@ -75,7 +75,7 @@ const enableEdit = (row) => {
   navigateTo({
     path: `/collections/${collectionSlug}/edit/${itemId}`,
     query: {
-      collection: collectionName.value,
+      collection: collectionSlug,
       edit: "true",
     },
   });

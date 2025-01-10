@@ -20,22 +20,23 @@
         },
       ]"
     />
+
     <div
       class="rounded-md bg-white shadow-sm border border-gray-200 dark:bg-slate-800 dark:border-slate-700"
     >
-      <div class="p-4 sm:p-8 flex flex-row gap-x-16">
+      <div
+        v-if="collections.length > 0"
+        class="p-4 sm:p-8 flex flex-row gap-x-16"
+      >
         <!-- Sidebar Order -->
-        <div class="w-1/2 p-2">
+        <div class="p-2">
           <h3 class="text-base font-semibold">Sidebar Collections Order</h3>
           <p class="text-sm text-gray-600">
             Collections in the sidebar are displayed based on the order below.
           </p>
 
           <!-- Collections List -->
-          <ul
-            v-if="collections.length > 0"
-            class="mt-4 space-y-2 border border-gray-200 rounded-md p-4"
-          >
+          <ul class="mt-4 space-y-2 border border-gray-200 rounded-md p-4">
             <li
               v-for="(collection, index) in collections"
               :key="collection.id"
@@ -69,31 +70,25 @@
               </div>
             </li>
           </ul>
-
-          <!-- No Collections Note -->
-          <div
-            v-else
-            class="mt-4 p-4 border border-gray-200 rounded-md text-center text-gray-600 dark:text-gray-300"
-          >
-            <p>No collections available.</p>
-            <p>
-              Add collections by navigating to the
-              <a href="/collections" class="text-violet-500 underline"
-                >Collections Page</a
-              >.
-            </p>
-          </div>
         </div>
         <!-- Dashboard Stats -->
-        <div class="w-1/2 p-2">
+        <div class="p-2">
           <h3 class="font-bold text-base">Select Dashboard Stats</h3>
           <p class="text-sm text-gray-600">
             Choose up to 3 collections to display on the dashboard stats cards.
           </p>
           <div>
-            <div
-              class="mt-4 space-y-2 border overflow-scroll border-gray-200 rounded-md p-4"
+            <!-- Other settings -->
+            <button
+              @click="clearSelection"
+              class="px-3 py-2 bg-red-500 text-white rounded"
             >
+              Clear Selection
+            </button>
+            <p v-if="error" class="text-red-500">{{ error }}</p>
+          </div>
+          <div>
+            <div class="mt-4 space-y-2 border border-gray-200 rounded-md p-4">
               <div
                 v-for="collection in availableCollections"
                 :key="collection"
@@ -119,53 +114,24 @@
         </div>
       </div>
 
-      <!-- Collections Overview -->
-      <div class="p-4">
-        <div class="p-4 bg-gray-50 rounded-md">
-          <div class="mt-6 space-y-4">
-            <h3 class="text-base font-semibold">Collections Overview</h3>
-            <ul class="list-disc pl-4 text-sm text-gray-700">
-              <li>
-                <strong>Add a Collection:</strong>
-                Go to
-                <NuxtLink
-                  to="/collections/new/add/collections"
-                  class="text-violet-500 hover:underline"
-                  >Add Collection</NuxtLink
-                >
-                and fill out the required fields.
-              </li>
-              <li>
-                <strong>View Collections:</strong>
-                Visit the
-                <NuxtLink
-                  to="/collections"
-                  class="text-violet-500 hover:underline"
-                  >Collections Page</NuxtLink
-                >
-                to see all available collections.
-              </li>
-              <li>
-                <strong>Manage Collections:</strong>
-                Reorder collections on this page or edit them via the
-                <NuxtLink
-                  to="/collections"
-                  class="text-violet-500 hover:underline"
-                  >Collections Page</NuxtLink
-                >.
-              </li>
-              <li>
-                <strong>Edit a Collection:</strong>
-                Navigate to the
-                <NuxtLink
-                  to="/collections"
-                  class="text-violet-500 hover:underline"
-                  >Collections Page</NuxtLink
-                >
-                and click 'Edit' next to the desired collection.
-              </li>
-            </ul>
-          </div>
+      <!-- No Collections Note -->
+      <div
+        v-else
+        class="mt-4 p-4 rounded-md text-center text-gray-600 dark:text-gray-300"
+      >
+        <p>No collections available.</p>
+        <p>
+          Add collections by navigating to the
+          <a href="/collections" class="text-violet-500 underline"
+            >Collections Page</a
+          >.
+        </p>
+      </div>
+
+      <!-- Error Message -->
+      <div class="flex justify-end p-6">
+        <div v-if="error" class="text-red-500 text-sm">
+          {{ error }}
         </div>
       </div>
     </div>
@@ -205,6 +171,9 @@ import {
   Cog6ToothIcon,
 } from "@heroicons/vue/24/outline";
 
+import { useNotificationStore } from "@/stores/notification";
+const notificationStore = useNotificationStore();
+
 // Store references
 const authStore = useAuthStore();
 const usersStore = useUsersStore();
@@ -214,7 +183,14 @@ const collectionsStore = useCollectionsStore();
 const availableCollections = ref([]);
 const selectedStats = ref([]);
 
+const clearSelection = () => {
+  selectedStats.value = [];
+  error.value = "";
+};
+
 const collections = ref([]);
+
+const error = ref("");
 
 onMounted(async () => {
   // Fetch collections dynamically based on the organization
@@ -264,8 +240,6 @@ const moveUp = (index) => {
 
     // Reorder the array
     collections.value.splice(index - 1, 2, current, above);
-
-    console.log("[Move Up] Updated Positions:", collections.value);
   }
 };
 
@@ -282,8 +256,6 @@ const moveDown = (index) => {
 
     // Reorder the array
     collections.value.splice(index, 2, below, current);
-
-    console.log("[Move Down] Updated Positions:", collections.value);
   }
 };
 
@@ -298,27 +270,19 @@ const saveSettings = async () => {
       organization_id: collection.organization_id,
     }));
 
-    console.log("[Save Settings] Updated Positions:", updatedCollections);
-
     await collectionsStore.updateCollectionPositions(updatedCollections);
-    console.log("[Save Settings] Positions saved successfully.");
 
     // Save Preferences
     const userId = authStore.id;
     if (!userId) {
-      alert("User not authenticated.");
+      error.value = "User not authenticated.";
       return;
     }
 
     const currentPreferences =
       usersStore.getUserById(userId)?.preferences || {};
-    console.log("[Save Settings] Current Preferences:", currentPreferences);
 
     currentPreferences.dashboard = { stats: selectedStats.value };
-    console.log(
-      "[Save Settings] Updated Preferences Payload:",
-      currentPreferences
-    );
 
     const success = await usersStore.updateUserPreferences(
       userId,
@@ -329,13 +293,26 @@ const saveSettings = async () => {
       console.log(
         "[Save Settings] Dashboard preferences updated successfully."
       );
-      alert("Settings saved successfully!");
+
+      // Show success notification
+      notificationStore.showNotification(
+        "success",
+        "Settings saved successfully!"
+      );
+
+      // Redirect to collections
+      navigateTo("/dashboard");
+
+      // Refresh the page to update sidebar and other components
+      setTimeout(() => {
+        window.location.reload();
+      }, 100);
     } else {
-      alert("Failed to update dashboard preferences.");
+      error.value = "Failed to update dashboard preferences.";
     }
   } catch (err) {
     console.error("[Save Settings] Failed to save settings:", err);
-    alert("Failed to save settings.");
+    error.value = "Failed to save settings.";
   }
 };
 

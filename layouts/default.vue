@@ -298,6 +298,8 @@
       <!-- Main section -->
       <main class="flex-grow bg-gray-100 dark:bg-gray-900">
         <div class="px-6 py-4 sm:py-8 sm:px-8">
+          <NotificationContainer />
+
           <NuxtPage />
         </div>
       </main>
@@ -310,24 +312,18 @@ import { ref } from "vue";
 import { useNuxtApp } from "#app";
 import { useCollectionsStore } from "~/stores/collections";
 import BrandFooter from "~/components/BrandFooter.vue";
+import { getIconForSlug } from "@/utils/iconMappings";
 
 import {
   Bars3Icon,
   HomeIcon,
-  UsersIcon,
-  UserPlusIcon,
-  FolderIcon,
-  QueueListIcon,
   ClipboardDocumentIcon,
   UserCircleIcon,
   XMarkIcon,
   ArrowRightEndOnRectangleIcon,
-  ChatBubbleLeftIcon,
   Cog6ToothIcon,
   FolderPlusIcon,
   AdjustmentsHorizontalIcon,
-  StarIcon,
-  ShoppingCartIcon,
 } from "@heroicons/vue/24/outline";
 import { CubeIcon } from "@heroicons/vue/24/solid";
 import {
@@ -346,19 +342,20 @@ const collections = ref([]);
 const maxVisibleItems = 3;
 
 // Fetch collections on sidebar load
-onMounted(async () => {
+const fetchAndSetCollections = async () => {
   try {
     const fetchedCollections =
       await collectionsStore.fetchCollectionsForCurrentOrg();
-    // Sort collections by `position` or `order` field
     collections.value = fetchedCollections
       .filter((collection) => !collection.is_hidden)
-
       .sort((a, b) => a.position - b.position);
+    console.log("Sidebar collections updated.");
   } catch (err) {
     console.error("Failed to fetch collections for sidebar:", err.message);
   }
-});
+};
+
+onMounted(fetchAndSetCollections);
 
 // Dynamic navigation
 const visibleCollections = computed(() =>
@@ -370,27 +367,7 @@ const extraCollections = computed(() =>
 
 // Dynamic Icon Assignment
 const getIcon = (slug) => {
-  const lowerSlug = slug.toLowerCase();
-
-  if (["blogs", "posts", "blog", "post"].includes(lowerSlug)) {
-    return ChatBubbleLeftIcon; // Chat/Comment Icon
-  } else if (["leads", "lead"].includes(lowerSlug)) {
-    return UserPlusIcon; // Icon for Leads
-  } else if (["contacts", "contact"].includes(lowerSlug)) {
-    return UsersIcon; // Icon for Contacts
-  } else if (["tasks", "lists", "task", "list"].includes(lowerSlug)) {
-    return QueueListIcon; // Icon for Tasks/Lists
-  } else if (["reviews", "feedback", "review"].includes(lowerSlug)) {
-    return StarIcon; // Icon for Reviews
-  } else if (["products", "items", "product", "item"].includes(lowerSlug)) {
-    return ShoppingCartIcon; // Icon for Products/Items
-  } else if (["files", "documents", "file", "document"].includes(lowerSlug)) {
-    return DocumentIcon; // Icon for Files/Documents
-  } else if (["calendar", "events", "schedule", "event"].includes(lowerSlug)) {
-    return CalendarDaysIcon; // Icon for Calendar/Events
-  } else {
-    return FolderIcon; // Default Folder Icon
-  }
+  return getIconForSlug(slug);
 };
 
 const handleLogout = async () => {

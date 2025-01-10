@@ -6,7 +6,11 @@
     <div v-if="isLoading" class="text-center">Loading collection fields...</div>
     <div v-if="error" class="text-red-500">{{ error }}</div>
 
-    <form v-if="!isLoading && fields.length" @submit.prevent="saveChanges">
+    <form
+      v-if="!isLoading && fields.length"
+      @submit.prevent="saveChanges"
+      novalidate
+    >
       <div
         class="rounded-md bg-white shadow-sm border border-gray-200 dark:bg-slate-800 dark:border-slate-700 mb-6"
       >
@@ -25,7 +29,6 @@
                 <input
                   type="text"
                   id="name"
-                  disabled
                   v-model="collection.name"
                   class="border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 rounded-md shadow-sm focus:ring focus:ring-blue-500 p-2 disabled:opacity-50"
                 />
@@ -42,7 +45,6 @@
                 <input
                   type="text"
                   id="slug"
-                  disabled
                   v-model="collection.slug"
                   class="border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 rounded-md shadow-sm focus:ring focus:ring-blue-500 p-2 disabled:opacity-50"
                 />
@@ -120,7 +122,11 @@
                   </tr>
                 </thead>
                 <tbody class="text-sm text-gray-600 dark:text-gray-100">
-                  <tr v-for="(field, index) in fields" :key="field.key">
+                  <tr
+                    v-for="(field, index) in fields"
+                    :key="field.key"
+                    class=""
+                  >
                     <td class="px-4 py-2">
                       <input
                         type="text"
@@ -173,6 +179,12 @@
             >
               Add New Field
             </button>
+            <!-- Error and Success Messages -->
+            <div>
+              <div v-if="errors.length" class="mt-4 p-2 text-red-500 text-sm">
+                {{ errors }}
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -203,21 +215,33 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from "vue";
+import { ref, computed, onMounted, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useContentStore } from "~/stores/content";
 import { useCollectionsStore } from "~/stores/collections";
 import { XCircleIcon, CheckCircleIcon } from "@heroicons/vue/24/outline";
 
+import { useNotificationStore } from "@/stores/notification";
+const notificationStore = useNotificationStore();
+
 // Route and Router
 const route = useRoute();
 const router = useRouter();
 const collectionSlug = route.params.slug;
+console.log(route.params.slug);
 
 // State and Store
 const contentStore = useContentStore();
 const collectionsStore = useCollectionsStore();
-const collection = ref(null);
+const collection = ref({
+  name: "",
+  slug: "",
+  description: "",
+  is_hidden: false,
+  position: 0,
+});
+
+const errors = ref([]);
 
 const isLoading = computed(() => contentStore.isLoading);
 const error = computed(() => contentStore.error);
@@ -227,6 +251,7 @@ const collectionName = computed(
 
 // Editable Fields
 const fields = ref([]);
+let originalSlug = "";
 
 onMounted(async () => {
   try {
@@ -234,19 +259,25 @@ onMounted(async () => {
       collectionSlug
     );
 
+    console.log("[Collection Data]", collectionData);
+
     // Initialize collection details
     if (collectionData) {
       collection.value = {
+        id: collectionData.id,
         name: collectionData.name,
         slug: collectionData.slug,
         description: collectionData.description,
         is_hidden: collectionData.is_hidden,
         position: collectionData.position,
       };
+      originalSlug = collectionData.slug;
+      console.log("[Initialized Collection]", collection.value);
     }
 
     // Fetch fields
     await contentStore.fetchContentAndFields(collectionSlug);
+    console.log("[Fields Data]", contentStore.fields);
 
     // If no fields exist, add a default one
     if (!contentStore.fields.length) {
@@ -301,20 +332,53 @@ const addField = () => {
 
 // Save changes
 const saveChanges = async () => {
-  // Check if any field names are still set to the default
-  const hasInvalidNames = fields.value.some(
-    (field) => field.name === "New Field"
-  );
+  // Reset errors
+  errors.value = "";
 
-  if (hasInvalidNames) {
-    alert(
-      "Please rename all fields with the default name ('New Field') before saving."
-    );
-    return; // Prevent saving
+  // Step 1: Validate Collection Metadata
+  if (!collection.value.name.trim()) {
+    errors.value = "Collection name cannot be empty.";
+    return;
+  }
+  if (!collection.value.slug.trim()) {
+    errors.value = "Collection slug cannot be empty.";
+    return;
+  }
+  if (
+    typeof collection.value.position !== "number" ||
+    collection.value.position < 0
+  ) {
+    errors.value = "Position must be a valid positive number.";
+    return;
   }
 
-  const updatedFields = fields.value.map((field) => ({
-    id: field.id || undefined,
+  // Step 2: Validate Slug Uniqueness
+  if (collection.value.slug !== originalSlug) {
+    const slugExists = await collectionsStore.checkSlugExists(
+      collection.value.slug
+    );
+    if (slugExists) {
+      errors.value = "The slug is already in use by another collection.";
+      return;
+    }
+  }
+
+  // Step 3: Validate Fields
+  const hasInvalidNames = fields.value.some(
+    (field) => field.name === "New Field" || field.name.trim() === ""
+  );
+  if (hasInvalidNames) {
+    errors.value =
+      "Please rename all fields with the default name ('New Field') before saving.";
+    return;
+  }
+
+  // Split fields into new and existing
+  const newFields = fields.value.filter((field) => !field.id);
+  const existingFields = fields.value.filter((field) => field.id);
+
+  const updatedFields = existingFields.map((field) => ({
+    id: field.id,
     name: field.name,
     type: field.type,
     position: field.position,
@@ -329,14 +393,69 @@ const saveChanges = async () => {
         : null,
   }));
 
-  const success = await contentStore.updateCollectionFields(
-    collectionSlug,
-    updatedFields
-  );
+  // Prepare data for inserts
+  const newFieldsToInsert = newFields.map((field) => ({
+    name: field.name,
+    type: field.type,
+    position: field.position,
+    is_required: field.is_required || false,
+    default_value: field.default_value || null,
+    options:
+      field.type === "select" && field.options
+        ? field.options.split(",").map((opt) => ({
+            label: opt.trim(),
+            value: opt.trim().toLowerCase().replace(/\s+/g, "_"),
+          }))
+        : null,
+  }));
 
-  if (success) {
-    alert("Collection fields updated successfully.");
+  try {
+    let messages = [];
+
+    // Step 1: Update collection metadata (name, slug, etc.)
+    const { error: metadataError } = await collectionsStore.updateCollection({
+      id: collection.value.id,
+      name: collection.value.name,
+      slug: collection.value.slug,
+      description: collection.value.description,
+      is_hidden: collection.value.is_hidden,
+      position: collection.value.position,
+    });
+    if (metadataError) throw metadataError;
+    messages.push("Collection metadata updated successfully.");
+
+    // Step 2: Update existing fields
+    if (updatedFields.length) {
+      const { error: updateError } = await contentStore.updateCollectionFields(
+        collectionSlug,
+        updatedFields
+      );
+      if (updateError) throw updateError;
+
+      messages.push(" Field(s) updated successfully.");
+    }
+
+    // Step 3: Insert new fields
+    if (newFieldsToInsert.length) {
+      const { error: insertError } = await contentStore.addNewCollectionFields(
+        collectionSlug,
+        newFieldsToInsert
+      );
+      if (insertError) throw insertError;
+
+      messages.push("New field(s) added successfully.");
+    }
+
+    // Show success notification
+    const finalMessage = messages.length
+      ? messages.join(" ")
+      : "Collection and fields updated successfully.";
+    notificationStore.showNotification("success", finalMessage);
+
     router.push(`/collections`);
+  } catch (err) {
+    console.error("Failed to update collection fields:", err);
+    errors.value = "Failed to update or add collection fields.";
   }
 };
 

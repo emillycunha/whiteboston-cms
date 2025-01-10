@@ -4,7 +4,7 @@
       <h2 class="mx-4 py-2 border-b border-gray-200 font-bold text-gray-800">
         Recent Posts
       </h2>
-      <ul class="mt-2 p-4 space-y-8">
+      <ul v-if="content.length > 0" class="mt-2 p-4 space-y-8">
         <li
           v-for="blog in latestBlogs"
           :key="blog.id"
@@ -24,6 +24,13 @@
           </div>
         </li>
       </ul>
+      <!-- No Collections Note -->
+      <div
+        v-else
+        class="mt-4 p-4 rounded-md text-center text-gray-600 dark:text-gray-300"
+      >
+        <p>No data available.</p>
+      </div>
     </div>
   </section>
 </template>

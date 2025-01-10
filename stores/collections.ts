@@ -122,7 +122,19 @@ export const useCollectionsStore = defineStore("collections", {
           .eq("organization_id", organizationId)
           .single();
 
-        if (error) throw error;
+        console.log("[Fetch Collection By Slug] Query Response:", {
+          data,
+          error,
+        });
+
+        if (error) {
+          console.error(
+            "[Collections Store] Error fetching collection by slug:",
+            error
+          );
+          this.error = "Failed to fetch collection.";
+          return null;
+        }
 
         return data;
       } catch (err) {
@@ -263,20 +275,40 @@ export const useCollectionsStore = defineStore("collections", {
       const authStore = useAuthStore();
       const organizationId = authStore.org_id;
 
+      // Safeguard: Ensure organization ID exists
+      if (!organizationId) {
+        console.error("[Collections Store] Missing organization ID.");
+        return false;
+      }
+
+      console.log("[Check Slug Exists] Inputs:", { slug, organizationId });
+
       try {
         const { data, error } = await $supabase
           .from("collections")
           .select("id")
           .eq("slug", slug)
           .eq("organization_id", organizationId)
-          .single();
+          .maybeSingle();
 
-        if (error && error.code !== "PGRST116") {
-          // Ignore "Row not found" errors
-          throw error;
+        console.log("[Check Slug Exists] Query Response:", { data, error });
+
+        if (error) {
+          if (error.code === "PGRST116") {
+            return false;
+          } else {
+            console.error(
+              "[Collections Store] Unexpected error checking slug:",
+              error
+            );
+            throw error;
+          }
         }
 
-        return !!data; // Return true if the slug exists, false otherwise
+        const exists = data !== null;
+        console.log("[Check Slug Exists] Slug existence check result:", exists);
+
+        return exists;
       } catch (err) {
         console.error("[Collections Store] Error checking slug:", err);
         return false;

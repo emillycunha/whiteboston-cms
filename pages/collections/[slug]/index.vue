@@ -118,7 +118,7 @@ const handleView = (row) => {
   navigateTo({
     path: `/collections/${collectionSlug}/view/${row.id}`,
     query: {
-      collection: collectionName.value,
+      collection: collectionSlug,
     },
   });
 };
@@ -163,7 +163,7 @@ const addNew = () => {
   navigateTo({
     path: `/collections/${collectionSlug}/add/content`,
     query: {
-      collection: collectionName.value,
+      collection: collectionSlug,
     },
   });
 };

@@ -9,7 +9,9 @@
         class="lg:col-start-3 lg:col-span-1 lg:row-start-1 lg:row-span-2 bg-gradient-to-l from-teal-50 to-violet-50 p-4 shadow rounded-md"
       >
         <!-- Greeting and Date -->
-        <h2 class="text-gray-700 text-xl">{{ greeting }}, {{ userName }}</h2>
+        <h2 class="text-gray-700 text-xl">
+          {{ greeting }}, {{ authStore.name }}
+        </h2>
         <p class="text-teal-500 text-sm mt-1">{{ formattedDate }}</p>
 
         <!-- Profile Section -->
@@ -93,15 +95,30 @@ const usersStore = useUsersStore();
 const selectedStats = ref([]);
 
 onMounted(async () => {
-  // Ensure users are loaded
-  if (!usersStore.users.length) {
-    await usersStore.fetchUsers();
-  }
+  if (authStore.isAuthenticated) {
+    // Fetch user metadata
+    await authStore.fetchUserMetadata();
+    console.log("[Test Page] User Metadata:", {
+      id: authStore.id,
+      email: authStore.email,
+      name: authStore.name,
+      role: authStore.role,
+      darkmode: authStore.darkmode,
+      org_id: authStore.org_id,
+    });
 
-  // Fetch and assign user preferences
-  const userId = authStore.id;
-  if (userId) {
-    selectedStats.value = usersStore.getUserDashboardPreferences(userId);
+    // Ensure users are loaded
+    if (!usersStore.users.length) {
+      await usersStore.fetchUsers();
+    }
+
+    // Fetch and assign user preferences
+    const userId = authStore.id;
+    if (userId) {
+      selectedStats.value = usersStore.getUserDashboardPreferences(userId);
+    }
+  } else {
+    console.warn("[Test Page] User is not authenticated.");
   }
 });
 
@@ -125,7 +142,4 @@ const formattedDate = computed(() => {
     year: "numeric",
   });
 });
-
-// Placeholder for user profile information
-const userName = ref("Emilly");
 </script>

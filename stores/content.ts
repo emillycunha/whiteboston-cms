@@ -40,6 +40,8 @@ export const useContentStore = defineStore("content", {
     async fetchContentAndFields(collectionSlug: string) {
       const { $supabase } = useNuxtApp();
       const authStore = useAuthStore();
+
+      // Prevent concurrent loading for the same slug
       if (this.isLoadingBySlug[collectionSlug]) {
         console.log("[Content Store] Fetch already in progress. Skipping...");
         return;
@@ -54,21 +56,27 @@ export const useContentStore = defineStore("content", {
           .select("id")
           .eq("slug", collectionSlug)
           .eq("organization_id", authStore.org_id)
-          .single();
+          .maybeSingle();
 
         if (collectionError) {
           console.error(
-            "[Content Store] Failed to fetch collection ID:",
+            "[Content Store] Error fetching collection ID:",
             collectionError
           );
-          throw collectionError;
+          throw new Error("Failed to fetch collection. Please try again.");
         }
 
-        const collectionId = collectionData?.id;
-        if (!collectionId) {
-          throw new Error("Collection ID not found for the provided slug.");
+        // Handle case where no collection is found
+        if (!collectionData) {
+          console.warn(
+            "[Content Store] No collection found for the provided slug. Treating as empty."
+          );
+          this.fields = []; // Treat it as having no fields
+          this.content = []; // Treat it as having no content
+          return; // Exit early without fetching further
         }
 
+        const collectionId = collectionData.id;
         console.log(`[Content Store] Fetched collection ID: ${collectionId}`);
 
         // Step 2: Fetch the fields of the collection
@@ -77,14 +85,14 @@ export const useContentStore = defineStore("content", {
           .select("id, name, type, options, position, is_required")
           .eq("collection_id", collectionId);
 
-        // Sort the fieldsData by position before mapping
-        if (fieldsData) {
-          fieldsData.sort((a, b) => (a.position || 99) - (b.position || 99));
-        }
-
         if (fieldsError) {
           console.error("[Content Store] Failed to fetch fields:", fieldsError);
-          throw fieldsError;
+          throw new Error("Failed to fetch fields for the collection.");
+        }
+
+        // Sort the fieldsData by position
+        if (fieldsData) {
+          fieldsData.sort((a, b) => (a.position || 99) - (b.position || 99));
         }
 
         // Map fields into table column format
@@ -104,7 +112,6 @@ export const useContentStore = defineStore("content", {
                 );
               }
             } else if (Array.isArray(field.options)) {
-              // Use the array directly if it's already parsed
               parsedOptions = field.options;
             }
           }
@@ -139,7 +146,7 @@ export const useContentStore = defineStore("content", {
             "[Content Store] Failed to fetch content:",
             contentError
           );
-          throw contentError;
+          throw new Error("Failed to fetch content for the collection.");
         }
 
         // Map the content's `data` field to include dynamic fields
@@ -154,7 +161,7 @@ export const useContentStore = defineStore("content", {
         this.error =
           err instanceof Error
             ? err.message
-            : "Failed to fetch content and fields.";
+            : "An unexpected error occurred while fetching content and fields.";
       } finally {
         this.isLoadingBySlug[collectionSlug] = false;
       }
@@ -312,13 +319,15 @@ export const useContentStore = defineStore("content", {
             position: field.position,
             is_required: field.is_required,
             options:
-              field.type === "select" ? JSON.stringify(field.options) : null,
+              field.type === "select" && Array.isArray(field.options)
+                ? JSON.stringify(field.options)
+                : null,
           })),
 
           { onConflict: "id" }
         );
 
-        if (error) throw error;
+        if (error) throw new Error(`Failed to update fields: ${error.message}`);
 
         return true;
       } catch (err) {
@@ -326,6 +335,40 @@ export const useContentStore = defineStore("content", {
         return false;
       } finally {
         this.isLoading = false;
+      }
+    },
+
+    async addNewCollectionFields(collectionSlug: string, newFields: Field[]) {
+      const { $supabase } = useNuxtApp();
+      const authStore = useAuthStore();
+
+      try {
+        // Fetch collection ID
+        const { data: collectionData, error: collectionError } = await $supabase
+          .from("collections")
+          .select("id")
+          .eq("slug", collectionSlug)
+          .eq("organization_id", authStore.org_id)
+          .single();
+
+        if (collectionError)
+          throw new Error(`Collection not found: ${collectionError.message}`);
+
+        // Insert new fields
+        const { error: insertError } = await $supabase.from("fields").insert(
+          newFields.map((field) => ({
+            ...field,
+            collection_id: collectionData.id, // Attach the collection ID
+          }))
+        );
+
+        if (insertError)
+          throw new Error(`Failed to add new fields: ${insertError.message}`);
+
+        return true;
+      } catch (err) {
+        console.error("Failed to add new fields:", err);
+        throw err;
       }
     },
 

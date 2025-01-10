@@ -93,7 +93,7 @@ const handleEdit = (collection) => {
   navigateTo({
     path: `/collections/${collection.slug}/edit`,
     query: {
-      collection: collection.name,
+      collection: collection.slug,
       edit: "true",
     },
   });

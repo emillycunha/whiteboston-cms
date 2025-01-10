@@ -20,6 +20,7 @@
 <script setup>
 import { ref, onMounted, watch } from "vue";
 import { useCollectionsStore } from "~/stores/collections";
+import { getIconForSlug } from "@/utils/iconMappings";
 
 // Import Heroicons or any other icon library
 import {
@@ -49,27 +50,11 @@ const collectionName = computed(() => {
   return props.collectionSlug.replace("-", " ");
 });
 
-// Determine the appropriate icon based on the collection slug
+// Dynamic Icon Assignment
 const icon = computed(() => {
-  const slug = props.collectionSlug.toLowerCase();
-
-  if (["blogs", "posts", "blog", "post"].includes(slug)) {
-    return ChatBubbleLeftIcon; // Chat or Comment Icon
-  } else if (["leads", "contacts", "lead", "contact"].includes(slug)) {
-    return UsersIcon; // User or Contact Icon
-  } else if (["tasks", "lists", "task", "list"].includes(slug)) {
-    return QueueListIcon; // Task or Checklist Icon
-  } else if (["reviews", "feedback", "review"].includes(slug)) {
-    return StarIcon; // Star Icon for Reviews
-  } else if (["products", "items", "product", "item"].includes(slug)) {
-    return ShoppingCartIcon; // Shopping Cart Icon for Products
-  } else if (["files", "documents", "file", "document"].includes(slug)) {
-    return DocumentIcon; // Document Icon for Files
-  } else if (["calendar", "events", "schedule", "event"].includes(slug)) {
-    return CalendarIcon; // Calendar Icon for Events
-  } else {
-    return FolderIcon; // Default Folder Icon
-  }
+  const slug = props.collectionSlug;
+  console.log("[Dynamic Icon] Slug:", slug);
+  return getIconForSlug(slug);
 });
 
 // Fetch count for the collection

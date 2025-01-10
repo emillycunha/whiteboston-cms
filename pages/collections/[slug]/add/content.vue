@@ -16,15 +16,19 @@
       </p>
     </div>
 
-    <form v-if="!isLoading && fields.length" @submit.prevent="addItem">
+    <form
+      v-if="!isLoading && fields.length"
+      @submit.prevent="addItem"
+      novalidate
+    >
       <div
         class="rounded-md bg-white shadow-sm border border-gray-200 dark:bg-slate-800 dark:border-slate-700 mb-6"
       >
         <div class="p-4 sm:p-8">
           <div class="flex flex-wrap gap-y-4">
             <div
-              v-for="field in fields"
-              :key="field.key"
+              v-for="(field, index) in fields"
+              :key="field.key || `fallback_${index}`"
               :class="[
                 'flex flex-col space-y-2 p-2',
                 field.type === 'text' ? 'w-1/2' : 'w-full',
@@ -94,7 +98,16 @@
                 class="border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 rounded-md shadow-sm focus:ring focus:ring-blue-500 p-2 w-full"
                 :placeholder="`Enter ${field.label}`"
               />
+
+              <!-- Field-Specific Error -->
+              <div v-if="errors[field.key]" class="text-sm text-red-500 mt-1">
+                {{ errors[field.key] }}
+              </div>
             </div>
+          </div>
+          <!-- General Error Message -->
+          <div v-if="errors.general" class="text-red-500 text-sm mb-4">
+            {{ errors.general }}
           </div>
         </div>
       </div>
@@ -128,6 +141,9 @@ import { useContentStore } from "~/stores/content";
 import { useRoute, useRouter } from "vue-router";
 import { XCircleIcon, CheckCircleIcon } from "@heroicons/vue/24/outline";
 
+import { useNotificationStore } from "@/stores/notification";
+const notificationStore = useNotificationStore();
+
 // Get Route Params
 const route = useRoute();
 const router = useRouter();
@@ -137,13 +153,14 @@ const collectionSlug = route.params.slug;
 const contentStore = useContentStore();
 const isLoading = computed(() => contentStore.isLoading);
 const error = computed(() => contentStore.error);
-const fields = computed(() => contentStore.fields); // Fields for the collection
+const fields = computed(() => contentStore.fields || []);
 const collectionName = computed(
   () => collectionSlug.charAt(0).toUpperCase() + collectionSlug.slice(1)
 );
 
 // Form Data
 const formData = ref({});
+const errors = ref({});
 
 const slugify = (text) => {
   return text
@@ -164,28 +181,6 @@ watch(
     }
   }
 );
-
-// Add item with validation
-const addItem = async () => {
-  if (!validateForm()) {
-    console.log("Validation failed");
-    return;
-  }
-
-  // Extract the actual values from formData
-  const dataToSubmit = Object.keys(formData.value).reduce((acc, key) => {
-    acc[key] = formData.value[key];
-    return acc;
-  }, {});
-
-  const success = await contentStore.addContentItem(
-    collectionSlug,
-    dataToSubmit
-  );
-  if (success) {
-    router.push(`/collections/${collectionSlug}`);
-  }
-};
 
 // Validate a single field
 const validateField = (field, value) => {
@@ -210,22 +205,58 @@ const validateField = (field, value) => {
 
 // Validate the entire form
 const validateForm = () => {
+  errors.value = {}; // Reset errors object
   let isValid = true;
+
   fields.value.forEach((field) => {
     const error = validateField(field, formData.value[field.key]);
     if (error) {
       isValid = false;
-      console.error(error);
+      errors.value[field.key] = error; // Only set the error for the current field
     }
   });
+
   return isValid;
+};
+
+// Add item with validation
+const addItem = async () => {
+  if (!validateForm()) {
+    console.log("Validation failed");
+    return;
+  }
+
+  // Extract the actual values from formData
+  const dataToSubmit = Object.keys(formData.value).reduce((acc, key) => {
+    acc[key] = formData.value[key];
+    return acc;
+  }, {});
+
+  try {
+    const success = await contentStore.addContentItem(
+      collectionSlug,
+      dataToSubmit
+    );
+    if (success) {
+      notificationStore.showNotification(
+        "success",
+        "Item added successfully to the collection!"
+      );
+      router.push(`/collections/${collectionSlug}`);
+    } else {
+      errors.value.general = "Failed to add item. Please try again.";
+    }
+  } catch (err) {
+    errors.value.general = "An unexpected error occurred. Please try again.";
+    console.error("Error while adding item:", err);
+  }
 };
 
 // Initialize form data with validation
 onMounted(async () => {
   await contentStore.fetchContentAndFields(collectionSlug);
 
-  // Initialize formData with default or empty values
+  // Initialize formData with default values
   fields.value.forEach((field) => {
     if (field.type === "number") {
       formData.value[field.key] = 0;
@@ -243,6 +274,8 @@ onMounted(async () => {
       formData.value[field.key] = "";
     }
   });
+
+  console.log("FormData after initialization:", formData.value); // Log formData
 });
 
 // Cancel Add

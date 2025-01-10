@@ -3,10 +3,8 @@
     <!-- Page Header -->
     <PageHeader title="Add New Collection" />
 
-    <div v-if="error" class="text-red-500">{{ error }}</div>
-
     <!-- Add Collection Form -->
-    <form @submit.prevent="addCollection">
+    <form @submit.prevent="addCollection" novalidate>
       <div
         class="rounded-md bg-white shadow-sm border border-gray-200 dark:bg-slate-800 dark:border-slate-700 mb-6"
       >
@@ -25,6 +23,9 @@
                 placeholder="Enter collection name"
                 required
               />
+              <div v-if="errors.name" class="text-sm text-red-500">
+                {{ errors.name }}
+              </div>
             </div>
 
             <!-- Collection Slug -->
@@ -40,6 +41,9 @@
                 placeholder="Enter unique slug"
                 required
               />
+              <div v-if="errors.slug" class="text-sm text-red-500">
+                {{ errors.slug }}
+              </div>
             </div>
 
             <!-- Description -->
@@ -56,6 +60,9 @@
                 class="border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 rounded-md shadow-sm focus:ring focus:ring-blue-500 p-2 w-full"
                 placeholder="Enter collection description"
               ></textarea>
+              <div v-if="errors.description" class="text-sm text-red-500">
+                {{ errors.description }}
+              </div>
             </div>
 
             <!-- Position -->
@@ -93,6 +100,9 @@
             </div>
           </div>
         </div>
+        <div v-if="errors.general" class="text-sm text-red-500 mt-4">
+          {{ errors.general }}
+        </div>
       </div>
 
       <!-- Form Buttons -->
@@ -120,16 +130,19 @@
 </template>
 
 <script setup>
-import { ref, watch } from "vue";
+import { ref, watch, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import { useAuthStore } from "~/stores/auth";
 import { useCollectionsStore } from "~/stores/collections";
 import { XCircleIcon, CheckCircleIcon } from "@heroicons/vue/24/outline";
 
-const collectionsStore = useCollectionsStore();
+import { useNotificationStore } from "@/stores/notification";
+const notificationStore = useNotificationStore();
 
+const collectionsStore = useCollectionsStore();
 const router = useRouter();
-const error = ref(null);
+const errors = ref({});
+
 const form = ref({
   name: "",
   slug: "",
@@ -138,11 +151,10 @@ const form = ref({
   position: 0,
 });
 
-// Get Organization ID
 const authStore = useAuthStore();
 const organizationId = authStore.org_id;
 
-// Initialize Form
+// Reset form on mount
 onMounted(() => {
   form.value = {
     name: "",
@@ -175,46 +187,64 @@ watch(
 
 // Validate Form
 const validateForm = () => {
+  errors.value = {}; // Reset errors
+
   if (!form.value.name.trim()) {
-    error.value = "Name is required.";
-    return false;
+    errors.value.name = "Name is required.";
   }
   if (!form.value.slug.trim()) {
-    error.value = "Slug is required.";
-    return false;
+    errors.value.slug = "Slug is required.";
   }
-  return true;
+
+  return Object.keys(errors.value).length === 0; // Return true if no errors
 };
 
 // Add New Collection
 const addCollection = async () => {
   if (!validateForm()) return;
 
-  // Check for existing slug
-  const existingSlug = await collectionsStore.checkSlugExists(form.value.slug);
-  if (existingSlug) {
-    error.value = "Collection slug already exists. Please use a unique slug.";
-    return;
-  }
+  try {
+    // Check if the slug already exists
+    const existingSlug = await collectionsStore.checkSlugExists(
+      form.value.slug
+    );
+    if (existingSlug) {
+      errors.value.slug =
+        "Collection slug already exists. Please use a unique slug.";
+      return;
+    }
 
-  const success = await collectionsStore.addCollection({
-    name: form.value.name,
-    slug: form.value.slug,
-    description: form.value.description,
-    is_hidden: form.value.is_hidden,
-    position: form.value.position,
-  });
-
-  if (success) {
-    alert("Collection added successfully!");
-
-    // Clear the cache and reload the collections after redirect
-    collectionsStore.clearCollections();
-    router.push("/collections").then(() => {
-      collectionsStore.fetchCollectionsForCurrentOrg();
+    // Add the collection
+    const success = await collectionsStore.addCollection({
+      name: form.value.name,
+      slug: form.value.slug,
+      description: form.value.description,
+      is_hidden: form.value.is_hidden,
+      position: form.value.position,
     });
-  } else {
-    console.error("Failed to add collection:", collectionsStore.error);
+
+    if (success) {
+      // Show success notification
+      notificationStore.showNotification(
+        "success",
+        "Collection added successfully!"
+      );
+
+      // Clear the cache and reload the collections after redirect
+      collectionsStore.clearCollections();
+
+      // Redirect to the new collection's edit page
+      const newSlug = form.value.slug;
+      await router.push(
+        `/collections/${newSlug}/edit?collection=${newSlug}&edit=true`
+      );
+    } else {
+      console.error("Failed to add collection:", collectionsStore.error);
+      errors.value.general = "Failed to add collection. Please try again.";
+    }
+  } catch (err) {
+    errors.value.general = "An unexpected error occurred. Please try again.";
+    console.error("Add Collection Error:", err);
   }
 };
 

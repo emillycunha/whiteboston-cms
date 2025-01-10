@@ -78,7 +78,6 @@
 
 <script setup>
 import { onMounted } from "vue";
-import DarkModeToggle from "@/components/DarkModeToggle.vue";
 import { useAuthStore } from "~/stores/auth";
 import { ChevronLeftIcon, CheckCircleIcon } from "@heroicons/vue/24/outline";
 
@@ -86,8 +85,6 @@ const authStore = useAuthStore();
 
 // Fetch user metadata and log details on page load
 onMounted(async () => {
-  console.log("[Test Page] Auth Store State:", authStore.$state);
-
   if (authStore.isAuthenticated) {
     console.log("[Test Page] Fetching user metadata...");
     await authStore.fetchUserMetadata();
