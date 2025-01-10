@@ -10,9 +10,16 @@ export const useAuthStore = defineStore("auth", {
     role: null as string | null,
     isAuthenticated: false,
     error: null as string | null,
+    demoOrgId: "2f5115d4-a9b7-4997-a65a-fb3f32aae049", // Demo org ID
   }),
 
-  persist: true, // Persist state across reloads
+  persist: true,
+
+  getters: {
+    isDemoUser(state) {
+      return state.org_id === state.demoOrgId || state.role === "demo";
+    },
+  },
 
   actions: {
     // Fetch and set user metadata from `public.users` and `organization_members`

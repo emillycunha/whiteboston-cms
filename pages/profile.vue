@@ -17,8 +17,9 @@
               <input
                 v-model="authStore.name"
                 type="text"
+                :disabled="authStore.isDemoUser"
                 placeholder="Enter your name"
-                class="mt-1 w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 rounded-md shadow-sm focus:ring focus:ring-blue-500"
+                class="mt-1 w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 rounded-md shadow-sm focus:ring focus:ring-blue-500 disabled:opacity-50"
               />
             </div>
 
@@ -31,8 +32,9 @@
               <input
                 v-model="authStore.email"
                 type="email"
+                :disabled="authStore.isDemoUser"
                 placeholder="Enter your email"
-                class="mt-1 w-1/2 border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 rounded-md shadow-sm focus:ring focus:ring-blue-500"
+                class="mt-1 w-1/2 border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 rounded-md shadow-sm focus:ring focus:ring-blue-500 disabled:opacity-50"
               />
             </div>
 
@@ -45,8 +47,9 @@
               <input
                 v-model="password"
                 type="password"
+                :disabled="authStore.isDemoUser"
                 placeholder="Update your password"
-                class="mt-1 w-1/2 border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 rounded-md shadow-sm focus:ring focus:ring-blue-500"
+                class="mt-1 w-1/2 border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 rounded-md shadow-sm focus:ring focus:ring-blue-500 disabled:opacity-50"
               />
             </div>
           </div>
@@ -82,22 +85,15 @@ import { useAuthStore } from "~/stores/auth";
 import { ChevronLeftIcon, CheckCircleIcon } from "@heroicons/vue/24/outline";
 
 const authStore = useAuthStore();
+if (authStore.isDemoUser) {
+  console.log("This user is a demo user!");
+}
 
 // Fetch user metadata and log details on page load
 onMounted(async () => {
   if (authStore.isAuthenticated) {
-    console.log("[Test Page] Fetching user metadata...");
     await authStore.fetchUserMetadata();
-    console.log("[Test Page] User Metadata:", {
-      id: authStore.id,
-      email: authStore.email,
-      name: authStore.name,
-      role: authStore.role,
-      darkmode: authStore.darkmode,
-      org_id: authStore.org_id,
-    });
   } else {
-    console.warn("[Test Page] User is not authenticated.");
   }
 });
 
@@ -110,4 +106,6 @@ function saveProfile() {
   console.log("Profile saved:", {});
   alert("Profile saved successfully!");
 }
+
+const password = ref("");
 </script>

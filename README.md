@@ -57,17 +57,81 @@ Whether you're building static or dynamic Astro sites, CMS WhiteBoston offers an
 
 ## **Database**
 
-The project uses Supabase for storing content data.
+The project uses **Supabase** to store and manage CMS content data.
 
-### **Create Tables**
+### How to Set Up the Database
 
-To set up the database schema:
+1. **Create Tables:**
 
-1. Open the `schema.sql` file included in the repository.
-2. Copy the SQL commands from the file.
-3. Paste and run the commands in the SQL editor of your Supabase project.
+   - Open the `schema.sql` file included in the repository.
+   - Copy the SQL commands from the file.
+   - Paste and execute the commands in the SQL editor of your Supabase project.
 
-This script creates all required tables for the CMS.
+   This script creates the following tables:
+
+   - `users`
+   - `collections`
+   - `fields`
+   - `content`
+   - `organizations`
+   - `organization_members`
+   - `tickets`
+
+2. **Enable RLS and Apply Policies:**
+
+   - Enable RLS for tables requiring restricted access:
+
+     ```sql
+     ALTER TABLE collections ENABLE ROW LEVEL SECURITY;
+     ALTER TABLE users ENABLE ROW LEVEL SECURITY;
+     ```
+
+   - Add example policies as shown below to secure access based on `organization_id` or `auth.uid()`.
+
+3. **Testing the Database:**
+   - Verify that users can only access data tied to their organization or ID using the provided RLS policies.
+
+This ensures that unauthorized access is mitigated and that data integrity remains robust.
+
+---
+
+## Row-Level Security (RLS) Policies
+
+For added security, implement Row-Level Security (RLS) policies. These policies restrict data access based on user authentication or other criteria.
+
+### Example Policy for Organization ID
+
+To allow access to rows based on a user's membership in an organization:
+
+```sql
+-- Policy for collections table
+CREATE POLICY "Allow access to organization collections"
+ON collections
+FOR SELECT, INSERT, UPDATE, DELETE
+USING (organization_id IN (
+  SELECT organization_members.organization_id
+  FROM organization_members
+  WHERE organization_members.user_id = auth.uid()
+));
+
+-- Enable RLS for the collections table
+ALTER TABLE collections ENABLE ROW LEVEL SECURITY;
+```
+
+### Example Policy for User ID
+
+To restrict access to rows that match the authenticated user's ID:
+
+```sql
+-- Policy for users table
+CREATE POLICY "Allow access to own user data"
+ON users
+FOR SELECT, UPDATE
+USING (id = auth.uid());
+
+-- Enable RLS for the users table
+ALTER TABLE users ENABLE ROW LEVEL SECURITY;
+```
 
 ---
 
@@ -107,8 +171,8 @@ npm run build
 
 Make sure to add your environment variables to Netlify as described in the setup section.
 
-NUXT_SUPABASE_URL=your_supabase_url
-NUXT_SUPABASE_ANON_KEY=your_supabase_anon_key
+- NUXT_SUPABASE_URL=your_supabase_url
+- NUXT_SUPABASE_ANON_KEY=your_supabase_anon_key
 
 ---
 
