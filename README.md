@@ -4,9 +4,9 @@ CMS WhiteBoston is a lightweight, open-source Content Management System (CMS) bu
 
 Whether you're building static or dynamic Astro sites, CMS WhiteBoston offers an easy-to-use and flexible backend for managing your content while scaling globally.
 
----
+🚧 This is in the early stages and still in development. My first Vue project and it's open source. Feedback is welcome!
 
-## **Features and Tech Stack**
+## **✨ Features and Tech Stack**
 
 - **Nuxt.js**: Framework for building Vue.js applications.
 - **Supabase**: Authentication and database management.
@@ -14,9 +14,7 @@ Whether you're building static or dynamic Astro sites, CMS WhiteBoston offers an
 - **Pinia**: State management with persisted state support.
 - **Netlify**: Hosting and continuous deployment.
 
----
-
-## **Setup**
+## **🛠️ Setup**
 
 ### **Requirements**
 
@@ -25,7 +23,7 @@ Whether you're building static or dynamic Astro sites, CMS WhiteBoston offers an
 - Netlify account
 - GitHub account
 
-### **Installation**
+### **🚀 Installation**
 
 1. Clone the repository:
 
@@ -53,9 +51,38 @@ Whether you're building static or dynamic Astro sites, CMS WhiteBoston offers an
      - `NUXT_SUPABASE_URL`
      - `NUXT_SUPABASE_ANON_KEY`
 
----
+### **Run Locally**
 
-## **Database**
+Start the development server:
+
+```bash
+npm run dev
+```
+
+- Open [http://localhost:3000](http://localhost:3000) to view the site.
+
+### **Build**
+
+To create a production build:
+
+```bash
+npm run build
+```
+
+### **Automatic Deployment**
+
+1. Connect your GitHub repository to Netlify.
+2. Push your changes to the `main` branch.
+3. Netlify will automatically build and deploy your project globally.
+
+### **Environment Variables**
+
+Make sure to add your environment variables to Netlify as described in the setup section.
+
+- NUXT_SUPABASE_URL=your_supabase_url
+- NUXT_SUPABASE_ANON_KEY=your_supabase_anon_key
+
+## **💾 Database**
 
 The project uses **Supabase** to store and manage CMS content data.
 
@@ -93,9 +120,7 @@ The project uses **Supabase** to store and manage CMS content data.
 
 This ensures that unauthorized access is mitigated and that data integrity remains robust.
 
----
-
-## Row-Level Security (RLS) Policies
+## **🔒 Row-Level Security (RLS) Policies**
 
 For added security, implement Row-Level Security (RLS) policies. These policies restrict data access based on user authentication or other criteria.
 
@@ -133,55 +158,10 @@ USING (id = auth.uid());
 ALTER TABLE users ENABLE ROW LEVEL SECURITY;
 ```
 
----
-
-## **Development**
-
-### **Run Locally**
-
-Start the development server:
-
-```bash
-npm run dev
-```
-
-- Open [http://localhost:3000](http://localhost:3000) to view the site.
-
----
-
-## **Build**
-
-To create a production build:
-
-```bash
-npm run build
-```
-
----
-
-## **Deployment**
-
-### **Automatic Deployment**
-
-1. Connect your GitHub repository to Netlify.
-2. Push your changes to the `main` branch.
-3. Netlify will automatically build and deploy your project globally.
-
-### **Environment Variables**
-
-Make sure to add your environment variables to Netlify as described in the setup section.
-
-- NUXT_SUPABASE_URL=your_supabase_url
-- NUXT_SUPABASE_ANON_KEY=your_supabase_anon_key
-
----
-
-## **Contributing**
+## **🤝 Contributing**
 
 Feel free to fork this repository and submit a pull request with any improvements or fixes. Please ensure all changes are thoroughly tested before submitting.
 
----
-
-## **License**
+## **📜 License**
 
 This project is licensed under the [MIT License](LICENSE).
