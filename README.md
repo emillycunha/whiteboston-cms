@@ -23,7 +23,7 @@ Whether you're building static or dynamic Astro sites, CMS WhiteBoston offers an
 - Netlify account
 - GitHub account
 
-### **🚀 Installation**
+## **🚀 Installation**
 
 1. Clone the repository:
 
