@@ -17,7 +17,7 @@
               <input
                 v-model="authStore.name"
                 type="text"
-                :disabled="authStore.isDemoUser"
+                :disabled="isDemoUser"
                 placeholder="Enter your name"
                 class="mt-1 w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 rounded-md shadow-sm focus:ring focus:ring-blue-500 disabled:opacity-50"
               />
@@ -32,7 +32,7 @@
               <input
                 v-model="authStore.email"
                 type="email"
-                :disabled="authStore.isDemoUser"
+                :disabled="isDemoUser"
                 placeholder="Enter your email"
                 class="mt-1 w-1/2 border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 rounded-md shadow-sm focus:ring focus:ring-blue-500 disabled:opacity-50"
               />
@@ -47,7 +47,7 @@
               <input
                 v-model="password"
                 type="password"
-                :disabled="authStore.isDemoUser"
+                :disabled="isDemoUser"
                 placeholder="Update your password"
                 class="mt-1 w-1/2 border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 rounded-md shadow-sm focus:ring focus:ring-blue-500 disabled:opacity-50"
               />
@@ -84,10 +84,7 @@ import { onMounted } from "vue";
 import { useAuthStore } from "~/stores/auth";
 import { ChevronLeftIcon, CheckCircleIcon } from "@heroicons/vue/24/outline";
 
-const authStore = useAuthStore();
-if (authStore.isDemoUser) {
-  console.log("This user is a demo user!");
-}
+const isDemoUser = false;
 
 // Fetch user metadata and log details on page load
 onMounted(async () => {
