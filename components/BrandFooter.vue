@@ -1,9 +1,9 @@
 <template>
   <div class="text-center mt-2">
-    <p class="mt-6 text-xs text-gray-700 dark:text-gray-300">
-      &copy; {{ currentYear }} WhiteBoston CMS <br />
-      Version {{ version }}
+    <p class="mt-6 text-xs text-gray-500 dark:text-gray-300">
+      &copy; {{ currentYear }} WhiteBoston CMS
     </p>
+    <p class="text-xs text-gray-500 dark:text-gray-300">{{ version }}</p>
   </div>
   <div class="text-center mt-2">
     <!-- Demo Banner -->
@@ -15,9 +15,7 @@
 </template>
 
 <script setup>
-import { useAuthStore } from "~/stores/auth";
 const config = useRuntimeConfig();
 const version = config.public.appVersion;
 const currentYear = new Date().getFullYear();
-const authStore = useAuthStore();
 </script>

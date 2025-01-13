@@ -13,7 +13,7 @@
         <div class="p-4">
           <div class="flex items-start">
             <div class="flex-shrink-0">
-              <slot name="icon" v-bind:type="notification.type">
+              <slot :type="notification.type" name="icon">
                 <!-- Heroicons -->
                 <CheckCircleIcon
                   v-if="notification.type === 'success'"
@@ -33,8 +33,8 @@
             </div>
             <div class="ml-4 flex-shrink-0">
               <button
-                @click="removeNotification(notification.id)"
                 class="bg-white dark:bg-gray-800 rounded-md inline-flex text-gray-400 hover:text-gray-500 dark:hover:text-gray-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                @click="removeNotification(notification.id)"
               >
                 <span class="sr-only">Close</span>
                 <XMarkIcon class="h-5 w-5" />

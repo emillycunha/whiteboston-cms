@@ -78,13 +78,6 @@ import RecentPosts from "@/components/RecentPosts.vue";
 import DailyQuote from "@/components/DailyQuote.vue";
 import DashboardStats from "@/components/DashboardStats.vue";
 
-import {
-  ListBulletIcon,
-  DocumentTextIcon,
-  UserIcon,
-  ArrowRightIcon,
-} from "@heroicons/vue/24/solid";
-
 import { ref, computed, onMounted } from "vue";
 import { useUsersStore } from "~/stores/users";
 import { useAuthStore } from "~/stores/auth";

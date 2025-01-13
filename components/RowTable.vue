@@ -35,7 +35,7 @@
                   field.inputClass,
                   field.error ? 'border-red-500' : '',
                 ]"
-              ></textarea>
+              />
 
               <select
                 v-else-if="editable && field.type === 'select'"

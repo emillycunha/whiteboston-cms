@@ -44,9 +44,9 @@
               <!-- Date Picker -->
               <input
                 v-if="field.type === 'date'"
+                :id="field.key"
                 type="date"
                 v-model="formData[field.key]"
-                :id="field.key"
                 class="border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 rounded-md shadow-sm focus:ring focus:ring-blue-500 p-2 w-1/2"
               />
 
@@ -54,7 +54,6 @@
               <select
                 v-else-if="field.type === 'select' && field.options"
                 v-model="formData[field.key]"
-                :id="field.key"
                 class="border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 rounded-md shadow-sm focus:ring focus:ring-blue-500 p-2 w-1/2"
               >
                 <option
@@ -69,9 +68,9 @@
               <!-- Textarea Field -->
               <textarea
                 v-else-if="field.type === 'textarea'"
+                :id="field.key"
                 v-model="formData[field.key]"
                 :rows="10"
-                :id="field.key"
                 class="border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 rounded-md shadow-sm focus:ring focus:ring-blue-500 p-2 w-full"
                 :placeholder="`Enter ${field.label}`"
               ></textarea>
@@ -82,9 +81,9 @@
                 class="flex items-center space-x-2"
               >
                 <input
+                  :id="field.key"
                   type="checkbox"
                   v-model="formData[field.key]"
-                  :id="field.key"
                   class="h-5 w-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                 />
               </div>
@@ -92,9 +91,9 @@
               <!-- Default Input -->
               <input
                 v-else
+                :id="field.key"
                 :type="field.type"
                 v-model="formData[field.key]"
-                :id="field.key"
                 class="border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 rounded-md shadow-sm focus:ring focus:ring-blue-500 p-2 w-full"
                 :placeholder="`Enter ${field.label}`"
               />

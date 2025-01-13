@@ -31,17 +31,17 @@
               <!-- Date Picker -->
               <input
                 v-if="field.type === 'date'"
-                type="date"
                 v-model="field.value"
                 :id="field.key"
+                type="date"
                 class="border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 rounded-md shadow-sm focus:ring focus:ring-blue-500 p-2 w-1/2"
               />
 
               <!-- Select Field -->
               <select
                 v-else-if="field.type === 'select' && field.options"
-                v-model="field.value"
                 :id="field.key"
+                v-model="field.value"
                 class="border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 rounded-md shadow-sm focus:ring focus:ring-blue-500 p-2 w-1/2"
               >
                 <option
@@ -56,9 +56,9 @@
               <!-- Textarea Field -->
               <textarea
                 v-else-if="field.type === 'textarea'"
+                :id="field.key"
                 v-model="field.value"
                 :rows="10"
-                :id="field.key"
                 class="border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 rounded-md shadow-sm focus:ring focus:ring-blue-500 p-2 w-full"
                 :placeholder="`Enter ${field.label}`"
               ></textarea>
@@ -69,9 +69,9 @@
                 class="flex items-center space-x-2"
               >
                 <input
-                  type="checkbox"
-                  v-model="field.value"
                   :id="field.key"
+                  v-model="field.value"
+                  type="checkbox"
                   class="h-5 w-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                 />
               </div>
@@ -79,9 +79,9 @@
               <!-- Default Input -->
               <input
                 v-else
-                :type="field.type"
-                v-model="field.value"
                 :id="field.key"
+                v-model="field.value"
+                :type="field.type"
                 class="border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 rounded-md shadow-sm focus:ring focus:ring-blue-500 p-2 w-full"
                 :placeholder="`Enter ${field.label}`"
               />

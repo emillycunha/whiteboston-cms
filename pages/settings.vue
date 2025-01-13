@@ -52,18 +52,18 @@
               <div class="flex space-x-2">
                 <!-- Move Up -->
                 <button
-                  @click="moveUp(index)"
                   :disabled="index === 0"
                   class="p-1 bg-gray-200 rounded hover:bg-gray-300 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                  @click="moveUp(index)"
                 >
                   ▲
                 </button>
 
                 <!-- Move Down -->
                 <button
-                  @click="moveDown(index)"
                   :disabled="index === collections.length - 1"
                   class="p-1 bg-gray-200 rounded hover:bg-gray-300 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                  @click="moveDown(index)"
                 >
                   ▼
                 </button>
@@ -80,8 +80,8 @@
           <div>
             <!-- Other settings -->
             <button
-              @click="clearSelection"
               class="px-3 py-2 bg-red-500 text-white rounded"
+              @click="clearSelection"
             >
               Clear Selection
             </button>
@@ -95,12 +95,12 @@
                 class="flex items-center space-x-3"
               >
                 <input
-                  type="checkbox"
                   :id="collection"
-                  :value="collection"
                   v-model="selectedStats"
-                  @change="handleCheckboxChange(collection)"
+                  type="checkbox"
+                  :value="collection"
                   class="h-4 w-4 text-violet-500 border-gray-300 rounded focus:ring-violet-500"
+                  @change="handleCheckboxChange(collection)"
                 />
                 <label
                   :for="collection"

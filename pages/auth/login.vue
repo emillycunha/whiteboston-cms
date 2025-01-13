@@ -13,21 +13,21 @@
         class="max-w-lg w-full mx-auto sm:p-10 lg:p-12 rounded-lg shadow bg-white"
       >
         <form
-          @submit.prevent="handleLogin"
           class="flex flex-col space-y-6 p-10"
           novalidate
+          @submit.prevent="handleLogin"
         >
           <!-- Email -->
           <div class="flex flex-col space-y-2">
             <label class="block" for="email">Email</label>
             <input
-              class="border border-gray-500 focus:ring-violet-500 rounded-md p-2 w-full placeholder:text-gray-500"
-              v-model="email"
               id="email"
+              v-model="email"
               type="email"
               placeholder="enter your email"
               required
               aria-describedby="email-error"
+              class="border border-gray-500 focus:ring-violet-500 rounded-md p-2 w-full placeholder:text-gray-500"
             />
             <p
               v-if="error && errorField === 'email'"
@@ -43,18 +43,18 @@
             <label class="block" for="password">Password</label>
             <div class="relative">
               <input
-                class="border border-gray-500 focus:ring-violet-500 rounded-md p-2 pr-10 w-full placeholder:text-gray-500"
-                v-model="password"
                 id="password"
+                v-model="password"
                 :type="showPassword ? 'text' : 'password'"
                 placeholder="enter your password"
                 required
                 aria-describedby="password-error"
+                class="border border-gray-500 focus:ring-violet-500 rounded-md p-2 pr-10 w-full placeholder:text-gray-500"
               />
               <button
                 type="button"
-                @click="togglePasswordVisibility"
                 class="absolute inset-y-0 right-3 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-white"
+                @click="togglePasswordVisibility"
               >
                 <template v-if="showPassword">
                   <!-- Eye-off Icon -->
@@ -109,7 +109,6 @@
 <script setup>
 import { ref } from "vue";
 import { useRouter } from "vue-router";
-import { useNuxtApp } from "#app";
 import BrandFooter from "~/components/BrandFooter.vue";
 
 import { EyeIcon, EyeSlashIcon } from "@heroicons/vue/24/solid";
@@ -124,7 +123,6 @@ const loading = ref(false);
 const error = ref(null);
 const errorField = ref(null);
 const router = useRouter();
-const { $supabase } = useNuxtApp();
 
 const togglePasswordVisibility = () => {
   showPassword.value = !showPassword.value;

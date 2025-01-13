@@ -7,7 +7,7 @@
           <ContentNavigation v-slot="{ navigation }">
             <ul class="space-y-8 text-sm">
               <li v-for="link in navigation[0]?.children" :key="link._path">
-                <Disclosure defaultOpen v-if="link.children" v-slot="{ open }">
+                <Disclosure v-if="link.children" v-slot="{ open }" defaultOpen>
                   <DisclosureButton
                     class="w-full flex justify-between items-center text-white pb-2"
                   >

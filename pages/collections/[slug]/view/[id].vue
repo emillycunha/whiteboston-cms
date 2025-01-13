@@ -46,13 +46,6 @@ const route = useRoute();
 const collectionSlug = route.params.slug;
 const itemId = route.params.id;
 
-// Compute Collection Name from Slug
-const collectionName = computed(
-  () =>
-    collectionSlug.charAt(0).toUpperCase() +
-    collectionSlug.slice(1).replace("-", " ")
-);
-
 // State and Store
 const contentStore = useContentStore();
 const isLoading = computed(() => contentStore.isLoading);

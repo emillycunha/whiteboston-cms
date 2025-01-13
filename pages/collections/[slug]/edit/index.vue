@@ -8,8 +8,8 @@
 
     <form
       v-if="!isLoading && fields.length"
-      @submit.prevent="saveChanges"
       novalidate
+      @submit.prevent="saveChanges"
     >
       <div
         class="rounded-md bg-white shadow-sm border border-gray-200 dark:bg-slate-800 dark:border-slate-700 mb-6"
@@ -27,9 +27,9 @@
                   Collection Name
                 </label>
                 <input
-                  type="text"
                   id="name"
                   v-model="collection.name"
+                  type="text"
                   class="border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 rounded-md shadow-sm focus:ring focus:ring-blue-500 p-2 disabled:opacity-50"
                 />
               </div>
@@ -43,9 +43,9 @@
                   Slug
                 </label>
                 <input
-                  type="text"
                   id="slug"
                   v-model="collection.slug"
+                  type="text"
                   class="border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 rounded-md shadow-sm focus:ring focus:ring-blue-500 p-2 disabled:opacity-50"
                 />
               </div>
@@ -59,9 +59,9 @@
                   Position
                 </label>
                 <input
-                  type="number"
                   id="position"
                   v-model.number="collection.position"
+                  type="number"
                   class="border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 rounded-md shadow-sm focus:ring focus:ring-blue-500 p-2 w-fit"
                 />
               </div>
@@ -84,9 +84,9 @@
               <!-- Hidden Toggle -->
               <div class="flex items-center gap-x-2 p-2">
                 <input
-                  type="checkbox"
                   id="is_hidden"
                   v-model="collection.is_hidden"
+                  type="checkbox"
                   class="h-5 w-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                 />
                 <label
@@ -215,7 +215,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, watch } from "vue";
+import { ref, computed, onMounted } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useContentStore } from "~/stores/content";
 import { useCollectionsStore } from "~/stores/collections";

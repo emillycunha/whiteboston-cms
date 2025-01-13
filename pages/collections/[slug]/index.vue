@@ -35,8 +35,8 @@
       :columns="fieldsWithCreatedAt"
       :enableCheckbox="true"
       :actionType="'view'"
-      @view="handleView"
       :rowsPerPage="10"
+      @view="handleView"
       @selection-change="updateSelectedItems"
     />
 

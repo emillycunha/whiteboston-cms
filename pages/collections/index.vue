@@ -49,7 +49,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from "vue";
+import { onMounted, computed } from "vue";
 import { useCollectionsStore } from "~/stores/collections";
 import { useRouter } from "vue-router";
 import { Cog6ToothIcon, PlusIcon } from "@heroicons/vue/24/outline";

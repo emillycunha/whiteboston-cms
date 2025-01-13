@@ -11,29 +11,16 @@
         class="bg-violet-500 text-white p-2 w-12 h-12 rounded flex items-center justify-center"
       >
         <!-- Dynamic Icon -->
-        <component :is="icon" class="w-6 h-6"></component>
+        <component :is="icon" class="w-6 h-6" />
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted, watch } from "vue";
+import { ref, onMounted } from "vue";
 import { useCollectionsStore } from "~/stores/collections";
 import { getIconForSlug } from "@/utils/iconMappings";
-
-// Import Heroicons or any other icon library
-import {
-  UsersIcon,
-  DocumentIcon,
-  FolderIcon,
-  QueueListIcon,
-  ShoppingCartIcon,
-  StarIcon,
-  ChatBubbleLeftIcon,
-  CalendarIcon,
-  FolderPlusIcon,
-} from "@heroicons/vue/24/outline";
 
 const props = defineProps({
   collectionSlug: {

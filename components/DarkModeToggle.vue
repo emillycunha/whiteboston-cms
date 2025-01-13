@@ -6,10 +6,7 @@ import { Switch } from "@headlessui/vue";
 const authStore = useAuthStore();
 
 const toggleDarkMode = () => {
-  console.log("[ToggleDarkMode] Current darkmode state:", authStore.darkmode);
-  console.log("[ToggleDarkMode] Toggling theme...");
-  authStore.toggleDarkMode(); // Call the store action to toggle dark mode
-  console.log("[ToggleDarkMode] Updated darkmode state:", authStore.darkmode);
+  authStore.toggleDarkMode();
 };
 </script>
 
@@ -18,9 +15,9 @@ const toggleDarkMode = () => {
     <SunIcon class="h-5 w-5 text-gray-700 dark:text-gray-300" />
     <Switch
       v-model="authStore.darkmode"
-      @click="toggleDarkMode"
       :class="authStore.darkmode ? 'bg-gray-600' : 'bg-violet-100'"
       class="relative inline-flex h-6 w-11 items-center rounded-full"
+      @click="toggleDarkMode"
     >
       <span class="sr-only">Dark Mode</span>
       <span

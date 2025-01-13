@@ -12,11 +12,10 @@
     </div>
 
     <!-- Buttons -->
-    <div class="flex gap-3" v-if="buttons.length > 0">
+    <div v-if="buttons.length > 0" class="flex gap-3">
       <button
         v-for="(button, index) in buttons"
         :key="index"
-        @click="() => button.onClick && button.onClick()"
         :disabled="button.disabled"
         :type="button.type || 'button'"
         :class="[
@@ -26,18 +25,19 @@
             : 'text-gray-700 bg-white border border-gray-400 hover:bg-gray-50 dark:bg-slate-500 dark:text-white dark:border-slate-500 dark:hover:bg-gray-600 dark:hover:border-slate-600',
           button.disabled ? 'opacity-50 cursor-not-allowed text-gray-400' : '',
         ]"
+        @click="() => button.onClick && button.onClick()"
       >
         <!-- Icon Before -->
         <component
           :is="button.icon"
-          class="mr-2 size-5"
           v-if="button.icon && button.iconPosition === 'before'"
+          class="mr-2 size-5"
         /><span class=""> {{ button.label }}</span>
         <!-- Icon After -->
         <component
           :is="button.icon"
-          class="ml-2 size-5"
           v-if="button.icon && button.iconPosition === 'after'"
+          class="ml-2 size-5"
         />
       </button>
     </div>

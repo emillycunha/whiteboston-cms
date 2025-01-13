@@ -4,7 +4,7 @@
     <PageHeader title="Add New Collection" />
 
     <!-- Add Collection Form -->
-    <form @submit.prevent="addCollection" novalidate>
+    <form novalidate @submit.prevent="addCollection">
       <div
         class="rounded-md bg-white shadow-sm border border-gray-200 dark:bg-slate-800 dark:border-slate-700 mb-6"
       >
@@ -16,9 +16,9 @@
                 Collection Name
               </label>
               <input
-                type="text"
                 id="name"
                 v-model="form.name"
+                type="text"
                 class="border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 rounded-md shadow-sm focus:ring focus:ring-blue-500 p-2 w-full"
                 placeholder="Enter collection name"
                 required
@@ -34,9 +34,9 @@
                 Slug
               </label>
               <input
-                type="text"
                 id="slug"
                 v-model="form.slug"
+                type="text"
                 class="border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 rounded-md shadow-sm focus:ring focus:ring-blue-500 p-2 w-full"
                 placeholder="Enter unique slug"
                 required
@@ -74,9 +74,9 @@
                 Position
               </label>
               <input
-                type="number"
                 id="position"
                 v-model.number="form.position"
+                type="number"
                 :min="1"
                 class="border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 rounded-md shadow-sm focus:ring focus:ring-blue-500 p-2 w-fit"
                 placeholder="Enter position (optional)"
@@ -132,7 +132,6 @@
 <script setup>
 import { ref, watch, onMounted } from "vue";
 import { useRouter } from "vue-router";
-import { useAuthStore } from "~/stores/auth";
 import { useCollectionsStore } from "~/stores/collections";
 import { XCircleIcon, CheckCircleIcon } from "@heroicons/vue/24/outline";
 
@@ -150,9 +149,6 @@ const form = ref({
   is_hidden: false,
   position: 0,
 });
-
-const authStore = useAuthStore();
-const organizationId = authStore.org_id;
 
 // Reset form on mount
 onMounted(() => {

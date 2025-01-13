@@ -15,7 +15,7 @@ export default defineNuxtConfig({
       injectPage: false,
     },
   },
-  modules: ["@pinia/nuxt", "@nuxt/content"],
+  modules: ["@pinia/nuxt", "@nuxt/content", "@nuxt/eslint"],
   nitro: {
     preset: "static",
   },

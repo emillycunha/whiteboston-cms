@@ -11,9 +11,9 @@
             <th v-if="enableCheckbox" class="px-4 py-2 w-8">
               <input
                 type="checkbox"
-                @change="toggleAll"
                 :checked="allSelected"
                 class="h-4 w-4 text-violet-500 border-gray-500 rounded focus:ring-violet-500 dark:focus:ring-teal-500 dark:text-teal-500"
+                @change="toggleAll"
               />
             </th>
             <th
@@ -31,7 +31,7 @@
                 <BarsArrowDownIcon v-else class="w-4 h-4 inline-block" />
               </span>
             </th>
-            <th v-if="actionType !== 'none'" class="px-2 py-2 w-24"></th>
+            <th v-if="actionType !== 'none'" class="px-2 py-2 w-24" />
           </tr>
         </thead>
         <tbody class="text-sm text-gray-700 dark:text-gray-100">
@@ -45,8 +45,8 @@
                 type="checkbox"
                 :value="row.id"
                 :checked="selectedRows.includes(row.id)"
-                @change="toggleRow(row.id)"
                 class="h-4 w-4 text-violet-500 border-gray-500 rounded focus:ring-violet-500 dark:focus:ring-teal-500 dark:text-teal-500"
+                @change="toggleRow(row.id)"
               />
             </td>
             <td v-for="column in columns" :key="column.key" class="px-4 py-4">
@@ -59,15 +59,15 @@
             <td v-if="actionType !== 'none'" class="px-4 py-2">
               <button
                 v-if="actionType === 'view' || actionType === 'both'"
-                @click="onView(row)"
                 class="px-3 py-1 font-semibold text-violet-600 dark:text-teal-500"
+                @click="onView(row)"
               >
                 View
               </button>
               <button
                 v-if="actionType === 'edit' || actionType === 'both'"
-                @click="onEdit(row)"
                 class="px-3 py-1 font-semibold text-violet-600 dark:text-teal-500"
+                @click="onEdit(row)"
               >
                 Edit
               </button>
@@ -90,9 +90,9 @@
   <!-- Pagination -->
   <div class="flex justify-between items-center px-2">
     <button
-      @click="prevPage"
-      :disabled="currentPage === 1"
       class="px-4 py-2 text-sm text-violet-500 dark:text-teal-500 disabled:text-gray-500 dark:disabled:text-gray-300"
+      :disabled="currentPage === 1"
+      @click="prevPage"
     >
       Previous
     </button>
@@ -100,9 +100,9 @@
       Page {{ currentPage }} of {{ totalPages }}
     </span>
     <button
-      @click="nextPage"
-      :disabled="currentPage === totalPages"
       class="px-4 py-2 text-sm text-violet-500 dark:text-teal-500 disabled:text-gray-500 dark:disabled:text-gray-300"
+      :disabled="currentPage === totalPages"
+      @click="nextPage"
     >
       Next
     </button>
@@ -144,7 +144,7 @@ const activeSortKey = ref("");
 const activeSortOrder = ref("asc");
 
 const totalPages = computed(() => {
-  return Math.ceil(props.data.length / props.rowsPerPage); // Use the rowsPerPage prop
+  return Math.ceil(props.data.length / props.rowsPerPage);
 });
 
 const allSelected = computed(() => {
@@ -167,8 +167,8 @@ const paginatedAndSortedData = computed(() => {
       return 0;
     });
   }
-  const start = (currentPage.value - 1) * props.rowsPerPage; // Use the rowsPerPage prop
-  const end = start + props.rowsPerPage; // Use the rowsPerPage prop
+  const start = (currentPage.value - 1) * props.rowsPerPage;
+  const end = start + props.rowsPerPage;
   return sortedData.slice(start, end);
 });
 

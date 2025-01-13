@@ -52,7 +52,6 @@ export const defaultIcon = FolderIcon;
  */
 export function getIconForSlug(slug) {
   if (typeof slug !== "string") {
-    console.error("[getIconForSlug] Invalid slug type:", typeof slug, slug);
     return defaultIcon;
   }
 
@@ -64,9 +63,5 @@ export function getIconForSlug(slug) {
   if (mapping) {
     return mapping.icon;
   }
-
-  console.warn(
-    `[getIconForSlug] No icon found for slug "${slug}". Using default.`
-  );
   return defaultIcon;
 }
