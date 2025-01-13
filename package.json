@@ -1,6 +1,9 @@
 {
   "name": "nuxt-app",
+  "version": "0.0.1-alpha.1",
   "private": true,
+  "license": "MIT",
+  "author": "emillycunha",
   "type": "module",
   "scripts": {
     "build": "nuxt build",
@@ -12,6 +15,7 @@
   "dependencies": {
     "@headlessui/vue": "^1.7.23",
     "@heroicons/vue": "^2.2.0",
+    "@nuxt/content": "^2.13.4",
     "@nuxt/eslint": "^0.7.3",
     "@nuxt/nitro": "^0.10.0",
     "@pinia/nuxt": "^0.9.0",
@@ -27,7 +31,7 @@
   },
   "devDependencies": {
     "@types/markdown-it": "^14.1.2",
-    "@types/node": "^22.10.2",
+    "@types/node": "^22.10.5",
     "autoprefixer": "^10.4.20",
     "dotenv": "^16.4.7",
     "nuxt": "^3.14.1592",

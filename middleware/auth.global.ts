@@ -1,7 +1,6 @@
 export default defineNuxtRouteMiddleware(async (to) => {
   // Skip the middleware for the login page
-  if (to.path === "/auth/login") {
-    console.log("[Auth Middleware] Skipping for /auth/login");
+  if (to.path === "/auth/login" || to.path === "/") {
     return;
   }
 
@@ -13,7 +12,6 @@ export default defineNuxtRouteMiddleware(async (to) => {
 
   // If the session is already initialized, skip re-fetching
   if (authStore.isAuthenticated) {
-    //console.log("[Auth Middleware] User already authenticated.");
     return;
   }
 
@@ -24,23 +22,19 @@ export default defineNuxtRouteMiddleware(async (to) => {
   } = await $supabase.auth.getUser();
 
   if (error) {
-    console.error("[Auth Middleware] Error fetching user:", error.message);
     return navigateTo("/auth/login");
   }
 
-  //console.log("[Auth Middleware] User:", user);
-
   // Redirect to login if not authenticated
   if (!user) {
-    console.log("[Auth Middleware] User not authenticated. Redirecting...");
     return navigateTo("/auth/login");
   }
 
   // Initialize the session in authStore
-  authStore.id = user.id ?? null; // auth.users ID
+  authStore.id = user.id ?? null;
   authStore.email = user.email ?? null;
   authStore.isAuthenticated = true;
 
-  await authStore.fetchUserMetadata(); // Fetch from public.users
+  await authStore.fetchUserMetadata();
   authStore.applyDarkMode();
 });

@@ -1,3 +1,5 @@
+import { version } from "./package.json";
+
 export default defineNuxtConfig({
   compatibilityDate: "2024-11-01",
   devtools: { enabled: true },
@@ -8,7 +10,12 @@ export default defineNuxtConfig({
       autoprefixer: {},
     },
   },
-  modules: ["@pinia/nuxt"],
+  content: {
+    documentDriven: {
+      injectPage: false,
+    },
+  },
+  modules: ["@pinia/nuxt", "@nuxt/content"],
   nitro: {
     preset: "static",
   },
@@ -22,13 +29,13 @@ export default defineNuxtConfig({
       },
     },
   },
-
   runtimeConfig: {
     public: {
       supabaseUrl: process.env.NUXT_SUPABASE_URL,
       supabaseAnonKey: process.env.NUXT_SUPABASE_ANON_KEY,
+      appVersion: version,
     },
   },
   plugins: [{ src: "~/plugins/supabase.client", mode: "client" }],
-  ssr: false,
+  ssr: true,
 });

@@ -84,6 +84,7 @@ import { onMounted } from "vue";
 import { useAuthStore } from "~/stores/auth";
 import { ChevronLeftIcon, CheckCircleIcon } from "@heroicons/vue/24/outline";
 
+const authStore = useAuthStore();
 const isDemoUser = false;
 
 // Fetch user metadata and log details on page load
