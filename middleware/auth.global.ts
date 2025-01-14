@@ -35,6 +35,8 @@ export default defineNuxtRouteMiddleware(async (to) => {
   authStore.email = user.email ?? null;
   authStore.isAuthenticated = true;
 
-  await authStore.fetchUserMetadata();
-  authStore.applyDarkMode();
+  if (!authStore.name) {
+    await authStore.fetchUserMetadata();
+    authStore.applyDarkMode();
+  }
 });
