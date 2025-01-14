@@ -30,6 +30,7 @@ const props = defineProps({
 });
 
 const collectionsStore = useCollectionsStore();
+const contentStore = useContentStore();
 const count = ref(0);
 
 // Compute a human-readable name for the collection
@@ -40,7 +41,6 @@ const collectionName = computed(() => {
 // Dynamic Icon Assignment
 const icon = computed(() => {
   const slug = props.collectionSlug;
-  console.log("[Dynamic Icon] Slug:", slug);
   return getIconForSlug(slug);
 });
 
@@ -53,9 +53,7 @@ onMounted(async () => {
 
   if (collection) {
     // Fetch content count
-    const contentCount = await collectionsStore.fetchContentCount(
-      collection.id
-    );
+    const contentCount = await contentStore.fetchContentCount(collection.id);
     count.value = contentCount || 0;
   }
 });

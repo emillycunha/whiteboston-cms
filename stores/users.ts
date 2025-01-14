@@ -9,9 +9,9 @@ export interface User {
 
 export const useUsersStore = defineStore("users", {
   state: () => ({
-    users: [] as User[], // Store fetched users
-    error: null as string | null, // Error handling
-    isLoading: false, // Loading state
+    users: [] as User[],
+    error: null as string | null,
+    isLoading: false,
   }),
   getters: {
     // Get a user by ID
@@ -31,7 +31,6 @@ export const useUsersStore = defineStore("users", {
       const { $supabase } = useNuxtApp();
 
       if (this.users.length > 0) {
-        // Skip fetching if users are already cached
         return this.users;
       }
 
@@ -40,8 +39,14 @@ export const useUsersStore = defineStore("users", {
         const { data, error } = await $supabase.from("users").select("*");
         if (error) throw error;
 
-        this.users = data || []; // Cache the fetched users
+        this.users = data || [];
         console.log("[Debug] Users successfully fetched:", this.users);
+
+        // Debug individual user preferences
+        this.users.forEach((user) => {
+          console.log("[Debug] User preferences:", user.id, user.preferences);
+        });
+
         return this.users;
       } catch (err) {
         this.error = "Failed to fetch users.";
@@ -81,40 +86,6 @@ export const useUsersStore = defineStore("users", {
         return null;
       } finally {
         this.isLoading = false;
-      }
-    },
-
-    async updateUserPreferences(
-      userId: string,
-      preferences: Record<string, any>
-    ) {
-      const { $supabase } = useNuxtApp();
-
-      try {
-        const { data, error } = await $supabase
-          .from("users")
-          .update({ preferences })
-          .eq("id", userId)
-          .select("*");
-
-        if (error) throw error;
-
-        if (!data || data.length === 0) {
-          console.warn("Update successful, but no data returned.");
-          return true;
-        }
-
-        // Update the local store
-        const user = this.getUserById(userId);
-        if (user) {
-          user.preferences = preferences;
-        }
-
-        console.log("Preferences updated successfully:", data);
-        return true;
-      } catch (err) {
-        console.error("Failed to update preferences:", err);
-        return false;
       }
     },
 

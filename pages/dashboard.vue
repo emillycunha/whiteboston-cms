@@ -69,48 +69,19 @@
 </template>
 
 <script setup>
-import PageHeader from "@/components/PageHeader.vue";
-import RecentLeads from "@/components/RecentLeads.vue";
-import RecentPosts from "@/components/RecentPosts.vue";
-import DailyQuote from "@/components/DailyQuote.vue";
-import DashboardStats from "@/components/DashboardStats.vue";
-
-import { ref, onMounted } from "vue";
-import { useUsersStore } from "~/stores/users";
-import { useAuthStore } from "~/stores/auth";
+//import { ref, onMounted } from "vue";
 
 const authStore = useAuthStore();
-const usersStore = useUsersStore();
 const selectedStats = ref([]);
 
 onMounted(async () => {
   if (authStore.isAuthenticated) {
-    // Fetch user metadata
     await authStore.fetchUserMetadata();
-    console.log("[Test Page] User Metadata:", {
-      id: authStore.id,
-      email: authStore.email,
-      name: authStore.name,
-      role: authStore.role,
-      darkmode: authStore.darkmode,
-      org_id: authStore.org_id,
-    });
 
-    // Ensure users are loaded
-    if (!usersStore.users.length) {
-      await usersStore.fetchUsers();
-    }
-
-    // Fetch and assign user preferences
-    const userId = authStore.id;
-    if (userId) {
-      selectedStats.value = usersStore.getUserDashboardPreferences(userId);
-    }
+    const dashboardStats = authStore.preferences?.dashboard?.stats || [];
+    selectedStats.value = dashboardStats;
   } else {
-    console.warn("[Test Page] User is not authenticated.");
-  }
-  if (authStore.isAuthenticated && !authStore.name) {
-    await authStore.fetchUserMetadata();
+    console.warn("[Mounted] User is not authenticated.");
   }
 });
 </script>

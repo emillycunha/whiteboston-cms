@@ -1,5 +1,6 @@
 import { defineStore } from "pinia";
 import { useAuthStore } from "~/stores/auth";
+import { useNotificationStore } from "~/stores/notification";
 
 export interface Collection {
   id: number;
@@ -31,9 +32,18 @@ export const useCollectionsStore = defineStore("collections", {
     async fetchCollectionsForCurrentOrg() {
       const { $supabase } = useNuxtApp();
       const authStore = useAuthStore();
+      const organizationId = authStore.org_id;
+
+      // Check if the user has the required permission
+      if (!authStore.canView) {
+        console.error(
+          "[Collections Store] User does not have permission to view collections."
+        );
+        this.error = "You do not have permission to view collections.";
+        return [];
+      }
 
       // Check if organization ID is available
-      const organizationId = authStore.org_id;
       if (!organizationId) {
         console.error("[Collections Store] Organization ID is missing.");
         this.error = "Organization ID is missing.";
@@ -72,6 +82,26 @@ export const useCollectionsStore = defineStore("collections", {
     async fetchCollectionById(id: number) {
       const { $supabase } = useNuxtApp();
       const authStore = useAuthStore();
+      const organizationId = authStore.org_id;
+
+      // Check if the user has the required permission
+      if (!authStore.canView) {
+        console.error(
+          "[Collections Store] User does not have permission to view collections."
+        );
+        this.error = "You do not have permission to view collections.";
+        return [];
+      } else {
+        console.log(
+          "[Collections Store] Permission granted: User can view collections."
+        );
+      }
+
+      if (!organizationId) {
+        console.error("[Collections Store] Missing organization ID.");
+        this.error = "User is not associated with any organization.";
+        return null;
+      }
 
       const cachedCollection = this.getCollectionById(id);
       if (cachedCollection) {
@@ -84,13 +114,13 @@ export const useCollectionsStore = defineStore("collections", {
           .from("collections")
           .select("*")
           .eq("id", id)
-          .eq("organization_id", authStore.org_id) // Ensure it belongs to the user's org
+          .eq("organization_id", authStore.org_id)
           .single();
 
         if (error) throw error;
 
         if (data) {
-          this.collections.push(data); // Cache the fetched collection
+          this.collections.push(data);
         }
         return data;
       } catch (err) {
@@ -107,6 +137,19 @@ export const useCollectionsStore = defineStore("collections", {
       const { $supabase } = useNuxtApp();
       const authStore = useAuthStore();
       const organizationId = authStore.org_id;
+
+      // Check if the user has the required permission
+      if (!authStore.canView) {
+        console.error(
+          "[Collections Store] User does not have permission to view collections."
+        );
+        this.error = "You do not have permission to view collections.";
+        return [];
+      } else {
+        console.log(
+          "[Collections Store] Permission granted: User can view collections."
+        );
+      }
 
       if (!organizationId) {
         console.error("[Collections Store] Missing organization ID.");
@@ -150,6 +193,35 @@ export const useCollectionsStore = defineStore("collections", {
     // Update a collection
     async updateCollection(updatedCollection: Collection) {
       const { $supabase } = useNuxtApp();
+      const authStore = useAuthStore();
+      const notificationStore = useNotificationStore();
+
+      this.isLoading = true;
+
+      // Check if the user has the required permission
+      if (!authStore.canEdit) {
+        console.error(
+          "[Collections Store] User does not have permission to edit collections."
+        );
+
+        notificationStore.showNotification(
+          "error",
+          "You do not have permission to edit collections."
+        );
+
+        this.error = "You do not have permission to edit collections.";
+        return false;
+      } else {
+        console.log(
+          "[Collections Store] Permission granted: User can edit collections."
+        );
+
+        notificationStore.showNotification(
+          "success",
+          "Permission granted. You can edit collections."
+        );
+      }
+
       try {
         const { error } = await $supabase
           .from("collections")
@@ -177,6 +249,8 @@ export const useCollectionsStore = defineStore("collections", {
         console.error("[Collections Store] Failed to update collection:", err);
         this.error = "Failed to update collection.";
         return false;
+      } finally {
+        this.isLoading = false;
       }
     },
 
@@ -191,6 +265,31 @@ export const useCollectionsStore = defineStore("collections", {
       const { $supabase } = useNuxtApp();
       const authStore = useAuthStore();
       const organizationId = authStore.org_id;
+      const notificationStore = useNotificationStore();
+
+      // Check if the user has the required permission
+      if (!authStore.canAddCollections) {
+        console.error(
+          "[Collections Store] User does not have permission to add collections."
+        );
+
+        notificationStore.showNotification(
+          "error",
+          "You do not have permission to add collections."
+        );
+
+        this.error = "You do not have permission to add collections.";
+        return false;
+      } else {
+        console.log(
+          "[Collections Store] Permission granted: User can add collections."
+        );
+
+        notificationStore.showNotification(
+          "success",
+          "Permission granted. You can add collections."
+        );
+      }
 
       if (!organizationId) {
         this.error = "Organization ID is missing.";
@@ -222,50 +321,6 @@ export const useCollectionsStore = defineStore("collections", {
         console.error("[Collections Store] Unexpected error:", err);
         this.error = "An unexpected error occurred.";
         return false;
-      }
-    },
-
-    // In collections store
-    async toggleCollectionVisibility(slug: string, isHidden: boolean) {
-      const { $supabase } = useNuxtApp();
-      try {
-        const { error } = await $supabase
-          .from("collections")
-          .update({ is_hidden: isHidden })
-          .eq("slug", slug);
-        if (error) throw error;
-
-        // Update local state
-        const collection = this.collections.find((c) => c.slug === slug);
-        if (collection) {
-          collection.is_hidden = isHidden;
-        }
-      } catch (err) {
-        console.error("[Collections Store] Failed to update visibility:", err);
-      }
-    },
-
-    // Fetch content count for a collection
-    async fetchContentCount(collectionId: number) {
-      const { $supabase } = useNuxtApp();
-      try {
-        const { count, error } = await $supabase
-          .from("content")
-          .select("id", { count: "exact" })
-          .eq("collection_id", collectionId);
-
-        if (error) {
-          console.error(
-            "[Collections Store] Failed to fetch content count:",
-            error
-          );
-          return 0;
-        }
-
-        return count || 0;
-      } catch (err) {
-        console.error("[Collections Store] Error fetching content count:", err);
-        return 0;
       }
     },
 
@@ -318,6 +373,31 @@ export const useCollectionsStore = defineStore("collections", {
     async updateCollectionPositions(updatedCollections: Collection[]) {
       const { $supabase } = useNuxtApp();
       const authStore = useAuthStore();
+      const notificationStore = useNotificationStore();
+
+      // Check if the user has the required permission
+      if (!authStore.canEdit) {
+        console.error(
+          "[Collections Store] User does not have permission to edit collections."
+        );
+
+        notificationStore.showNotification(
+          "error",
+          "You do not have permission to edit collections."
+        );
+
+        this.error = "You do not have permission to edit collections.";
+        return false;
+      } else {
+        console.log(
+          "[Collections Store] Permission granted: User can edit collections."
+        );
+
+        notificationStore.showNotification(
+          "success",
+          "Permission granted. You can edit collections."
+        );
+      }
 
       try {
         const updates = updatedCollections.map((collection) => ({

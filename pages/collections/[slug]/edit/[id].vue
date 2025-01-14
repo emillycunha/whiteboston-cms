@@ -1,3 +1,8 @@
+<!-- 
+  Developer Note:
+  This page allows users to manage content, including:
+  - Updating content (e.g., title, name, description).
+-->
 <template>
   <div class="px-6 py-4 space-y-6">
     <!-- Header Section -->

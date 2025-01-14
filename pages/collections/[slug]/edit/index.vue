@@ -1,3 +1,11 @@
+<!-- 
+  Developer Note:
+  This page allows users to manage collections, including:
+  - Updating collection metadata (e.g., name, slug, description).
+  - Adding new fields to the collection.
+  - Editing existing fields in the collection.
+-->
+
 <template>
   <div class="px-6 py-4 space-y-6">
     <!-- Page Header -->
@@ -217,18 +225,15 @@
 <script setup>
 import { ref, computed, onMounted } from "vue";
 import { useRoute, useRouter } from "vue-router";
-import { useContentStore } from "~/stores/content";
-import { useCollectionsStore } from "~/stores/collections";
 import { XCircleIcon, CheckCircleIcon } from "@heroicons/vue/24/outline";
 
-import { useNotificationStore } from "@/stores/notification";
+const authStore = useAuthStore();
 const notificationStore = useNotificationStore();
 
 // Route and Router
 const route = useRoute();
 const router = useRouter();
 const collectionSlug = route.params.slug;
-console.log(route.params.slug);
 
 // State and Store
 const contentStore = useContentStore();
@@ -241,9 +246,8 @@ const collection = ref({
   position: 0,
 });
 
-const errors = ref([]);
-
 const isLoading = computed(() => contentStore.isLoading);
+const errors = ref([]);
 const error = computed(() => contentStore.error);
 const collectionName = computed(
   () => collectionSlug.charAt(0).toUpperCase() + collectionSlug.slice(1)
@@ -258,8 +262,6 @@ onMounted(async () => {
     const collectionData = await collectionsStore.fetchCollectionBySlug(
       collectionSlug
     );
-
-    console.log("[Collection Data]", collectionData);
 
     // Initialize collection details
     if (collectionData) {
@@ -332,6 +334,22 @@ const addField = () => {
 
 // Save changes
 const saveChanges = async () => {
+  // Check if the user has the required permission
+  if (!authStore.canEdit) {
+    console.error(
+      "[Save Changes] User does not have permission to edit collections."
+    );
+
+    notificationStore.showNotification(
+      "error",
+      "You do not have permission to edit this collection."
+    );
+
+    errors.value = "You do not have permission to edit this collection.";
+
+    return; // Exit early
+  }
+
   // Reset errors
   errors.value = "";
 

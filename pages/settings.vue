@@ -159,10 +159,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from "vue";
-import { useAuthStore } from "~/stores/auth";
-import { useUsersStore } from "~/stores/users";
-import { useCollectionsStore } from "~/stores/collections";
+//import { ref, onMounted } from "vue";
 
 import {
   ChevronLeftIcon,
@@ -176,30 +173,25 @@ const notificationStore = useNotificationStore();
 
 // Store references
 const authStore = useAuthStore();
-const usersStore = useUsersStore();
 const collectionsStore = useCollectionsStore();
 
 // Reactive state
-const availableCollections = ref([]);
 const selectedStats = ref([]);
+const availableCollections = ref([]);
+const collections = ref([]);
+const error = ref("");
 
 const clearSelection = () => {
   selectedStats.value = [];
   error.value = "";
 };
 
-const collections = ref([]);
-
-const error = ref("");
-
 onMounted(async () => {
-  // Fetch collections dynamically based on the organization
   const orgId = authStore.org_id;
   if (!orgId) {
     return;
   }
 
-  // Fetch collections for the organization
   await collectionsStore.fetchCollectionsForCurrentOrg();
   collections.value = collectionsStore.collections;
 
@@ -207,13 +199,10 @@ onMounted(async () => {
     .getCollectionsByOrg(orgId)
     .map((collection) => collection.slug);
 
-  // Fetch user preferences
-  const userId = authStore.id;
-  if (userId) {
-    await usersStore.fetchUsers();
-    const userPreferences = usersStore.getUserDashboardPreferences(userId);
-    selectedStats.value = userPreferences;
-  }
+  // Fetch user preferences from authStore
+  console.log("[Mounted] User preferences fetched:", authStore.preferences);
+  const userPreferences = authStore.preferences?.dashboard?.stats || [];
+  selectedStats.value = userPreferences;
 });
 
 // Handle checkbox changes and enforce max limit
@@ -272,22 +261,19 @@ const saveSettings = async () => {
 
     await collectionsStore.updateCollectionPositions(updatedCollections);
 
-    // Save Preferences
+    // Save Preferences to authStore
     const userId = authStore.id;
     if (!userId) {
       error.value = "User not authenticated.";
       return;
     }
 
-    const currentPreferences =
-      usersStore.getUserById(userId)?.preferences || {};
+    const updatedPreferences = {
+      ...authStore.preferences,
+      dashboard: { stats: selectedStats.value },
+    };
 
-    currentPreferences.dashboard = { stats: selectedStats.value };
-
-    const success = await usersStore.updateUserPreferences(
-      userId,
-      currentPreferences
-    );
+    const success = await authStore.updatePreferences(updatedPreferences);
 
     if (success) {
       console.log(
@@ -300,7 +286,7 @@ const saveSettings = async () => {
         "Settings saved successfully!"
       );
 
-      // Redirect to collections
+      // Redirect to dashboard
       navigateTo("/dashboard");
 
       // Refresh the page to update sidebar and other components

@@ -1,4 +1,11 @@
 import { defineStore } from "pinia";
+import {
+  permissions,
+  hasPermission,
+  useMyPermissionsStore,
+} from "~/stores/permissions";
+
+type Role = "SuperAdmin" | "admin" | "user" | "viewer";
 
 export const useAuthStore = defineStore("auth", {
   state: () => ({
@@ -7,17 +14,35 @@ export const useAuthStore = defineStore("auth", {
     name: null as string | null,
     org_id: null as string | null,
     preferences: {} as Record<string, any>,
-    role: null as string | null,
+    role: null as Role | null, // "SuperAdmin", "admin", "user", "viewer"
     isAuthenticated: false,
     error: null as string | null,
   }),
 
   persist: true,
 
+  getters: {
+    isRoleValid: (state) => state.role !== null,
+    hasPermission:
+      (state) => (action: keyof (typeof permissions)["SuperAdmin"]) => {
+        return hasPermission(state.role, action);
+      },
+    canView: (state) => hasPermission(state.role, "canView"),
+    canAddContent: (state) => hasPermission(state.role, "canAddContent"),
+    canAddFields: (state) => hasPermission(state.role, "canAddFields"),
+    canAddCollections: (state) =>
+      hasPermission(state.role, "canAddCollections"),
+    canEdit: (state) => hasPermission(state.role, "canEdit"),
+    canDelete: (state) => hasPermission(state.role, "canDelete"),
+    canManageOrganizations: (state) =>
+      hasPermission(state.role, "canManageOrganizations"),
+  },
+
   actions: {
     // Fetch and set user metadata from `public.users` and `organization_members`
     async fetchUserMetadata() {
       const { $supabase } = useNuxtApp();
+
       if (!this.id) {
         console.warn("[Auth Store] No user ID found, cannot fetch metadata.");
         return;
@@ -54,6 +79,10 @@ export const useAuthStore = defineStore("auth", {
           org_id: this.org_id,
           role: this.role,
         });
+
+        // Update permissions store
+        const permissionsStore = useMyPermissionsStore();
+        permissionsStore.setRole(this.role);
       } catch (err) {
         console.error("[Auth Store] Failed to fetch user metadata:", err);
         this.error = "Failed to load user metadata.";
@@ -155,15 +184,15 @@ export const useAuthStore = defineStore("auth", {
     async toggleDarkMode() {
       const { $supabase } = useNuxtApp();
 
-      const darkmode = !(this.preferences?.darkmode ?? false); // Toggle dark mode
-      this.preferences = { ...this.preferences, darkmode }; // Update locally
+      const darkmode = !(this.preferences?.darkmode ?? false);
+      this.preferences = { ...this.preferences, darkmode };
       this.applyDarkMode();
 
       if (this.id) {
         try {
           const { error } = await $supabase
             .from("users")
-            .update({ preferences: this.preferences }) // Update preferences in Supabase
+            .update({ preferences: this.preferences })
             .eq("id", this.id);
 
           if (error) throw error;
@@ -172,6 +201,40 @@ export const useAuthStore = defineStore("auth", {
         } catch (err) {
           console.error("[Auth Store] Failed to update dark mode:", err);
         }
+      }
+    },
+
+    async updatePreferences(updatedPreferences: Record<string, any>) {
+      const { $supabase } = useNuxtApp();
+
+      if (!this.id) {
+        console.error(
+          "[Auth Store] User ID is missing. Cannot update preferences."
+        );
+        return false;
+      }
+
+      try {
+        // Update preferences in the database
+        const { data, error } = await $supabase
+          .from("users")
+          .update({ preferences: updatedPreferences })
+          .eq("id", this.id)
+          .select("*");
+
+        if (error) {
+          console.error("[Auth Store] Failed to update preferences:", error);
+          return false;
+        }
+
+        // Update preferences in the local store
+        this.preferences = updatedPreferences;
+
+        console.log("[Auth Store] Preferences updated successfully:", data);
+        return true;
+      } catch (err) {
+        console.error("[Auth Store] Error updating preferences:", err);
+        return false;
       }
     },
 

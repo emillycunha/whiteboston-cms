@@ -99,9 +99,15 @@
               </label>
             </div>
           </div>
-        </div>
-        <div v-if="errors.general" class="text-sm text-red-500 mt-4">
-          {{ errors.general }}
+          <!-- Error and Success Messages -->
+          <div>
+            <div v-if="errors.general" class="text-sm text-red-500 mt-4">
+              {{ errors.general }}
+            </div>
+            <div v-if="errors.length" class="mt-4 p-2 text-red-500 text-sm">
+              {{ errors }}
+            </div>
+          </div>
         </div>
       </div>
 
@@ -132,10 +138,9 @@
 <script setup>
 import { ref, watch, onMounted } from "vue";
 import { useRouter } from "vue-router";
-import { useCollectionsStore } from "~/stores/collections";
 import { XCircleIcon, CheckCircleIcon } from "@heroicons/vue/24/outline";
 
-import { useNotificationStore } from "@/stores/notification";
+const authStore = useAuthStore();
 const notificationStore = useNotificationStore();
 
 const collectionsStore = useCollectionsStore();
@@ -192,11 +197,29 @@ const validateForm = () => {
     errors.value.slug = "Slug is required.";
   }
 
-  return Object.keys(errors.value).length === 0; // Return true if no errors
+  return Object.keys(errors.value).length === 0;
 };
 
 // Add New Collection
 const addCollection = async () => {
+  // Check if the user has the required permission
+  if (!authStore.canAddCollections) {
+    console.error(
+      "[Save Changes] User does not have permission to add collections."
+    );
+
+    // Show error notification
+    notificationStore.showNotification(
+      "error",
+      "You do not have permission to add collections."
+    );
+
+    // Set error for UI feedback if needed
+    errors.value = "You do not have permission to add collections.";
+
+    return; // Exit early
+  }
+
   if (!validateForm()) return;
 
   try {

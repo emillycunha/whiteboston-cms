@@ -41,12 +41,22 @@ export const useContentStore = defineStore("content", {
       const { $supabase } = useNuxtApp();
       const authStore = useAuthStore();
 
+      // Check if the user has the required permission
+      if (!authStore.canView) {
+        console.error(
+          "[Content Store] User does not have permission to view content."
+        );
+        this.error = "You do not have permission to view content.";
+        return [];
+      }
+
       // Prevent concurrent loading for the same slug
       if (this.isLoadingBySlug[collectionSlug]) {
         console.log("[Content Store] Fetch already in progress. Skipping...");
         return;
       }
 
+      this.isLoading = true;
       this.isLoadingBySlug[collectionSlug] = true;
 
       try {
@@ -69,7 +79,7 @@ export const useContentStore = defineStore("content", {
         // Handle case where no collection is found
         if (!collectionData) {
           console.warn(
-            "[Content Store] No collection found for the provided slug. Treating as empty."
+            `[Content Store] No collection found for the provided slug: ${collectionSlug}. Treating as empty.`
           );
           this.fields = []; // Treat it as having no fields
           this.content = []; // Treat it as having no content
@@ -77,7 +87,6 @@ export const useContentStore = defineStore("content", {
         }
 
         const collectionId = collectionData.id;
-        console.log(`[Content Store] Fetched collection ID: ${collectionId}`);
 
         // Step 2: Fetch the fields of the collection
         const { data: fieldsData, error: fieldsError } = await $supabase
@@ -163,6 +172,7 @@ export const useContentStore = defineStore("content", {
             ? err.message
             : "An unexpected error occurred while fetching content and fields.";
       } finally {
+        this.isLoading = false;
         this.isLoadingBySlug[collectionSlug] = false;
       }
     },
@@ -171,6 +181,19 @@ export const useContentStore = defineStore("content", {
       const { $supabase } = useNuxtApp();
       const authStore = useAuthStore();
       this.isLoading = true;
+
+      // Check if the user has the required permission
+      if (!authStore.canView) {
+        console.error(
+          "[Content Store] User does not have permission to view content."
+        );
+        this.error = "You do not have permission to view content.";
+        return [];
+      } else {
+        console.log(
+          "[Content Store] Permission granted: User can view content."
+        );
+      }
 
       try {
         // Step 1: Validate the collection and organization
@@ -214,7 +237,33 @@ export const useContentStore = defineStore("content", {
     ) {
       const { $supabase } = useNuxtApp();
       const authStore = useAuthStore();
+      const notificationStore = useNotificationStore();
+
       this.isLoading = true;
+
+      // Check if the user has the required permission
+      if (!authStore.canAddContent) {
+        console.error(
+          "[Content Store] User does not have permission to edit content."
+        );
+
+        notificationStore.showNotification(
+          "error",
+          "You do not have permission to edit content."
+        );
+
+        this.error = "You do not have permission to edit content.";
+        return false;
+      } else {
+        console.log(
+          "[Content Store] Permission granted: User can edit content."
+        );
+
+        notificationStore.showNotification(
+          "success",
+          "Permission granted. You can edit content."
+        );
+      }
 
       try {
         // Step 1: Validate the collection and organization
@@ -258,7 +307,33 @@ export const useContentStore = defineStore("content", {
     ) {
       const { $supabase } = useNuxtApp();
       const authStore = useAuthStore();
+      const notificationStore = useNotificationStore();
+
       this.isLoading = true;
+
+      // Check if the user has the required permission
+      if (!authStore.canAddContent) {
+        console.error(
+          "[Content Store] User does not have permission to add content."
+        );
+
+        notificationStore.showNotification(
+          "error",
+          "You do not have permission to add content."
+        );
+
+        this.error = "You do not have permission to add content.";
+        return false;
+      } else {
+        console.log(
+          "[Content Store] Permission granted: User can add content."
+        );
+
+        notificationStore.showNotification(
+          "success",
+          "Permission granted. You can add content."
+        );
+      }
 
       try {
         // Step 1: Validate the collection and organization
@@ -299,7 +374,35 @@ export const useContentStore = defineStore("content", {
     ) {
       const { $supabase } = useNuxtApp();
       const authStore = useAuthStore();
+      const notificationStore = useNotificationStore();
+
       this.isLoading = true;
+
+      // Check if the user has the required permission
+      if (!authStore.canEdit) {
+        console.error(
+          "[Collections Store] User does not have permission to edit collections."
+        );
+
+        // Show error notification
+        notificationStore.showNotification(
+          "error",
+          "You do not have permission to edit collections."
+        );
+
+        this.error = "You do not have permission to edit collections.";
+        return false;
+      } else {
+        console.log(
+          "[Collections Store] Permission granted: User can edit collections."
+        );
+
+        // Show success notification
+        notificationStore.showNotification(
+          "success",
+          "Permission granted. You can edit collections."
+        );
+      }
 
       try {
         const { data: collectionData, error: collectionError } = await $supabase
@@ -341,6 +444,29 @@ export const useContentStore = defineStore("content", {
     async addNewCollectionFields(collectionSlug: string, newFields: Field[]) {
       const { $supabase } = useNuxtApp();
       const authStore = useAuthStore();
+      const notificationStore = useNotificationStore();
+
+      // Check if the user has the required permission
+      if (!authStore.canAddFields) {
+        console.error(
+          "[Content Store] User does not have permission to add fields."
+        );
+
+        notificationStore.showNotification(
+          "error",
+          "You do not have permission to add fields."
+        );
+
+        this.error = "You do not have permission to add fields.";
+        return false;
+      } else {
+        console.log("[Content Store] Permission granted: User can add fields.");
+
+        notificationStore.showNotification(
+          "success",
+          "Permission granted. You can add fields."
+        );
+      }
 
       try {
         // Fetch collection ID
@@ -369,6 +495,41 @@ export const useContentStore = defineStore("content", {
       } catch (err) {
         console.error("Failed to add new fields:", err);
         throw err;
+      }
+    },
+
+    // Fetch content count for a collection
+    async fetchContentCount(collectionId: number) {
+      const { $supabase } = useNuxtApp();
+      const authStore = useAuthStore();
+
+      // Check if the user has the required permission
+      if (!authStore.canView) {
+        console.error(
+          "[Collections Store] User does not have permission to view collections."
+        );
+        this.error = "You do not have permission to view collections.";
+        return [];
+      }
+
+      try {
+        const { count, error } = await $supabase
+          .from("content")
+          .select("id", { count: "exact" })
+          .eq("collection_id", collectionId);
+
+        if (error) {
+          console.error(
+            "[Collections Store] Failed to fetch content count:",
+            error
+          );
+          return 0;
+        }
+
+        return count || 0;
+      } catch (err) {
+        console.error("[Collections Store] Error fetching content count:", err);
+        return 0;
       }
     },
 

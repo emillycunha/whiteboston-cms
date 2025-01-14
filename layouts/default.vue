@@ -349,7 +349,6 @@ const fetchAndSetCollections = async () => {
     collections.value = fetchedCollections
       .filter((collection) => !collection.is_hidden)
       .sort((a, b) => a.position - b.position);
-    console.log("Sidebar collections updated.");
   } catch (err) {
     console.error("Failed to fetch collections for sidebar:", err.message);
   }
