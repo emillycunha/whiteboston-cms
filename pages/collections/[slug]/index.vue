@@ -26,13 +26,13 @@
     <div v-if="isLoading" class="text-center">Loading...</div>
 
     <!-- Error State -->
-    <div v-if="error" class="text-red-500">{{ error }}</div>
+    <div v-else-if="error" class="text-red-500">{{ error }}</div>
 
     <!-- Reusable Table -->
     <DataTable
-      v-if="!isLoading && !error && content.length"
+      v-else-if="!isLoading && !error && content.length"
       :data="content"
-      :columns="fieldsWithCreatedAt"
+      :columns="fields"
       :enableCheckbox="true"
       :actionType="'view'"
       :rowsPerPage="10"
@@ -41,10 +41,7 @@
     />
 
     <!-- Empty State -->
-    <div
-      v-else-if="!isLoading && !error && !content.length"
-      class="text-center text-gray-600 dark:text-gray-300"
-    >
+    <div v-else class="text-center text-gray-600 dark:text-gray-300">
       <p>No data found for this collection.</p>
       <p>
         Add content by clicking
@@ -81,26 +78,6 @@ const fields = computed(() => {
     .filter((field) => typeof field.position === "number" && field.position > 0)
     .sort((a, b) => a.position - b.position)
     .slice(0, 3);
-});
-
-const formatDate = (dateString) => {
-  if (!dateString) return "";
-  const date = new Date(dateString);
-  return date.toISOString().split("T")[0];
-};
-
-// Add created_at to the fields dynamically
-const fieldsWithCreatedAt = computed(() => {
-  return [
-    ...fields.value,
-    {
-      key: "created_at",
-      label: "Created At",
-      type: "date",
-      position: 999,
-      formatter: (value) => formatDate(value),
-    },
-  ];
 });
 
 // Track selected items

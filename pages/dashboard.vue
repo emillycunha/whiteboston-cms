@@ -9,10 +9,7 @@
         class="lg:col-start-3 lg:col-span-1 lg:row-start-1 lg:row-span-2 bg-gradient-to-l from-teal-50 to-violet-50 p-4 shadow rounded-md"
       >
         <!-- Greeting and Date -->
-        <h2 class="text-gray-700 text-xl">
-          {{ greeting }}, {{ authStore.name }}
-        </h2>
-        <p class="text-teal-500 text-sm mt-1">{{ formattedDate }}</p>
+        <DashboardGreeting />
 
         <!-- Profile Section -->
         <div class="my-4 border-t border-gray-500 pt-4">
@@ -78,13 +75,12 @@ import RecentPosts from "@/components/RecentPosts.vue";
 import DailyQuote from "@/components/DailyQuote.vue";
 import DashboardStats from "@/components/DashboardStats.vue";
 
-import { ref, computed, onMounted } from "vue";
+import { ref, onMounted } from "vue";
 import { useUsersStore } from "~/stores/users";
 import { useAuthStore } from "~/stores/auth";
 
 const authStore = useAuthStore();
 const usersStore = useUsersStore();
-
 const selectedStats = ref([]);
 
 onMounted(async () => {
@@ -113,26 +109,8 @@ onMounted(async () => {
   } else {
     console.warn("[Test Page] User is not authenticated.");
   }
-});
-
-// Get current date and time
-const currentDate = new Date();
-const hours = currentDate.getHours();
-
-// Determine the greeting
-const greeting = computed(() => {
-  if (hours < 12) return "Good morning";
-  if (hours < 18) return "Good afternoon";
-  return "Good evening";
-});
-
-// Format today's date
-const formattedDate = computed(() => {
-  return currentDate.toLocaleDateString("en-US", {
-    weekday: "long",
-    month: "long",
-    day: "numeric",
-    year: "numeric",
-  });
+  if (authStore.isAuthenticated && !authStore.name) {
+    await authStore.fetchUserMetadata();
+  }
 });
 </script>

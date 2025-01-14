@@ -10,12 +10,7 @@ export default defineNuxtConfig({
       autoprefixer: {},
     },
   },
-  content: {
-    documentDriven: {
-      injectPage: false,
-    },
-  },
-  modules: ["@pinia/nuxt", "@nuxt/content", "@nuxt/eslint"],
+  modules: ["@pinia/nuxt", "@nuxt/eslint"],
   nitro: {
     preset: "static",
   },
@@ -37,5 +32,5 @@ export default defineNuxtConfig({
     },
   },
   plugins: [{ src: "~/plugins/supabase.client", mode: "client" }],
-  ssr: true,
+  ssr: false,
 });
