@@ -27,7 +27,7 @@
           <div class="text-sm p-2 sm:p-4">
             <div class="flex flex-wrap gap-y-4">
               <!-- Collection Name -->
-              <div class="flex flex-col w-1/2 gap-y-1 p-2">
+              <div class="flex flex-col flex-1 gap-y-1 p-2">
                 <label
                   for="name"
                   class="font-bold text-gray-700 dark:text-white"
@@ -43,7 +43,7 @@
               </div>
 
               <!-- Collection Slug -->
-              <div class="flex flex-col w-1/4 gap-y-1 p-2">
+              <div class="flex flex-col flex-1 gap-y-1 p-2">
                 <label
                   for="slug"
                   class="font-bold text-gray-700 dark:text-white"
@@ -59,7 +59,7 @@
               </div>
 
               <!-- Position -->
-              <div class="flex flex-col w-1/4 gap-y-1 p-2">
+              <div class="flex flex-col gap-y-1 p-2">
                 <label
                   for="position"
                   class="font-bold text-gray-700 dark:text-white"
@@ -121,11 +121,17 @@
                     <th class="px-4 py-2 text-left text-sm font-semibold">
                       Type
                     </th>
+                    <th
+                      v-if="fields.some((field) => field.type === 'select')"
+                      class="px-4 py-2 text-left text-sm font-semibold"
+                    >
+                      Options
+                    </th>
                     <th class="px-4 py-2 text-left text-sm font-semibold">
                       Position
                     </th>
                     <th class="px-4 py-2 text-left text-sm font-semibold">
-                      Options
+                      Required
                     </th>
                   </tr>
                 </thead>
@@ -153,7 +159,19 @@
                         <option value="select">Select</option>
                         <option value="boolean">Boolean</option>
                         <option value="textarea">Textarea</option>
+                        <option value="richtext">Rich Text</option>
                       </select>
+                    </td>
+                    <td
+                      v-if="fields.some((field) => field.type === 'select')"
+                      class="px-4 py-2"
+                    >
+                      <textarea
+                        v-if="field.type === 'select'"
+                        v-model="field.options"
+                        placeholder="Comma-separated values (e.g., Option 1, Option 2)"
+                        class="w-full border border-gray-300 dark:border-gray-600 rounded-md px-2 py-1"
+                      ></textarea>
                     </td>
                     <td class="px-4 py-2">
                       <select
@@ -165,14 +183,21 @@
                         </option>
                       </select>
                     </td>
-                    <td class="px-4 py-2">
-                      <textarea
-                        v-if="field.type === 'select'"
-                        v-model="field.options"
-                        placeholder="Comma-separated values (e.g., Option 1, Option 2)"
-                        class="w-full border border-gray-300 dark:border-gray-600 rounded-md px-2 py-1"
-                      ></textarea>
+
+                    <td class="flex align-middle px-4 py-4">
+                      <input
+                        id="is_required"
+                        v-model="field.is_required"
+                        type="checkbox"
+                        class="h-5 w-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                      />
+                      <label
+                        for="is_hidden"
+                        class="font-bold text-gray-700 dark:text-white"
+                      >
+                      </label>
                     </td>
+
                     <td class="px-4 py-2"></td>
                   </tr>
                 </tbody>
@@ -288,6 +313,7 @@ onMounted(async () => {
         name: "New Field",
         type: "text",
         position: 1,
+        is_required: false,
         options: null,
       });
     } else {
@@ -307,6 +333,7 @@ onMounted(async () => {
           "select",
           "boolean",
           "textarea",
+          "richtext",
         ].includes(field.type)
           ? field.type
           : "text",
@@ -328,6 +355,7 @@ const addField = () => {
     name: "New Field",
     type: "text",
     position: fields.value.length + 1,
+    is_required: false,
     options: null,
   });
 };

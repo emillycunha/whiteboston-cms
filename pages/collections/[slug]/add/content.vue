@@ -75,6 +75,14 @@
                 :placeholder="`Enter ${field.label}`"
               ></textarea>
 
+              <RichTextEditor
+                v-else-if="field.type === 'richtext'"
+                :id="field.key"
+                v-model="formData[field.key]"
+                class="border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 rounded-md shadow-sm focus:ring focus:ring-blue-500 p-2 w-full"
+                :placeholder="`Enter ${field.label}`"
+              ></RichTextEditor>
+
               <!-- Checkbox for Boolean -->
               <div
                 v-else-if="field.type === 'boolean'"
