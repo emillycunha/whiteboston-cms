@@ -68,6 +68,25 @@
                 :placeholder="`Enter ${field.label}`"
               ></textarea>
 
+              <!-- Markdown Text Field -->
+              <div v-else-if="field.type === 'richtextmarkdown'">
+                <MarkdownEditor
+                  :id="field.key"
+                  v-model="field.value"
+                  class="border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 rounded-md shadow-sm focus:ring focus:ring-blue-500 p-2 w-full"
+                ></MarkdownEditor>
+                <p>Parent modelValue: {{ field.value }}</p>
+              </div>
+              <!-- Markdown Text Field -->
+              <div v-else-if="field.type === 'richtexthtml'">
+                <HtmlEditor
+                  :id="field.key"
+                  v-model="field.value"
+                  class="border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 rounded-md shadow-sm focus:ring focus:ring-blue-500 p-2 w-full"
+                ></HtmlEditor>
+                <p>Parent modelValue: {{ field.value }}</p>
+              </div>
+
               <!-- Checkbox for Boolean -->
               <div
                 v-else-if="field.type === 'boolean'"
@@ -135,7 +154,7 @@ const itemId = route.params.id;
 const contentStore = useContentStore();
 const isLoading = computed(() => contentStore.isLoading);
 const error = computed(() => contentStore.error);
-const fields = ref([]); // Fields for the item
+const fields = ref([]);
 
 // Fetch Item Data on Mount
 onMounted(async () => {
@@ -155,7 +174,7 @@ onMounted(async () => {
       key: field.key,
       label: field.label,
       type: field.type,
-      value: item.data[field.key] || "", // Use the fetched `item`
+      value: item.data[field.key] || "",
       options: field.options || [],
       isRequired: field.is_required,
     }));

@@ -5,7 +5,7 @@ export const useNotificationStore = defineStore("notification", {
     notifications: [] as { id: number; type: string; message: string }[],
   }),
   actions: {
-    showNotification(type: string, message: string, duration = 5000) {
+    showNotification(type: string, message: string, duration = 9000) {
       const id = Date.now();
       this.notifications.push({ id, type, message });
 

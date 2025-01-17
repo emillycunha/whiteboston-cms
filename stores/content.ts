@@ -259,10 +259,11 @@ export const useContentStore = defineStore("content", {
           "[Content Store] Permission granted: User can edit content."
         );
 
+        /* Show success notification
         notificationStore.showNotification(
           "success",
           "Permission granted. You can edit content."
-        );
+        ); */
       }
 
       try {
@@ -329,10 +330,11 @@ export const useContentStore = defineStore("content", {
           "[Content Store] Permission granted: User can add content."
         );
 
+        /* Show success notification
         notificationStore.showNotification(
           "success",
           "Permission granted. You can add content."
-        );
+        ); */
       }
 
       try {
@@ -397,11 +399,11 @@ export const useContentStore = defineStore("content", {
           "[Collections Store] Permission granted: User can edit collections."
         );
 
-        // Show success notification
+        /* Show success notification
         notificationStore.showNotification(
           "success",
           "Permission granted. You can edit collections."
-        );
+        ); */
       }
 
       try {
@@ -462,10 +464,11 @@ export const useContentStore = defineStore("content", {
       } else {
         console.log("[Content Store] Permission granted: User can add fields.");
 
+        /* Show success notification
         notificationStore.showNotification(
           "success",
           "Permission granted. You can add fields."
-        );
+        ); */
       }
 
       try {

@@ -52,8 +52,8 @@
             <td v-for="column in columns" :key="column.key" class="px-4 py-4">
               {{
                 column.formatter
-                  ? column.formatter(row[column.key])
-                  : row[column.key]
+                  ? truncateText(column.formatter(row[column.key]))
+                  : truncateText(row[column.key])
               }}
             </td>
             <td v-if="actionType !== 'none'" class="px-4 py-2">
@@ -142,6 +142,11 @@ const selectedRows = ref([]);
 const currentPage = ref(1);
 const activeSortKey = ref("");
 const activeSortOrder = ref("asc");
+
+const truncateText = (text, maxLength = 100) => {
+  if (!text) return ""; // Ensure there's no error if text is null/undefined
+  return text.length > maxLength ? text.slice(0, maxLength) + "..." : text;
+};
 
 const totalPages = computed(() => {
   return Math.ceil(props.data.length / props.rowsPerPage);

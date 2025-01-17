@@ -2,7 +2,7 @@
   <div v-if="editor" class="container">
     <EditorHeader :editor="editor" :setLink="setLink" />
 
-    <div class="border border-gray-500">
+    <div class="border border-gray-200 rounded-md">
       <editor-content :editor="editor" class="prose max-w-full" />
     </div>
   </div>
@@ -15,7 +15,7 @@ import { Editor, EditorContent } from "@tiptap/vue-3";
 import { Link } from "@tiptap/extension-link";
 import { convertHtmlToMarkdown } from "@/utils/htmlToMarkdown";
 
-defineProps({
+const props = defineProps({
   modelValue: {
     type: String,
     default: "",
@@ -24,6 +24,7 @@ defineProps({
 
 const emit = defineEmits(["update:modelValue"]);
 const modelValue = ref("");
+const selectedOption = ref(props.modelValue);
 const editor = ref(null);
 
 function setLink() {
@@ -52,9 +53,16 @@ function setLink() {
     .run();
 }
 
-// Watch for changes in `modelValue` and update the editor content
+// Watch for changes and update the parent modelValue
 watch(
-  () => modelValue,
+  () => selectedOption.value,
+  (newVal) => {
+    emit("update:modelValue", newVal);
+  }
+);
+
+watch(
+  () => modelValue.value,
   (value) => {
     if (!editor.value) return;
 
@@ -62,10 +70,15 @@ watch(
     if (isSame) return;
 
     editor.value.commands.setContent(value, false);
-  }
+  },
+  { immediate: true }
 );
 
 onMounted(() => {
+  const htmlContent = convertMarkdownToHtml(
+    props.modelValue || "starting typing"
+  );
+
   editor.value = new Editor({
     extensions: [
       StarterKit,
@@ -74,11 +87,10 @@ onMounted(() => {
         defaultProtocol: "https",
       }),
     ],
-    content: "",
+    content: htmlContent,
     onUpdate: ({ editor }) => {
       const htmlContent = editor.getHTML();
       const markdownContent = convertHtmlToMarkdown(htmlContent);
-
       emit("update:modelValue", markdownContent);
     },
   });

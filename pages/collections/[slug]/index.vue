@@ -34,9 +34,10 @@
       :data="content"
       :columns="fields"
       :enableCheckbox="true"
-      :actionType="'view'"
+      :actionType="'both'"
       :rowsPerPage="10"
       @view="handleView"
+      @edit="handleEdit"
       @selection-change="updateSelectedItems"
     />
 
@@ -90,12 +91,20 @@ onMounted(async () => {
 
 // Handle Edit
 const handleView = (row) => {
-  console.log("Viewing row:", row);
-
   navigateTo({
     path: `/collections/${collectionSlug}/view/${row.id}`,
     query: {
       collection: collectionSlug,
+    },
+  });
+};
+
+const handleEdit = (row) => {
+  navigateTo({
+    path: `/collections/${collectionSlug}/edit/${row.id}`,
+    query: {
+      collection: collectionSlug,
+      edit: "true",
     },
   });
 };

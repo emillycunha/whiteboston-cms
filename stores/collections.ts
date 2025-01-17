@@ -216,10 +216,11 @@ export const useCollectionsStore = defineStore("collections", {
           "[Collections Store] Permission granted: User can edit collections."
         );
 
+        /* Show success notification
         notificationStore.showNotification(
           "success",
           "Permission granted. You can edit collections."
-        );
+        ); */
       }
 
       try {
@@ -285,10 +286,11 @@ export const useCollectionsStore = defineStore("collections", {
           "[Collections Store] Permission granted: User can add collections."
         );
 
+        /* Show success notification
         notificationStore.showNotification(
           "success",
           "Permission granted. You can add collections."
-        );
+        ); */
       }
 
       if (!organizationId) {
@@ -393,10 +395,11 @@ export const useCollectionsStore = defineStore("collections", {
           "[Collections Store] Permission granted: User can edit collections."
         );
 
+        /* Show success notification
         notificationStore.showNotification(
           "success",
           "Permission granted. You can edit collections."
-        );
+        ); */
       }
 
       try {

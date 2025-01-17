@@ -16,7 +16,7 @@ function preprocessHtml(htmlContent) {
 export function convertHtmlToMarkdown(htmlContent) {
   console.log("[Input HTML Content]:", htmlContent);
 
-  // Preprocess the HTML
+  // Preprocess the HTML to ensure any <li><p></p></li> are properly formatted
   const preprocessedHtml = preprocessHtml(htmlContent);
 
   const lines = preprocessedHtml
@@ -34,8 +34,21 @@ export function convertHtmlToMarkdown(htmlContent) {
     // Convert Strike-Through
     .replace(/<s>(.*?)<\/s>/g, "~~$1~~")
 
-    // Convert Paragraphs
-    .replace(/<p>(.*?)<\/p>/g, "$1\n")
+    // Convert Paragraphs with better handling of inline elements inside
+    .replace(/<p>(.*?)<\/p>/g, (match, content) => {
+      // Handle empty paragraphs and preserve them
+      if (content.trim() === "") {
+        return "\n\n"; // Add two newlines for an empty paragraph
+      }
+      // Handle inline elements inside paragraphs
+      return (
+        content
+          .replace(/<strong>(.*?)<\/strong>/g, "**$1**")
+          .replace(/<em>(.*?)<\/em>/g, "_$1_")
+          .replace(/<b>(.*?)<\/b>/g, "**$1**")
+          .replace(/<i>(.*?)<\/i>/g, "_$1_") + "\n\n" // Ensure double newline for paragraphs
+      );
+    })
 
     // Convert Code Blocks
     .replace(
@@ -84,8 +97,10 @@ export function convertHtmlToMarkdown(htmlContent) {
     // Convert link
     .replace(/<a [^>]*href="(.*?)"[^>]*>(.*?)<\/a>/g, "[$2]($1)")
 
-    // Handle Line Breaks
+    // Handle Line Breaks (convert <br> to newline)
     .replace(/<br\s*\/?>/g, "\n")
+
+    // Remove other HTML tags
     .replace(/<\/?[^>]+(>|$)/g, "");
 
   const markdown = lines.trim();

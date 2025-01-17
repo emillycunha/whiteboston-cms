@@ -141,27 +141,24 @@
                     :key="field.key"
                     class=""
                   >
+                    <!-- Field Name -->
                     <td class="px-4 py-2">
                       <input
                         type="text"
                         v-model="field.name"
-                        class="w-full border border-gray-200 dark:border-gray-600 rounded-md px-2 py-1 disabled:opacity-50"
+                        class="w-full border border-gray-300 dark:border-gray-600 rounded-md px-2 py-1 disabled:opacity-50"
                       />
                     </td>
+
+                    <!-- Field Type-->
                     <td class="px-4 py-2">
-                      <select
+                      <CustomSelect
                         v-model="field.type"
+                        :options="fieldOptions"
                         class="w-full border border-gray-300 dark:border-gray-600 rounded-md px-2 py-1"
-                      >
-                        <option value="text">Text</option>
-                        <option value="number">Number</option>
-                        <option value="date">Date</option>
-                        <option value="select">Select</option>
-                        <option value="boolean">Boolean</option>
-                        <option value="textarea">Textarea</option>
-                        <option value="richtext">Rich Text</option>
-                      </select>
+                      />
                     </td>
+                    <!-- Select Options-->
                     <td
                       v-if="fields.some((field) => field.type === 'select')"
                       class="px-4 py-2"
@@ -173,17 +170,16 @@
                         class="w-full border border-gray-300 dark:border-gray-600 rounded-md px-2 py-1"
                       ></textarea>
                     </td>
+                    <!-- Field Position-->
                     <td class="px-4 py-2">
-                      <select
+                      <CustomSelect
                         v-model="field.position"
+                        :options="fieldPosition"
                         class="w-full border border-gray-300 dark:border-gray-600 rounded-md px-2 py-1"
-                      >
-                        <option v-for="i in fields.length" :value="i">
-                          {{ i }}
-                        </option>
-                      </select>
+                      />
                     </td>
 
+                    <!-- Field Required-->
                     <td class="flex align-middle px-4 py-4">
                       <input
                         id="is_required"
@@ -250,7 +246,17 @@
 <script setup>
 import { ref, computed, onMounted } from "vue";
 import { useRoute, useRouter } from "vue-router";
-import { XCircleIcon, CheckCircleIcon } from "@heroicons/vue/24/outline";
+import {
+  XCircleIcon,
+  CheckCircleIcon,
+  DocumentTextIcon,
+  BoldIcon,
+  HashtagIcon,
+  CalendarIcon,
+  QueueListIcon,
+  StopIcon,
+  PencilSquareIcon,
+} from "@heroicons/vue/24/outline";
 
 const authStore = useAuthStore();
 const notificationStore = useNotificationStore();
@@ -281,6 +287,30 @@ const collectionName = computed(
 // Editable Fields
 const fields = ref([]);
 let originalSlug = "";
+
+// Define the available options for the custom dropdown
+const fieldOptions = [
+  { label: "Text", icon: BoldIcon, value: "text" },
+  { label: "Number", icon: HashtagIcon, value: "number" },
+  { label: "Date", icon: CalendarIcon, value: "date" },
+  { label: "Select", icon: QueueListIcon, value: "select" },
+  { label: "Boolean", icon: StopIcon, value: "boolean" },
+  { label: "Textarea", icon: DocumentTextIcon, value: "textarea" },
+  { label: "Rich Text (HTML)", icon: PencilSquareIcon, value: "richtexthtml" },
+  {
+    label: "Rich Text (Markdown)",
+    icon: PencilSquareIcon,
+    value: "richtextmarkdown",
+  },
+];
+
+// Options for CustomSelect to manage field position (0 to fields.length)
+const fieldPosition = computed(() => {
+  return [...Array(fields.value.length).keys()].map((i) => ({
+    label: `${i + 1}`,
+    value: i + 1,
+  }));
+});
 
 onMounted(async () => {
   try {
@@ -333,7 +363,8 @@ onMounted(async () => {
           "select",
           "boolean",
           "textarea",
-          "richtext",
+          "richtexthtml",
+          "richtextmarkdown",
         ].includes(field.type)
           ? field.type
           : "text",

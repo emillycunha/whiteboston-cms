@@ -64,7 +64,7 @@ onMounted(async () => {
   }
 });
 
-const enableEdit = (row) => {
+const enableEdit = () => {
   navigateTo({
     path: `/collections/${collectionSlug}/edit/${itemId}`,
     query: {
