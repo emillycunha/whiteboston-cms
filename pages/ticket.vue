@@ -5,6 +5,7 @@
 
     <!-- Ticket Submission Form -->
     <RowTable :fields="fields" :editable="isEditing" />
+
     <PageFooter
       title=""
       :buttons="[
@@ -22,7 +23,7 @@
 
 <script setup>
 import { ref } from "vue";
-import RowTable from "~/components/RowTable.vue";
+import RowTable from "~/components/BasicForm.vue";
 import { CheckCircleIcon, ChevronLeftIcon } from "@heroicons/vue/24/outline";
 
 const { $supabase } = useNuxtApp();
@@ -35,6 +36,7 @@ const fields = ref([
     value: "",
     fullRow: false,
     attrs: { maxlength: 100, required: true },
+    type: "text",
     inputClass: "",
     placeholder: "Enter ticket title",
   },

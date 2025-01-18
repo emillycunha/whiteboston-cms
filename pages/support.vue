@@ -22,7 +22,7 @@
 <script setup>
 import { ref } from "vue";
 import PageHeader from "~/components/PageHeader.vue";
-import RowTable from "~/components/RowTable.vue";
+import RowTable from "~/components/BasicForm.vue";
 
 import { ChevronLeftIcon, CheckCircleIcon } from "@heroicons/vue/24/outline";
 
@@ -69,10 +69,6 @@ const fields = ref([
     inputClass: "w-full",
   },
 ]);
-
-const enableEdit = () => {
-  isEditing.value = true;
-};
 
 const goBack = () => {
   navigateTo("/dashboard");

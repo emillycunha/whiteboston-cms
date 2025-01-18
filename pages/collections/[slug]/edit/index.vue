@@ -144,8 +144,8 @@
                     <!-- Field Name -->
                     <td class="px-4 py-2">
                       <input
-                        type="text"
                         v-model="field.name"
+                        type="text"
                         class="w-full border border-gray-300 dark:border-gray-600 rounded-md px-2 py-1 disabled:opacity-50"
                       />
                     </td>
@@ -202,9 +202,9 @@
 
             <!-- Add Field Button -->
             <button
-              @click="addField"
               type="button"
               class="mt-2 ml-3 px-3 py-1 bg-violet-500 text-white text-sm rounded-md"
+              @click="addField"
             >
               Add New Field
             </button>
@@ -302,6 +302,7 @@ const fieldOptions = [
     icon: PencilSquareIcon,
     value: "richtextmarkdown",
   },
+  { label: "Image", icon: StopIcon, value: "image" },
 ];
 
 // Options for CustomSelect to manage field position (0 to fields.length)
@@ -365,6 +366,7 @@ onMounted(async () => {
           "textarea",
           "richtexthtml",
           "richtextmarkdown",
+          "image",
         ].includes(field.type)
           ? field.type
           : "text",

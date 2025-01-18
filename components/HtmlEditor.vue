@@ -9,21 +9,12 @@
 </template>
 
 <script setup>
-import { ref, watch, onMounted, onUnmounted } from "vue";
+import { ref, onMounted, onUnmounted } from "vue";
 import StarterKit from "@tiptap/starter-kit";
 import { Editor, EditorContent } from "@tiptap/vue-3";
 import { Link } from "@tiptap/extension-link";
 
-const props = defineProps({
-  modelValue: {
-    type: String,
-    default: "",
-  },
-});
-
-const emit = defineEmits(["update:modelValue"]);
-const modelValue = ref("");
-const selectedOption = ref(props.modelValue);
+const model = defineModel();
 const editor = ref(null);
 
 function setLink() {
@@ -52,26 +43,6 @@ function setLink() {
     .run();
 }
 
-// Watch for changes and update the parent modelValue
-watch(
-  () => selectedOption.value,
-  (newVal) => {
-    emit("update:modelValue", newVal);
-  }
-);
-
-watch(
-  () => modelValue,
-  (value) => {
-    if (!editor.value) return;
-
-    const isSame = editor.value.getHTML() === value;
-    if (isSame) return;
-
-    editor.value.commands.setContent(value, false);
-  }
-);
-
 onMounted(() => {
   editor.value = new Editor({
     extensions: [
@@ -81,9 +52,9 @@ onMounted(() => {
         defaultProtocol: "https",
       }),
     ],
-    content: props.modelValue || "starting typing",
+    content: model.value || "starting typing",
     onUpdate: () => {
-      emit("update:modelValue", editor.value.getHTML());
+      model.value = editor.value.getHTML();
     },
   });
 });

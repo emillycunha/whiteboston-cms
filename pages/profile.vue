@@ -2,60 +2,14 @@
   <div class="px-6 py-4 space-y-6">
     <!-- Page Header -->
     <PageHeader title="Profile" />
-    <div
-      class="rounded-md bg-white shadow-sm border border-gray-200 dark:bg-slate-800 dark:border-slate-700"
-    >
-      <div class="p-4 sm:p-8">
-        <form class="">
-          <div class="flex flex-wrap gap-y-4">
-            <!-- Name -->
-            <div class="w-1/2 p-2">
-              <label
-                class="block text-base font-semibold text-gray-700 dark:text-gray-300"
-                >Name</label
-              >
-              <input
-                v-model="authStore.name"
-                type="text"
-                :disabled="isDemoUser"
-                placeholder="Enter your name"
-                class="mt-1 w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 rounded-md shadow-sm focus:ring focus:ring-blue-500 disabled:opacity-50"
-              />
-            </div>
 
-            <!-- Email -->
-            <div class="w-full p-2">
-              <label
-                class="block text-base font-semibold text-gray-700 dark:text-gray-300"
-                >Email</label
-              >
-              <input
-                v-model="authStore.email"
-                type="email"
-                :disabled="isDemoUser"
-                placeholder="Enter your email"
-                class="mt-1 w-1/2 border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 rounded-md shadow-sm focus:ring focus:ring-blue-500 disabled:opacity-50"
-              />
-            </div>
-
-            <!-- Password -->
-            <div class="w-full p-2">
-              <label
-                class="block text-base font-semibold text-gray-700 dark:text-gray-300"
-                >Password</label
-              >
-              <input
-                v-model="password"
-                type="password"
-                :disabled="isDemoUser"
-                placeholder="Update your password"
-                class="mt-1 w-1/2 border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 rounded-md shadow-sm focus:ring focus:ring-blue-500 disabled:opacity-50"
-              />
-            </div>
-          </div>
-        </form>
-      </div>
-    </div>
+    <!-- Form for Profile -->
+    <BasicForm
+      :fields="fields"
+      :editable="true"
+      @submit="saveProfile"
+      @cancel="cancelProfile"
+    />
 
     <PageFooter
       title=""
@@ -80,18 +34,44 @@
 </template>
 
 <script setup>
-import { onMounted } from "vue";
+import { ref, onMounted } from "vue";
 import { useAuthStore } from "~/stores/auth";
 import { ChevronLeftIcon, CheckCircleIcon } from "@heroicons/vue/24/outline";
 
 const authStore = useAuthStore();
-const isDemoUser = false;
+
+// Fields for profile form
+const fields = ref([
+  {
+    key: "name",
+    label: "Name",
+    type: "text",
+    value: authStore.name,
+    isRequired: true,
+    placeholder: "Enter your name",
+  },
+  {
+    key: "email",
+    label: "Email",
+    type: "email",
+    value: authStore.email,
+    isRequired: true,
+    placeholder: "Enter your email",
+  },
+  {
+    key: "password",
+    label: "Password",
+    type: "password",
+    value: "",
+    isRequired: false,
+    placeholder: "Update your password",
+  },
+]);
 
 // Fetch user metadata and log details on page load
 onMounted(async () => {
   if (authStore.isAuthenticated) {
     await authStore.fetchUserMetadata();
-  } else {
   }
 });
 
@@ -101,9 +81,8 @@ function cancelProfile() {
 }
 
 function saveProfile() {
-  console.log("Profile saved:", {});
+  // Handle saving profile (you would likely call some API or store method here)
+  console.log("Profile saved:", fields.value);
   alert("Profile saved successfully!");
 }
-
-const password = ref("");
 </script>

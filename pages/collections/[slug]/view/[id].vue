@@ -1,3 +1,7 @@
+<!-- 
+  Developer Note:
+  This page allows users to view content.
+-->
 <template>
   <div class="px-6 py-4 space-y-6">
     <!-- Header Section -->
@@ -25,7 +29,7 @@
     <div v-if="error" class="text-red-500">{{ error }}</div>
 
     <!-- Reusable Form to View Item -->
-    <RowTable
+    <BaseForm
       v-if="!isLoading && !error && fields.length"
       :fields="fields"
       :editable="false"
@@ -54,13 +58,35 @@ const fields = ref([]); // Fields for the item
 
 // Fetch Item Data on Mount
 onMounted(async () => {
-  const item = await contentStore.fetchContentItem(collectionSlug, itemId);
-  if (item) {
-    fields.value = Object.entries(item.data).map(([key, value]) => ({
-      key,
-      label: key.charAt(0).toUpperCase() + key.slice(1),
-      value,
+  try {
+    // Fetch content and fields for the collection
+    await contentStore.fetchContentAndFields(collectionSlug);
+
+    // Fetch the specific content item
+    const item = await contentStore.fetchContentItem(collectionSlug, itemId);
+    if (!item) {
+      throw new Error("Item not found");
+    }
+    console.log("[Debug] Item Loaded for Editing:", item);
+
+    // Map fields with the content data
+    fields.value = contentStore.fields.map((field) => ({
+      key: field.key,
+      label: field.label,
+      type: field.type,
+      value: item.data[field.key] || "",
+      options: field.options || [],
+      isRequired: field.is_required,
+      fullRow:
+        field.type === "textarea" ||
+        field.type === "richtextmarkdown" ||
+        field.type === "richtexthtml" ||
+        field.type === "image",
     }));
+
+    console.log("[Debug] Fields Loaded:", fields.value);
+  } catch (err) {
+    console.error("[Error Loading Fields]:", err);
   }
 });
 

@@ -1,15 +1,3 @@
-<script setup>
-import { useAuthStore } from "~/stores/auth";
-import { MoonIcon, SunIcon } from "@heroicons/vue/24/outline";
-import { Switch } from "@headlessui/vue";
-
-const authStore = useAuthStore();
-
-const toggleDarkMode = () => {
-  authStore.toggleDarkMode();
-};
-</script>
-
 <template>
   <div class="flex flex-row items-center gap-x-2 justify-center">
     <SunIcon class="h-5 w-5 text-gray-700 dark:text-gray-300" />
@@ -28,3 +16,15 @@ const toggleDarkMode = () => {
     <MoonIcon class="h-5 w-5 text-gray-700 dark:text-gray-300" />
   </div>
 </template>
+
+<script setup>
+import { useAuthStore } from "~/stores/auth";
+import { MoonIcon, SunIcon } from "@heroicons/vue/24/outline";
+import { Switch } from "@headlessui/vue";
+
+const authStore = useAuthStore();
+
+const toggleDarkMode = () => {
+  authStore.toggleDarkMode();
+};
+</script>

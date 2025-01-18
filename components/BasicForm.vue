@@ -35,7 +35,7 @@
                   field.inputClass,
                   field.error ? 'border-red-500' : '',
                 ]"
-              />
+              ></textarea>
 
               <select
                 v-else-if="editable && field.type === 'select'"
@@ -57,19 +57,51 @@
                 </option>
               </select>
 
+              <!-- Text Input -->
               <input
-                v-else-if="editable"
+                v-else-if="editable && field.type === 'text'"
                 :id="`${fieldIndex}-${field.key}`"
                 v-model="field.value"
-                :type="field.type || 'text'"
                 :placeholder="field.placeholder || ''"
                 v-bind="field.attrs || {}"
+                :type="field.type"
                 :class="[
                   'border border-gray-500 focus:ring-violet-500  dark:bg-slate-700 dark:border-slate-600 dark:placeholder-white dark:text-white dark:focus:ring-slate-500 rounded-md p-2 w-full',
                   field.inputClass,
                   field.error ? 'border-red-500' : '',
                 ]"
               />
+
+              <!-- Email Input -->
+              <input
+                v-else-if="editable && field.type === 'email'"
+                :id="`${fieldIndex}-${field.key}`"
+                v-model="field.value"
+                :placeholder="field.placeholder || ''"
+                v-bind="field.attrs || {}"
+                type="email"
+                :class="[
+                  'border border-gray-500 focus:ring-violet-500  dark:bg-slate-700 dark:border-slate-600 dark:placeholder-white dark:text-white dark:focus:ring-slate-500 rounded-md p-2 w-full',
+                  field.inputClass,
+                  field.error ? 'border-red-500' : '',
+                ]"
+              />
+
+              <!-- Password Input -->
+              <input
+                v-else-if="editable && field.type === 'password'"
+                :id="`${fieldIndex}-${field.key}`"
+                v-model="field.value"
+                :placeholder="field.placeholder || ''"
+                v-bind="field.attrs || {}"
+                type="password"
+                :class="[
+                  'border border-gray-500 focus:ring-violet-500  dark:bg-slate-700 dark:border-slate-600 dark:placeholder-white dark:text-white dark:focus:ring-slate-500 rounded-md p-2 w-full',
+                  field.inputClass,
+                  field.error ? 'border-red-500' : '',
+                ]"
+              />
+
               <p v-else>{{ field.value }}</p>
               <p v-if="field.hint" class="text-gray-500 text-xs mt-1">
                 {{ field.hint }}

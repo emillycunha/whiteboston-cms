@@ -1,10 +1,10 @@
 <template>
-  <div class="relative" ref="dropdownContainer">
+  <div ref="dropdownContainer" class="relative">
     <!-- Button to trigger dropdown -->
     <button
-      @click="toggleDropdown"
       type="button"
       class="w-full px-2 py-1 text-left flex justify-between items-center"
+      @click="toggleDropdown"
     >
       <div class="flex-1">{{ selectedOptionLabel || "Select Option" }}</div>
       <div><ChevronDownIcon class="w-4 h-4" /></div>
@@ -19,8 +19,8 @@
         <li
           v-for="(option, index) in options"
           :key="index"
-          @click="selectOption(option)"
           class="px-2 py-1 cursor-pointer bg-gray-200 rounded-md m-1 hover:bg-gray-300 dark:hover:bg-gray-700 flex flex-row text-sm items-center align-middle"
+          @click="selectOption(option)"
         >
           <div v-if="option.icon" class="mr-2">
             <component :is="option.icon" class="w-4 h-4" />
@@ -35,9 +35,11 @@
 </template>
 
 <script setup>
-import { ref, watch, onMounted } from "vue";
+import { ref, computed, onMounted, onUnmounted } from "vue";
 import { ChevronDownIcon } from "@heroicons/vue/24/outline";
 
+// Define model for v-model binding
+const model = defineModel();
 const props = defineProps({
   options: {
     type: Array,
@@ -49,9 +51,8 @@ const props = defineProps({
   },
 });
 
-const emit = defineEmits(["update:modelValue"]);
 const isOpen = ref(false);
-const selectedOption = ref("");
+const selectedOption = ref(model);
 
 const selectedOptionLabel = computed(() => {
   const selectedOptionObj = props.options.find(
@@ -60,25 +61,12 @@ const selectedOptionLabel = computed(() => {
   return selectedOptionObj ? selectedOptionObj.label : null;
 });
 
-watch(
-  () => props.modelValue,
-  (newVal) => {
-    if (newVal !== selectedOption.value) {
-      selectedOption.value = newVal;
-    }
-  },
-  { immediate: true }
-);
-
 const toggleDropdown = () => {
   isOpen.value = !isOpen.value;
 };
 
 const selectOption = (option) => {
-  if (selectedOption.value !== option.value) {
-    selectedOption.value = option.label;
-    emit("update:modelValue", option.value);
-  }
+  model.value = option.value;
   isOpen.value = false;
 };
 

@@ -14,8 +14,6 @@ function preprocessHtml(htmlContent) {
 }
 
 export function convertHtmlToMarkdown(htmlContent) {
-  console.log("[Input HTML Content]:", htmlContent);
-
   // Preprocess the HTML to ensure any <li><p></p></li> are properly formatted
   const preprocessedHtml = preprocessHtml(htmlContent);
 
@@ -104,8 +102,6 @@ export function convertHtmlToMarkdown(htmlContent) {
     .replace(/<\/?[^>]+(>|$)/g, "");
 
   const markdown = lines.trim();
-
-  console.log("[Output Markdown Content]:", markdown);
 
   return markdown;
 }

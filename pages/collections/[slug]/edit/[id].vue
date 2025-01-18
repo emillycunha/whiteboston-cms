@@ -6,135 +6,39 @@
 <template>
   <div class="px-6 py-4 space-y-6">
     <!-- Header Section -->
-    <PageHeader :title="`Editing`" />
+    <PageHeader
+      :title="`Editing`"
+      :buttons="[
+        {
+          label: 'Cancel',
+          icon: XCircleIcon,
+          iconPosition: 'before',
+          variant: 'secondary',
+          onClick: cancelEdit,
+        },
+        {
+          label: 'Save',
+          icon: CheckCircleIcon,
+          iconPosition: 'after',
+          variant: 'primary',
+          onClick: saveChanges,
+        },
+      ]"
+    />
 
     <div v-if="isLoading" class="text-center">Loading item...</div>
     <div v-if="error" class="text-red-500">{{ error }}</div>
 
     <!-- Custom Form -->
-    <form v-if="!isLoading && fields.length" @submit.prevent="saveChanges">
-      <div
-        class="rounded-md bg-white shadow-sm border border-gray-200 dark:bg-slate-800 dark:border-slate-700 mb-6"
-      >
-        <div class="p-4 sm:p-8">
-          <div class="flex flex-wrap gap-y-4">
-            <div
-              v-for="field in fields"
-              :key="field.key"
-              :class="[
-                'flex flex-col space-y-2 p-2',
-                field.type === 'text' ? 'w-1/2' : 'w-full',
-              ]"
-            >
-              <label
-                :for="field.key"
-                class="font-bold text-gray-700 dark:text-white"
-              >
-                {{ field.label }}
-              </label>
+    <BaseForm
+      v-if="!isLoading && !error && fields.length"
+      :fields="fields"
+      :editable="true"
+      @submit="saveChanges"
+      @cancel="cancelEdit"
+    />
 
-              <!-- Date Picker -->
-              <input
-                v-if="field.type === 'date'"
-                v-model="field.value"
-                :id="field.key"
-                type="date"
-                class="border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 rounded-md shadow-sm focus:ring focus:ring-blue-500 p-2 w-1/2"
-              />
-
-              <!-- Select Field -->
-              <select
-                v-else-if="field.type === 'select' && field.options"
-                :id="field.key"
-                v-model="field.value"
-                class="border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 rounded-md shadow-sm focus:ring focus:ring-blue-500 p-2 w-1/2"
-              >
-                <option
-                  v-for="option in field.options"
-                  :key="option.value"
-                  :value="option.value"
-                >
-                  {{ option.label }}
-                </option>
-              </select>
-
-              <!-- Textarea Field -->
-              <textarea
-                v-else-if="field.type === 'textarea'"
-                :id="field.key"
-                v-model="field.value"
-                :rows="10"
-                class="border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 rounded-md shadow-sm focus:ring focus:ring-blue-500 p-2 w-full"
-                :placeholder="`Enter ${field.label}`"
-              ></textarea>
-
-              <!-- Markdown Text Field -->
-              <div v-else-if="field.type === 'richtextmarkdown'">
-                <MarkdownEditor
-                  :id="field.key"
-                  v-model="field.value"
-                  class="border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 rounded-md shadow-sm focus:ring focus:ring-blue-500 p-2 w-full"
-                ></MarkdownEditor>
-                <p>Parent modelValue: {{ field.value }}</p>
-              </div>
-              <!-- Markdown Text Field -->
-              <div v-else-if="field.type === 'richtexthtml'">
-                <HtmlEditor
-                  :id="field.key"
-                  v-model="field.value"
-                  class="border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 rounded-md shadow-sm focus:ring focus:ring-blue-500 p-2 w-full"
-                ></HtmlEditor>
-                <p>Parent modelValue: {{ field.value }}</p>
-              </div>
-
-              <!-- Checkbox for Boolean -->
-              <div
-                v-else-if="field.type === 'boolean'"
-                class="flex items-center space-x-2"
-              >
-                <input
-                  :id="field.key"
-                  v-model="field.value"
-                  type="checkbox"
-                  class="h-5 w-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                />
-              </div>
-
-              <!-- Default Input -->
-              <input
-                v-else
-                :id="field.key"
-                v-model="field.value"
-                :type="field.type"
-                class="border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 rounded-md shadow-sm focus:ring focus:ring-blue-500 p-2 w-full"
-                :placeholder="`Enter ${field.label}`"
-              />
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Form Buttons -->
-      <PageFooter
-        title=""
-        :buttons="[
-          {
-            label: 'Cancel',
-            icon: XCircleIcon,
-            iconPosition: 'before',
-            variant: 'secondary',
-            onClick: cancelEdit,
-          },
-          {
-            label: 'Save',
-            icon: CheckCircleIcon,
-            iconPosition: 'after',
-            variant: 'primary',
-            type: 'submit',
-          },
-        ]"
-      />
-    </form>
+    <div v-else-if="!isLoading && !error">No data found for this item.</div>
   </div>
 </template>
 
@@ -177,6 +81,11 @@ onMounted(async () => {
       value: item.data[field.key] || "",
       options: field.options || [],
       isRequired: field.is_required,
+      fullRow:
+        field.type === "textarea" ||
+        field.type === "richtextmarkdown" ||
+        field.type === "richtexthtml" ||
+        field.type === "image",
     }));
 
     console.log("[Debug] Fields Loaded:", fields.value);
@@ -184,6 +93,16 @@ onMounted(async () => {
     console.error("[Error Loading Fields]:", err);
   }
 });
+
+const cancelEdit = () => {
+  navigateTo({
+    path: `/collections/${collectionSlug}/view/${itemId}`,
+    query: {
+      collection: collectionSlug,
+      edit: "false",
+    },
+  });
+};
 
 // Save Changes
 const saveChanges = async () => {
@@ -202,16 +121,12 @@ const saveChanges = async () => {
     );
 
     if (success) {
-      router.push(`/collections/${collectionSlug}`);
+      router.push(`/collections/${collectionSlug}/view/${itemId}`);
     } else {
       console.error("Failed to save changes.");
     }
   } catch (err) {
     console.error("Error saving changes:", err);
   }
-};
-
-const cancelEdit = () => {
-  router.push(`/collections/${collectionSlug}`);
 };
 </script>

@@ -57,9 +57,6 @@ import { Cog6ToothIcon, PlusIcon } from "@heroicons/vue/24/outline";
 // Pinia Store
 const collectionsStore = useCollectionsStore();
 
-// Router for navigation
-const router = useRouter();
-
 // State
 const isLoading = computed(() => collectionsStore.isLoading);
 const error = computed(() => collectionsStore.error);

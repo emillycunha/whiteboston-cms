@@ -9,22 +9,20 @@
 </template>
 
 <script setup>
-import { ref, watch, onMounted, onUnmounted } from "vue";
+import { ref, onMounted, onUnmounted } from "vue";
 import StarterKit from "@tiptap/starter-kit";
 import { Editor, EditorContent } from "@tiptap/vue-3";
 import { Link } from "@tiptap/extension-link";
 import { convertHtmlToMarkdown } from "@/utils/htmlToMarkdown";
 
+const model = defineModel();
 const props = defineProps({
   modelValue: {
-    type: String,
+    type: [String, Number],
     default: "",
   },
 });
 
-const emit = defineEmits(["update:modelValue"]);
-const modelValue = ref("");
-const selectedOption = ref(props.modelValue);
 const editor = ref(null);
 
 function setLink() {
@@ -53,31 +51,8 @@ function setLink() {
     .run();
 }
 
-// Watch for changes and update the parent modelValue
-watch(
-  () => selectedOption.value,
-  (newVal) => {
-    emit("update:modelValue", newVal);
-  }
-);
-
-watch(
-  () => modelValue.value,
-  (value) => {
-    if (!editor.value) return;
-
-    const isSame = convertHtmlToMarkdown(editor.value.getHTML()) === value;
-    if (isSame) return;
-
-    editor.value.commands.setContent(value, false);
-  },
-  { immediate: true }
-);
-
 onMounted(() => {
-  const htmlContent = convertMarkdownToHtml(
-    props.modelValue || "starting typing"
-  );
+  const htmlContent = convertMarkdownToHtml(model.value || "starting typing");
 
   editor.value = new Editor({
     extensions: [
@@ -88,10 +63,10 @@ onMounted(() => {
       }),
     ],
     content: htmlContent,
-    onUpdate: ({ editor }) => {
-      const htmlContent = editor.getHTML();
+    onUpdate: () => {
+      const htmlContent = editor.value.getHTML();
       const markdownContent = convertHtmlToMarkdown(htmlContent);
-      emit("update:modelValue", markdownContent);
+      model.value = markdownContent;
     },
   });
 });
