@@ -77,15 +77,15 @@
           <p class="text-sm text-gray-600">
             Choose up to 3 collections to display on the dashboard stats cards.
           </p>
-          <div>
-            <!-- Other settings -->
+          <p v-if="error" class="text-red-500 mt-2">{{ error }}</p>
+
+          <div class="flex justify-end">
             <button
-              class="px-3 py-2 bg-red-500 text-white rounded"
+              class="px-3 py-2 text-xs bg-violet-500 text-white rounded"
               @click="clearSelection"
             >
               Clear Selection
             </button>
-            <p v-if="error" class="text-red-500">{{ error }}</p>
           </div>
           <div>
             <div class="mt-4 space-y-2 border border-gray-200 rounded-md p-4">

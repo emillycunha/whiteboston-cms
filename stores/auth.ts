@@ -73,13 +73,6 @@ export const useAuthStore = defineStore("auth", {
         this.org_id = memberData.organization_id;
         this.role = memberData.role;
 
-        console.log("[Auth Store] User metadata fetched:", {
-          name: this.name,
-          preferences: this.preferences,
-          org_id: this.org_id,
-          role: this.role,
-        });
-
         // Update permissions store
         const permissionsStore = useMyPermissionsStore();
         permissionsStore.setRole(this.role);
@@ -169,6 +162,62 @@ export const useAuthStore = defineStore("auth", {
       } catch (err) {
         console.error("[Auth Store] Logout failed:", err);
         this.error = "Failed to log out. Please try again.";
+      }
+    },
+
+    // Save profile data (name, email, password)
+    async saveProfile(updatedFields: {
+      name?: string;
+      email?: string;
+      password?: string;
+    }) {
+      const { $supabase } = useNuxtApp();
+
+      try {
+        //let { error } = null;
+
+        if (updatedFields.name) {
+          // Update the name in the `users` table
+          const { data, error: nameError } = await $supabase
+            .from("users")
+            .update({ name: updatedFields.name })
+            .eq("id", this.id);
+          if (nameError) {
+            this.error = nameError.message;
+            console.error("Error updating name:", nameError.message);
+            this.error = nameError.message;
+            return;
+          }
+          this.name = updatedFields.name;
+        }
+
+        if (updatedFields.email) {
+          const { data, error: emailError } = await $supabase.auth.updateUser({
+            email: updatedFields.email,
+          });
+          if (emailError) {
+            console.error("Error updating email:", emailError.message);
+
+            this.error = emailError.message;
+            return;
+          }
+          this.email = updatedFields.email;
+        }
+
+        if (updatedFields.password) {
+          const { error: passwordError } = await $supabase.auth.updateUser({
+            password: updatedFields.password,
+          });
+          if (passwordError) {
+            this.error = passwordError.message;
+            return;
+          }
+        }
+
+        this.error = null;
+      } catch (err) {
+        this.error = "An unexpected error occurred.";
+        console.error(err);
       }
     },
 
