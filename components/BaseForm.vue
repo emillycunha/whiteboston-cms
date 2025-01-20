@@ -6,7 +6,7 @@
         class="rounded-md bg-white shadow-sm border border-gray-200 dark:bg-slate-800 dark:border-slate-700 mb-6"
       >
         <div class="p-4 sm:p-8">
-          <div class="flex flex-col gap-y-4">
+          <div class="flex flex-wrap gap-y-4">
             <div
               v-for="(field, index) in fields"
               :key="field.key || `fallback_${index}`"
@@ -20,6 +20,7 @@
                 class="font-bold text-gray-700 dark:text-white"
               >
                 {{ field.label }}
+                <span v-if="field.isRequired" class="text-red-500">*</span>
               </label>
 
               <!-- Dynamic Field Rendering -->
@@ -44,6 +45,30 @@
                   :placeholder="field.placeholder || `Enter ${field.label}`"
                   class="border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 rounded-md p-2 w-full"
                 ></textarea>
+                <p v-else>{{ field.value }}</p>
+              </div>
+
+              <div v-else-if="field.type === 'email'">
+                <input
+                  v-if="editable"
+                  v-model="field.value"
+                  :id="field.key"
+                  type="email"
+                  :placeholder="field.placeholder || `Enter ${field.label}`"
+                  class="border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 rounded-md p-2 w-full"
+                />
+                <p v-else>{{ field.value }}</p>
+              </div>
+
+              <div v-else-if="field.type === 'phone'">
+                <input
+                  v-if="editable"
+                  v-model="field.value"
+                  :id="field.key"
+                  type="tel"
+                  :placeholder="field.placeholder || `Enter ${field.label}`"
+                  class="border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 rounded-md p-2 w-full"
+                />
                 <p v-else>{{ field.value }}</p>
               </div>
 
@@ -153,8 +178,6 @@
 </template>
 
 <script setup>
-import { ref, defineEmits } from "vue";
-import { useRouter } from "vue-router";
 import PageFooter from "@/components/PageFooter.vue";
 import ImageUpload from "@/components/ImageUpload.vue";
 import MarkdownEditor from "@/components/MarkdownEditor.vue";

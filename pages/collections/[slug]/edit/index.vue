@@ -95,7 +95,7 @@
                   id="is_hidden"
                   v-model="collection.is_hidden"
                   type="checkbox"
-                  class="h-5 w-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                  class="h-4 w-4 text-violet-500 border-gray-500 rounded focus:ring-violet-500 dark:focus:ring-teal-500 dark:text-teal-500"
                 />
                 <label
                   for="is_hidden"
@@ -118,7 +118,7 @@
                     <th class="px-4 py-2 text-left text-sm font-semibold">
                       Field Name
                     </th>
-                    <th class="px-4 py-2 text-left text-sm font-semibold">
+                    <th class="px-4 w-1/4 py-2 text-left text-sm font-semibold">
                       Type
                     </th>
                     <th
@@ -185,10 +185,10 @@
                         id="is_required"
                         v-model="field.is_required"
                         type="checkbox"
-                        class="h-5 w-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                        class="h-4 w-4 text-violet-500 border-gray-500 rounded focus:ring-violet-500 dark:focus:ring-teal-500 dark:text-teal-500"
                       />
                       <label
-                        for="is_hidden"
+                        for="is_required"
                         class="font-bold text-gray-700 dark:text-white"
                       >
                       </label>
@@ -256,6 +256,9 @@ import {
   QueueListIcon,
   StopIcon,
   PencilSquareIcon,
+  EnvelopeIcon,
+  PhoneIcon,
+  PhotoIcon,
 } from "@heroicons/vue/24/outline";
 
 const authStore = useAuthStore();
@@ -293,6 +296,9 @@ const fieldOptions = [
   { label: "Text", icon: BoldIcon, value: "text" },
   { label: "Number", icon: HashtagIcon, value: "number" },
   { label: "Date", icon: CalendarIcon, value: "date" },
+  { label: "Image", icon: PhotoIcon, value: "image" },
+  { label: "Email", icon: EnvelopeIcon, value: "email" },
+  { label: "Phone", icon: PhoneIcon, value: "phone" },
   { label: "Select", icon: QueueListIcon, value: "select" },
   { label: "Boolean", icon: StopIcon, value: "boolean" },
   { label: "Textarea", icon: DocumentTextIcon, value: "textarea" },
@@ -302,7 +308,6 @@ const fieldOptions = [
     icon: PencilSquareIcon,
     value: "richtextmarkdown",
   },
-  { label: "Image", icon: StopIcon, value: "image" },
 ];
 
 // Options for CustomSelect to manage field position (0 to fields.length)
@@ -374,6 +379,7 @@ onMounted(async () => {
         options: Array.isArray(field.options)
           ? field.options.map((opt) => opt.label || "").join(", ")
           : null,
+        is_required: field.is_required || false,
       }));
     }
   } catch (err) {
