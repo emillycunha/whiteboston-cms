@@ -119,10 +119,16 @@ const updateSelectedItems = (items) => {
 const exportSelectedToCSV = () => {
   if (!selectedItems.value.length) return;
 
-  const headers = fields.value.map((field) => field.label || field.key);
+  // Headers: Include all fields, not just the ones displayed
+  const headers = allFields.value
+    .filter((field) => typeof field.position === "number" && field.position > 0)
+    .sort((a, b) => a.position - b.position)
+    .map((field) => field.label || field.key); // Get labels or keys for headers
+
+  // Rows: Get data for the selected items based on all fields
   const rows = selectedItems.value.map((id) => {
     const row = content.value.find((item) => item.id === id);
-    return fields.value.map((field) => row[field.key] || "");
+    return allFields.value.map((field) => row[field.key] || ""); // Include all fields in content
   });
 
   // Generate CSV Content
