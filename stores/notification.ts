@@ -1,21 +1,39 @@
 import { defineStore } from "pinia";
 
+export enum NotificationType {
+  Success = "success",
+  Error = "error",
+  Info = "info",
+  Warning = "warning",
+}
+
+interface Notification {
+  id: number;
+  type: NotificationType;
+  message: string;
+}
+
 export const useNotificationStore = defineStore("notification", {
   state: () => ({
-    notifications: [] as { id: number; type: string; message: string }[],
+    notifications: [] as Notification[],
+    nextId: 1,
   }),
+
   actions: {
-    showNotification(type: string, message: string, duration = 9000) {
-      const id = Date.now();
+    showNotification(type: NotificationType, message: string, duration = 9000) {
+      const id = this.nextId++;
       this.notifications.push({ id, type, message });
 
-      // Auto-remove notification after `duration`
       setTimeout(() => {
         this.removeNotification(id);
       }, duration);
     },
+
     removeNotification(id: number) {
-      this.notifications = this.notifications.filter((n) => n.id !== id);
+      const index = this.notifications.findIndex((n) => n.id === id);
+      if (index !== -1) {
+        this.notifications.splice(index, 1);
+      }
     },
   },
 });

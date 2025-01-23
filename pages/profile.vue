@@ -1,50 +1,16 @@
 <template>
   <div class="px-6 py-4 space-y-6">
     <!-- Page Header -->
-    <PageHeader
-      v-if="editable === false"
-      title="Profile"
-      :buttons="[
-        {
-          label: 'Back',
-          icon: ChevronLeftIcon,
-          iconPosition: 'before',
-          variant: 'secondary',
-          onClick: goBack,
-        },
-        {
-          label: 'Edit',
-          icon: PencilSquareIcon,
-          iconPosition: 'after',
-          variant: 'primary',
-          onClick: enableEdit,
-        },
-      ]"
-    />
-    <PageHeader v-if="editable === true" title="Profile" />
+    <PageHeader title="Profile" />
 
     <!-- Form for Profile -->
-    <BasicForm :fields="fields" :editable="editable" />
-
-    <PageFooter
-      v-if="editable === true"
-      title=""
-      :buttons="[
-        {
-          label: 'Cancel',
-          icon: XCircleIcon,
-          iconPosition: 'after',
-          variant: 'secondary',
-          onClick: cancelEdit,
-        },
-        {
-          label: 'Save Profile',
-          icon: CheckCircleIcon,
-          iconPosition: 'after',
-          variant: 'primary',
-          onClick: saveProfile,
-        },
-      ]"
+    <BaseForm
+      :fields="fields"
+      :editable="editable"
+      @submit="saveProfile"
+      @cancel="cancelEdit"
+      @back="goBack"
+      @editable="enableEdit"
     />
   </div>
 </template>
@@ -52,16 +18,9 @@
 <script setup>
 import { ref, onMounted } from "vue";
 import { useAuthStore } from "~/stores/auth";
-import {
-  ChevronLeftIcon,
-  CheckCircleIcon,
-  PencilSquareIcon,
-  XCircleIcon,
-} from "@heroicons/vue/24/outline";
 
 const authStore = useAuthStore();
 const editable = ref(false);
-const router = useRouter();
 
 // Fields for profile form
 const fields = ref([
@@ -70,6 +29,7 @@ const fields = ref([
     label: "Name",
     type: "text",
     value: authStore.name,
+    originalValue: authStore.name,
     isRequired: true,
     placeholder: "Enter your name",
   },
@@ -78,16 +38,20 @@ const fields = ref([
     label: "Email",
     type: "email",
     value: authStore.email,
+    originalValue: authStore.email,
     isRequired: true,
     placeholder: "Enter your email",
   },
   {
     key: "password",
     label: "Password",
+    description: "Click edit to change your password",
+    hint: "Leave blank to keep the same",
     type: "password",
     value: "",
+    originalValue: "",
     isRequired: false,
-    placeholder: "Update your password",
+    placeholder: "Enter your NEW password",
   },
 ]);
 
@@ -110,6 +74,10 @@ function cancelEdit() {
 
 const enableEdit = () => {
   editable.value = true;
+  const passwordField = fields.value.find((field) => field.type === "password");
+  if (passwordField) {
+    passwordField.value = "";
+  }
 };
 
 async function saveProfile() {
@@ -140,8 +108,6 @@ async function saveProfile() {
 
   // If any field was updated, call the save function
   if (Object.keys(updatedFields).length > 0) {
-    console.log("Sending the following updated fields:", updatedFields);
-
     await authStore.saveProfile(updatedFields);
 
     // Show success notification
@@ -160,3 +126,8 @@ async function saveProfile() {
   }
 }
 </script>
+
+// Validate required fields const missingFields = fields.value.filter( (field)
+=> field.attrs?.required && (!field.value || field.value.trim() === "") ); if
+(missingFields.length > 0) { alert( `Please fill out the required fields:
+${missingFields .map((f) => f.label) .join(", ")}` ); return; }

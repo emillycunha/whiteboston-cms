@@ -4,38 +4,29 @@
     <PageHeader title="Submit a Ticket" />
 
     <!-- Ticket Submission Form -->
-    <RowTable :fields="fields" :editable="isEditing" />
-
-    <PageFooter
-      title=""
-      :buttons="[
-        {
-          label: isEditing ? 'Submit' : 'Back',
-          icon: isEditing ? CheckCircleIcon : ChevronLeftIcon,
-          iconPosition: isEditing ? 'after' : 'before',
-          variant: isEditing ? 'primary' : 'secondary',
-          onClick: isEditing ? submitTicket : goBack,
-        },
-      ]"
+    <BaseForm
+      :fields="fields"
+      :editable="editable"
+      @submit="submitTicket"
+      @cancel="goBack"
+      @editable="enableEdit"
     />
   </div>
 </template>
 
 <script setup>
 import { ref } from "vue";
-import RowTable from "~/components/BasicForm.vue";
-import { CheckCircleIcon, ChevronLeftIcon } from "@heroicons/vue/24/outline";
 
 const { $supabase } = useNuxtApp();
-
-const isEditing = ref(true);
+const editable = ref(true);
 const fields = ref([
   {
     key: "title",
     label: "Title",
     value: "",
     fullRow: false,
-    attrs: { maxlength: 100, required: true },
+    isRequired: true,
+    attrs: { maxlength: 100 },
     type: "text",
     inputClass: "",
     placeholder: "Enter ticket title",
@@ -45,7 +36,7 @@ const fields = ref([
     label: "Description",
     value: "",
     fullRow: true,
-    attrs: { required: true },
+    isRequired: true,
     type: "textarea",
     rows: 4,
     inputClass: "w-full",
@@ -55,7 +46,7 @@ const fields = ref([
     key: "category",
     label: "Category",
     value: "",
-    attrs: { required: true },
+    isRequired: true,
     type: "select",
     options: [
       { value: "", label: "Choose One" },
@@ -69,7 +60,7 @@ const fields = ref([
     key: "priority",
     label: "Priority",
     value: "",
-    attrs: { required: true },
+    isRequired: true,
     type: "select",
     options: [
       { value: "", label: "Choose One" },
@@ -82,21 +73,6 @@ const fields = ref([
 ]);
 
 const submitTicket = async () => {
-  // Validate required fields
-  const missingFields = fields.value.filter(
-    (field) =>
-      field.attrs?.required && (!field.value || field.value.trim() === "")
-  );
-
-  if (missingFields.length > 0) {
-    alert(
-      `Please fill out the required fields: ${missingFields
-        .map((f) => f.label)
-        .join(", ")}`
-    );
-    return;
-  }
-
   // Collect the ticket data
   const ticketData = fields.value.reduce((acc, field) => {
     acc[field.key] = field.value;

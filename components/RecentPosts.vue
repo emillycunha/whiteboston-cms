@@ -46,14 +46,24 @@ const collectionSlug = "blogs";
 // Content store
 const contentStore = useContentStore();
 const content = ref([]);
+const collectionFound = ref(false);
 
-// Fetch blogs content on mount
+// Fetch content on mount
 onMounted(async () => {
   try {
-    await contentStore.fetchContentAndFields(collectionSlug);
-    content.value = contentStore.content;
+    const collectionData = await contentStore.fetchContentAndFields(
+      collectionSlug
+    );
+    if (collectionData) {
+      content.value = contentStore.content;
+      collectionFound.value = true;
+    } else {
+      console.warn("[Warning] Collection not found for slug:", collectionSlug);
+      collectionFound.value = false;
+    }
   } catch (error) {
     console.error("[Error Fetching Content]:", error);
+    collectionFound.value = false;
   }
 });
 

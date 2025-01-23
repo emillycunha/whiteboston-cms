@@ -3,10 +3,10 @@
     <div class="border border-dashed border-gray-300 rounded-sm px-4 py-8 mb-4">
       <div
         class="flex flex-row justify-center gap-x-4 items-center mb-2"
+        :class="{ 'is-dragover': isDragOver }"
         @drop="onDrop"
         @dragover.prevent
         @dragenter.prevent
-        :class="{ 'is-dragover': isDragOver }"
       >
         <p class="text-base font-medium text-gray-800">Drag image here</p>
         <p class="text-sm text-gray-600">or</p>
@@ -21,10 +21,10 @@
         <input
           type="file"
           ref="fileInput"
-          @change="onFileChange"
           accept="image/jpeg, image/jpg, image/png, image/webp"
           class="file-input"
           hidden
+          @change="onFileChange"
         />
       </div>
 

@@ -27,10 +27,9 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed, watch } from "vue";
+import { ref, onMounted, computed } from "vue";
 import { useContentStore } from "~/stores/content";
 import { useRoute, useRouter } from "vue-router";
-import { XCircleIcon, CheckCircleIcon } from "@heroicons/vue/24/outline";
 
 import { useNotificationStore } from "@/stores/notification";
 const notificationStore = useNotificationStore();
@@ -39,34 +38,35 @@ const notificationStore = useNotificationStore();
 const route = useRoute();
 const router = useRouter();
 const collectionSlug = route.params.slug;
+const collectionName = computed(
+  () => collectionSlug.charAt(0).toUpperCase() + collectionSlug.slice(1)
+);
 
 // State and Store
 const contentStore = useContentStore();
 const isLoading = computed(() => contentStore.isLoading);
 const error = computed(() => contentStore.error);
-const fields = ref([]);
-const collectionName = computed(
-  () => collectionSlug.charAt(0).toUpperCase() + collectionSlug.slice(1)
-);
-
 const errors = ref({});
+
+const allFields = computed(() => contentStore.fields[collectionSlug] || []);
+
+const fields = ref([]);
 
 // Map fields to their default values based on type
 onMounted(async () => {
   await contentStore.fetchContentAndFields(collectionSlug);
 
-  fields.value = contentStore.fields.map((field) => ({
+  // Map fields with the content data
+  fields.value = allFields.value.map((field) => ({
     key: field.key,
     label: field.label,
     type: field.type,
-    value: "", // Initialize value as an empty string
+    value: "",
     options: field.options || [],
     isRequired: field.is_required,
-    fullRow:
-      field.type === "textarea" ||
-      field.type === "richtextmarkdown" ||
-      field.type === "richtexthtml" ||
-      field.type === "image",
+    fullRow: ["textarea", "richtextmarkdown", "richtexthtml", "image"].includes(
+      field.type
+    ),
   }));
 });
 

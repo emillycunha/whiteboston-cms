@@ -19,8 +19,9 @@
         <li
           v-for="(option, index) in options"
           :key="index"
-          class="px-2 py-1 cursor-pointer bg-gray-200 rounded-md m-1 hover:bg-gray-300 dark:hover:bg-gray-700 flex flex-row text-sm items-center align-middle"
+          class="px-2 py-1 cursor-pointer rounded-md m-1 hover:bg-gray-300 dark:hover:bg-gray-700 flex flex-row text-sm items-center align-middle"
           @click="selectOption(option)"
+          :class="['bg-gray-200', option.optionClass || '']"
         >
           <div v-if="option.icon" class="mr-2">
             <component :is="option.icon" class="w-4 h-4" />

@@ -14,12 +14,12 @@
 </template>
 
 <script setup>
-import { ref, watch, onMounted } from "vue";
+import { ref, watch } from "vue";
 import { useRouter } from "vue-router";
 import { useNotificationStore } from "@/stores/notification";
 import { useCollectionsStore } from "@/stores/collections";
 import { useAuthStore } from "@/stores/auth";
-import BaseForm from "@/components/BaseForm.vue"; // Import the BaseForm
+import BaseForm from "@/components/BaseForm.vue";
 
 const authStore = useAuthStore();
 const notificationStore = useNotificationStore();
@@ -45,6 +45,7 @@ const fields = ref([
     key: "description",
     label: "Description",
     type: "textarea",
+    fullRow: true,
     value: "",
     isRequired: false,
   },
@@ -143,9 +144,7 @@ const addCollection = async () => {
 
       // Redirect to the new collection's edit page
       const newSlug = fields.value.find((f) => f.key === "slug").value;
-      await router.push(
-        `/collections/${newSlug}/edit?collection=${newSlug}&edit=true`
-      );
+      await router.push(`/collections/${newSlug}/add/fields`);
     } else {
       console.error("Failed to add collection:", collectionsStore.error);
     }

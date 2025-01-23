@@ -9,15 +9,37 @@ export interface Organization {
 
 export const useOrganizationsStore = defineStore("organizations", {
   state: () => ({
-    organizations: [] as Organization[], // Cached organizations
-    error: null as string | null, // Error message
-    isLoading: false, // Loading state
+    organizations: [] as Organization[],
+    error: null as string | null,
+    isLoading: false,
   }),
   getters: {
     getOrganizationById: (state) => (id: string) =>
-      state.organizations.find((org) => org.id === id), // Find cached org by ID
+      state.organizations.find((org) => org.id === id),
   },
   actions: {
+    async checkPermissions(
+      permission: keyof (typeof permissions)["SuperAdmin"]
+    ) {
+      const authStore = useAuthStore();
+      const rolePermissions = permissions[authStore.role || "none"];
+      const hasPermission = rolePermissions?.[permission];
+
+      if (!hasPermission) {
+        const message = `You do not have permission to ${permission
+          .replace(/([A-Z])/g, " $1")
+          .toLowerCase()}.`;
+
+        const notificationStore = useNotificationStore();
+        notificationStore.showNotification(NotificationType.Error, message);
+        this.error = message;
+
+        return false;
+      }
+
+      return true;
+    },
+
     // Fetch all organizations (Super Admin access)
     async fetchAllOrganizations() {
       const { $supabase } = useNuxtApp();

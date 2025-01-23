@@ -7,7 +7,10 @@
   </div>
   <div class="text-center mt-2">
     <!-- Demo Banner -->
-    <div class="text-xs bg-red-50 text-red-500 text-center py-2 font-semibold">
+    <div
+      v-if="demoUser === true"
+      class="text-xs bg-red-50 text-red-500 text-center py-2 font-semibold"
+    >
       This is a demo of WhiteBostonCMS. Data resets every hour. Changes will not
       be saved permanently.
     </div>
@@ -15,7 +18,23 @@
 </template>
 
 <script setup>
+import { ref, onMounted } from "vue";
+
 const config = useRuntimeConfig();
 const version = config.public.appVersion;
 const currentYear = new Date().getFullYear();
+
+const demoUser = ref("");
+
+onMounted(() => {
+  const storedDemoUser = localStorage.getItem("demo_user");
+
+  if (storedDemoUser === "true") {
+    console.log("Is demo user.");
+    demoUser.value = true;
+  } else {
+    console.log("Not a demo user.");
+    demoUser.value = false;
+  }
+});
 </script>

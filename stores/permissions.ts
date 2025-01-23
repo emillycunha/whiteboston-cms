@@ -10,6 +10,7 @@ export const permissions = {
     canAddCollections: true,
     canEdit: true,
     canDelete: true,
+    canManage: true,
     canManageOrganizations: true,
   },
   admin: {
@@ -19,6 +20,7 @@ export const permissions = {
     canAddCollections: true,
     canEdit: true,
     canDelete: true,
+    canManage: true,
     canManageOrganizations: false,
   },
   user: {
@@ -28,6 +30,7 @@ export const permissions = {
     canAddCollections: false,
     canEdit: false,
     canDelete: false,
+    canManage: false,
     canManageOrganizations: false,
   },
   viewer: {
@@ -37,6 +40,7 @@ export const permissions = {
     canAddCollections: false,
     canEdit: false,
     canDelete: false,
+    canManage: false,
     canManageOrganizations: false,
   },
   none: {
@@ -46,6 +50,7 @@ export const permissions = {
     canAddCollections: false,
     canEdit: false,
     canDelete: false,
+    canManage: false,
     canManageOrganizations: false,
   },
 };
@@ -63,6 +68,11 @@ export const useMyPermissionsStore = defineStore("myPermissionsStore", {
     role: null as Role | null,
   }),
   getters: {
+    // Get the full permissions object for the current role
+    getPermissions: (state) => {
+      return permissions[state.role || "none"];
+    },
+    // Check if the current role has a specific permission
     hasPermission:
       (state) => (action: keyof (typeof permissions)["SuperAdmin"]) => {
         return hasPermission(state.role, action);

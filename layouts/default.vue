@@ -60,6 +60,7 @@
                       <NuxtLink
                         :to="item.href"
                         class="flex items-center w-full"
+                        @click="sidebarOpen = false"
                       >
                         <component
                           :is="item.icon"
@@ -80,6 +81,7 @@
                       <NuxtLink
                         :to="`/collections/${item.slug}`"
                         class="flex items-center w-full"
+                        @click="sidebarOpen = false"
                       >
                         <component
                           :is="getIcon(item.name)"
@@ -97,6 +99,7 @@
                       <NuxtLink
                         to="/collections"
                         class="flex items-center px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 rounded-md hover:bg-violet-50 dark:hover:bg-teal-500"
+                        @click="sidebarOpen = false"
                       >
                         <FolderPlusIcon
                           class="size-5 mr-2"
@@ -109,6 +112,7 @@
                       <NuxtLink
                         to="/collections"
                         class="flex items-center px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 rounded-md hover:bg-violet-50 dark:hover:bg-teal-500"
+                        @click="sidebarOpen = false"
                       >
                         <AdjustmentsHorizontalIcon
                           class="size-5 mr-2"
@@ -126,6 +130,7 @@
                       v-for="item in navigation2"
                       :key="item.name"
                       class="flex items-center px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 rounded-md hover:bg-violet-50 dark:hover:bg-teal-500"
+                      @click="sidebarOpen = false"
                     >
                       <NuxtLink
                         :to="item.href"
@@ -324,6 +329,7 @@ import {
   Cog6ToothIcon,
   FolderPlusIcon,
   AdjustmentsHorizontalIcon,
+  BuildingOffice2Icon,
 } from "@heroicons/vue/24/outline";
 import { CubeIcon } from "@heroicons/vue/24/solid";
 import {
@@ -334,6 +340,10 @@ import {
 } from "@headlessui/vue";
 
 const { $supabase } = useNuxtApp();
+const authStore = useAuthStore();
+const userRole = computed(() => authStore.role);
+console.log(userRole.value);
+
 const collectionsStore = useCollectionsStore();
 const router = useRouter();
 
@@ -391,19 +401,39 @@ const navigation = [
   { name: "Dashboard", href: "/dashboard", icon: HomeIcon, current: false },
 ];
 
-const navigation2 = [
-  {
-    name: "Submit Request",
-    href: "/ticket",
-    icon: ClipboardDocumentIcon,
-    current: false,
-  },
-  {
-    name: "Settings",
-    href: "/settings",
-    icon: Cog6ToothIcon,
-    current: false,
-  },
-  { name: "Profile", href: "/profile", icon: UserCircleIcon, current: false },
-];
+const navigation2 = computed(() => {
+  const baseNavigation = [
+    {
+      name: "Submit Request",
+      href: "/ticket",
+      icon: ClipboardDocumentIcon,
+      current: false,
+    },
+    {
+      name: "Organization",
+      href: "/organization",
+      icon: BuildingOffice2Icon,
+      current: false,
+    },
+    {
+      name: "Settings",
+      href: "/settings",
+      icon: Cog6ToothIcon,
+      current: false,
+    },
+    {
+      name: "Profile",
+      href: "/profile",
+      icon: UserCircleIcon,
+      current: false,
+    },
+  ];
+
+  // Only show the "Organization" tab if the user is an admin
+  if (userRole.value !== "admin") {
+    return baseNavigation.filter((item) => item.name !== "Organization");
+  }
+
+  return baseNavigation;
+});
 </script>

@@ -1,9 +1,5 @@
 import { defineStore } from "pinia";
-import {
-  permissions,
-  hasPermission,
-  useMyPermissionsStore,
-} from "~/stores/permissions";
+import { useMyPermissionsStore } from "~/stores/permissions";
 
 type Role = "SuperAdmin" | "admin" | "user" | "viewer";
 
@@ -23,28 +19,54 @@ export const useAuthStore = defineStore("auth", {
 
   getters: {
     isRoleValid: (state) => state.role !== null,
-    hasPermission:
-      (state) => (action: keyof (typeof permissions)["SuperAdmin"]) => {
-        return hasPermission(state.role, action);
-      },
-    canView: (state) => hasPermission(state.role, "canView"),
-    canAddContent: (state) => hasPermission(state.role, "canAddContent"),
-    canAddFields: (state) => hasPermission(state.role, "canAddFields"),
-    canAddCollections: (state) =>
-      hasPermission(state.role, "canAddCollections"),
-    canEdit: (state) => hasPermission(state.role, "canEdit"),
-    canDelete: (state) => hasPermission(state.role, "canDelete"),
-    canManageOrganizations: (state) =>
-      hasPermission(state.role, "canManageOrganizations"),
+
+    // Directly access permissions store inside each getter
+    canView: () => {
+      const permissionsStore = useMyPermissionsStore();
+      return permissionsStore.hasPermission("canView");
+    },
+    canAddContent: () => {
+      const permissionsStore = useMyPermissionsStore();
+      return permissionsStore.hasPermission("canAddContent");
+    },
+    canAddFields: () => {
+      const permissionsStore = useMyPermissionsStore();
+      return permissionsStore.hasPermission("canAddFields");
+    },
+    canAddCollections: () => {
+      const permissionsStore = useMyPermissionsStore();
+      return permissionsStore.hasPermission("canAddCollections");
+    },
+    canEdit: () => {
+      const permissionsStore = useMyPermissionsStore();
+      return permissionsStore.hasPermission("canEdit");
+    },
+    canDelete: () => {
+      const permissionsStore = useMyPermissionsStore();
+      return permissionsStore.hasPermission("canDelete");
+    },
+    canManage: () => {
+      const permissionsStore = useMyPermissionsStore();
+      return permissionsStore.hasPermission("canManage");
+    },
+    canManageOrganizations: () => {
+      const permissionsStore = useMyPermissionsStore();
+      return permissionsStore.hasPermission("canManageOrganizations");
+    },
   },
 
   actions: {
-    // Fetch and set user metadata from `public.users` and `organization_members`
+    // Fetch user metadata from Supabase
     async fetchUserMetadata() {
       const { $supabase } = useNuxtApp();
 
       if (!this.id) {
         console.warn("[Auth Store] No user ID found, cannot fetch metadata.");
+        return;
+      }
+
+      if (this.name && this.org_id && this.role) {
+        console.log("[Auth Store] User metadata already cached.");
         return;
       }
 
@@ -85,6 +107,11 @@ export const useAuthStore = defineStore("auth", {
     // Initialize user session from Supabase Auth
     async initializeAuthSession() {
       const { $supabase } = useNuxtApp();
+
+      if (this.isAuthenticated) {
+        console.log("[Auth Store] User is already authenticated.");
+        return;
+      }
 
       try {
         const {
@@ -176,7 +203,7 @@ export const useAuthStore = defineStore("auth", {
       try {
         //let { error } = null;
 
-        if (updatedFields.name) {
+        if (updatedFields.name && updatedFields.name !== this.name) {
           // Update the name in the `users` table
           const { data, error: nameError } = await $supabase
             .from("users")
@@ -191,7 +218,7 @@ export const useAuthStore = defineStore("auth", {
           this.name = updatedFields.name;
         }
 
-        if (updatedFields.email) {
+        if (updatedFields.email && updatedFields.email !== this.email) {
           const { data, error: emailError } = await $supabase.auth.updateUser({
             email: updatedFields.email,
           });
@@ -233,10 +260,10 @@ export const useAuthStore = defineStore("auth", {
     async toggleDarkMode() {
       const { $supabase } = useNuxtApp();
 
-      const darkmode = !(this.preferences?.darkmode ?? false);
-      this.preferences = { ...this.preferences, darkmode };
+      this.preferences.darkmode = !this.preferences.darkmode;
       this.applyDarkMode();
 
+      // Update the preferences in Supabase after the UI update
       if (this.id) {
         try {
           const { error } = await $supabase
@@ -245,7 +272,6 @@ export const useAuthStore = defineStore("auth", {
             .eq("id", this.id);
 
           if (error) throw error;
-
           console.log("[Auth Store] Dark mode preference updated.");
         } catch (err) {
           console.error("[Auth Store] Failed to update dark mode:", err);

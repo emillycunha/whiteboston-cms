@@ -31,7 +31,7 @@
     <!-- Reusable Table -->
     <DataTable
       v-else-if="!isLoading && !error && content.length"
-      :data="content"
+      :data="tableData"
       :columns="fields"
       :enableCheckbox="true"
       :actionType="'both'"
@@ -68,31 +68,62 @@ const collectionName = computed(
 
 // Content Store
 const contentStore = useContentStore();
-const content = computed(() => contentStore.content);
-const allFields = computed(() => contentStore.fields);
+const content = computed(() => {
+  const result = contentStore.content[collectionSlug] || [];
+  return result;
+});
+const allFields = computed(() => {
+  const result = contentStore.fields[collectionSlug] || [];
+  return result;
+});
+
+const tableData = computed(() => {
+  return content.value.map((item) => ({
+    ...item.data,
+    id: item.id,
+    created_at: item.created_at,
+    updated_at: item.updated_at,
+  }));
+});
+
 const isLoading = computed(() => contentStore.isLoading);
 const error = computed(() => contentStore.error);
 
-// Filter to get the top 3 fields based on their position
-const fields = computed(() => {
-  return allFields.value
-    .filter((field) => typeof field.position === "number" && field.position > 0)
-    .sort((a, b) => a.position - b.position)
-    .slice(0, 3);
-});
-
-// Track selected items
 const selectedItems = ref([]);
 
-// Fetch Content and Fields on Mount
-onMounted(async () => {
-  await contentStore.fetchContentAndFields(collectionSlug);
+const fields = computed(() => {
+  return allFields.value
+    .filter(
+      (field) => typeof field.position === "number" && field.position >= 0
+    )
+    .sort((a, b) => a.position - b.position);
 });
 
-// Handle Edit
+onMounted(async () => {
+  console.log(
+    `[Content Page] Mounting, fetching data for collection slug: ${collectionSlug}`
+  );
+  try {
+    if (collectionSlug) {
+      console.log("[Content Page] Fetching content and fields...");
+      await contentStore.fetchContentAndFields(collectionSlug);
+      console.log(
+        `[Content Page] Content and Fields loaded for: ${collectionSlug}`
+      );
+    } else {
+      console.warn("[Content Page] Collection slug not found.");
+    }
+  } catch (error) {
+    console.error("[Content Page] Error fetching content and fields:", error);
+  }
+
+  console.log(`[Content Page] Final content after mount:`, content.value);
+  console.log(`[Content Page] Final fields after mount:`, fields.value);
+});
+
 const handleView = (row) => {
   navigateTo({
-    path: `/collections/${collectionSlug}/view/${row.id}`,
+    path: `/collections/${collectionSlug}/view/${row.id}/content`,
     query: {
       collection: collectionSlug,
     },
@@ -101,7 +132,7 @@ const handleView = (row) => {
 
 const handleEdit = (row) => {
   navigateTo({
-    path: `/collections/${collectionSlug}/edit/${row.id}`,
+    path: `/collections/${collectionSlug}/edit/${row.id}/content`,
     query: {
       collection: collectionSlug,
       edit: "true",
@@ -109,13 +140,11 @@ const handleEdit = (row) => {
   });
 };
 
-// Update Selected Items
 const updateSelectedItems = (items) => {
   selectedItems.value = items;
   console.log("Selected items:", selectedItems.value);
 };
 
-// Export Selected Items to CSV
 const exportSelectedToCSV = () => {
   if (!selectedItems.value.length) return;
 
@@ -150,7 +179,6 @@ const exportSelectedToCSV = () => {
   console.log("Selected items exported to CSV.");
 };
 
-// Add New Item
 const addNew = () => {
   navigateTo({
     path: `/collections/${collectionSlug}/add/content`,
@@ -160,6 +188,5 @@ const addNew = () => {
   });
 };
 
-// Add Content Link
 const addContent = `/collections/${collectionSlug}/add/content?collection=${collectionSlug}`;
 </script>

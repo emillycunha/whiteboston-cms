@@ -54,34 +54,46 @@ const itemId = route.params.id;
 const contentStore = useContentStore();
 const isLoading = computed(() => contentStore.isLoading);
 const error = computed(() => contentStore.error);
-const fields = ref([]); // Fields for the item
+
+// Computed Fields for the Collection
+const allFields = computed(() => contentStore.fields[collectionSlug] || []);
+const content = computed(() => contentStore.content[collectionSlug] || []);
+
+const fields = ref([]);
 
 // Fetch Item Data on Mount
 onMounted(async () => {
   try {
+    console.log(
+      `[View Page] Fetching content and fields for collection slug: ${collectionSlug}`
+    );
+
     // Fetch content and fields for the collection
     await contentStore.fetchContentAndFields(collectionSlug);
 
-    // Fetch the specific content item
-    const item = await contentStore.fetchContentItem(collectionSlug, itemId);
+    // Find the specific item in content
+    const item = content.value.find(
+      (entry) => entry.id === parseInt(itemId, 10)
+    );
     if (!item) {
       throw new Error("Item not found");
     }
-    console.log("[Debug] Item Loaded for Editing:", item);
+    console.log("[Debug] Item Loaded for Viewing:", item);
 
     // Map fields with the content data
-    fields.value = contentStore.fields.map((field) => ({
+    fields.value = allFields.value.map((field) => ({
       key: field.key,
       label: field.label,
       type: field.type,
       value: item.data[field.key] || "",
       options: field.options || [],
       isRequired: field.is_required,
-      fullRow:
-        field.type === "textarea" ||
-        field.type === "richtextmarkdown" ||
-        field.type === "richtexthtml" ||
-        field.type === "image",
+      fullRow: [
+        "textarea",
+        "richtextmarkdown",
+        "richtexthtml",
+        "image",
+      ].includes(field.type),
     }));
 
     console.log("[Debug] Fields Loaded:", fields.value);
@@ -92,7 +104,7 @@ onMounted(async () => {
 
 const enableEdit = () => {
   navigateTo({
-    path: `/collections/${collectionSlug}/edit/${itemId}`,
+    path: `/collections/${collectionSlug}/edit/${itemId}/content`,
     query: {
       collection: collectionSlug,
       edit: "true",

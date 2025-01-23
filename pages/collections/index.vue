@@ -9,27 +9,27 @@
           icon: Cog6ToothIcon,
           iconPosition: 'after',
           variant: 'secondary',
-          onClick: goToSettings,
+          onClick: navigateToSettings,
         },
         {
           label: 'Add',
           icon: PlusIcon,
           iconPosition: 'after',
           variant: 'primary',
-          onClick: addNew,
+          onClick: navigateToAddNewCollection,
         },
       ]"
     />
 
     <!-- Loading State -->
-    <div v-if="isLoading" class="text-center">Loading collections...</div>
+    <div v-if="isLoading" class="text-center">Loading...</div>
 
     <!-- Error State -->
-    <div v-if="error" class="text-red-500">{{ error }}</div>
+    <div v-else-if="error" class="text-red-500">{{ error }}</div>
 
     <!-- List of Collections -->
     <DataTable
-      v-if="!isLoading && !error && collections.length"
+      v-else-if="!isLoading && !error && collections.length"
       :data="collections"
       :columns="columns"
       :rowsPerPage="5"
@@ -38,12 +38,17 @@
       @edit="handleEdit"
     />
 
-    <!-- Empty State -->
+    <!-- No Collections Note -->
     <div
-      v-else-if="!isLoading && !error && !collections.length"
-      class="text-center"
+      v-else
+      class="rounded-md bg-white shadow-sm border border-gray-200 dark:bg-slate-800 dark:border-slate-700"
     >
-      No collections found.
+      <div
+        class="mt-4 p-4 rounded-md text-center text-gray-600 dark:text-gray-300"
+      >
+        <p>No collections available.</p>
+        <p>Click the "Add" button to create a new collection.</p>
+      </div>
     </div>
   </div>
 </template>
@@ -51,18 +56,14 @@
 <script setup>
 import { onMounted, computed } from "vue";
 import { useCollectionsStore } from "~/stores/collections";
-import { useRouter } from "vue-router";
 import { Cog6ToothIcon, PlusIcon } from "@heroicons/vue/24/outline";
 
-// Pinia Store
 const collectionsStore = useCollectionsStore();
 
-// State
 const isLoading = computed(() => collectionsStore.isLoading);
 const error = computed(() => collectionsStore.error);
 const collections = computed(() => collectionsStore.collections);
 
-// Table Columns
 const columns = [
   { key: "name", label: "Collection Name" },
   { key: "slug", label: "Slug" },
@@ -71,36 +72,37 @@ const columns = [
   { key: "is_hidden", label: "Hidden?" },
 ];
 
-// Fetch Collections on Mount
 onMounted(async () => {
   await collectionsStore.fetchCollectionsForCurrentOrg();
 });
 
-// Handle Open Collection
 const handleView = (collection) => {
   navigateTo({
     path: `/collections/${collection.slug}`,
     query: {
-      collection: collection.name,
+      collectionId: collection.id,
+      collectionSlug: collection.slug,
+      collectionName: collection.name,
     },
   });
 };
 
 const handleEdit = (collection) => {
   navigateTo({
-    path: `/collections/${collection.slug}/edit`,
+    path: `/collections/${collection.slug}/edit/${collection.id}/collections`,
     query: {
-      collection: collection.slug,
+      collectionId: collection.id,
+      collectionSlug: collection.slug,
       edit: "true",
     },
   });
 };
 
-const addNew = () => {
+const navigateToAddNewCollection = () => {
   navigateTo({ path: `/collections/new/add/collection` });
 };
 
-const goToSettings = () => {
+const navigateToSettings = () => {
   navigateTo({ path: "/settings" });
 };
 </script>

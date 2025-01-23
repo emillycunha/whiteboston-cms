@@ -122,21 +122,22 @@
         <p>No collections available.</p>
         <p>
           Add collections by navigating to the
-          <a href="/collections" class="text-violet-500 underline"
-            >Collections Page</a
+          <NuxtLink href="/collections" class="text-violet-500 underline"
+            >Collections Page</NuxtLink
           >.
         </p>
       </div>
 
       <!-- Error Message -->
-      <div class="flex justify-end p-6">
-        <div v-if="error" class="text-red-500 text-sm">
+      <div v-if="error" class="flex justify-end p-6">
+        <div class="text-red-500 text-sm">
           {{ error }}
         </div>
       </div>
     </div>
 
     <PageFooter
+      v-if="collections.length > 0"
       title=""
       :buttons="[
         {

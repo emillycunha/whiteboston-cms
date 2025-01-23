@@ -24,6 +24,7 @@
               id="email"
               v-model="email"
               type="email"
+              name="email"
               placeholder="enter your email"
               required
               aria-describedby="email-error"
@@ -46,6 +47,7 @@
                 id="password"
                 v-model="password"
                 :type="showPassword ? 'text' : 'password'"
+                name="password"
                 placeholder="enter your password"
                 required
                 aria-describedby="password-error"
@@ -107,18 +109,18 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import BrandFooter from "~/components/BrandFooter.vue";
-
 import { EyeIcon, EyeSlashIcon } from "@heroicons/vue/24/solid";
-
 import { useAuthStore } from "~/stores/auth";
+
 const authStore = useAuthStore();
 
 const email = ref("");
 const password = ref("");
 const showPassword = ref(false);
+
 const loading = ref(false);
 const error = ref(null);
 const errorField = ref(null);
@@ -127,6 +129,18 @@ const router = useRouter();
 const togglePasswordVisibility = () => {
   showPassword.value = !showPassword.value;
 };
+
+onMounted(() => {
+  const demoEmail = localStorage.getItem("demo_email");
+  const demoPassword = localStorage.getItem("demo_password");
+
+  if (demoEmail && demoPassword) {
+    email.value = demoEmail;
+    password.value = demoPassword;
+  } else {
+    console.log("No demo user found in localStorage.");
+  }
+});
 
 const validateForm = () => {
   if (!email.value) {
