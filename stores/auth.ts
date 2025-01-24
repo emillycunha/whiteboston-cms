@@ -251,9 +251,17 @@ export const useAuthStore = defineStore("auth", {
     // Apply dark mode theme
     applyDarkMode() {
       const darkmode = this.preferences?.darkmode ?? false;
-      const theme = darkmode ? "dark" : "light";
-      document.documentElement.classList.remove("dark", "light");
-      document.documentElement.classList.add(theme);
+
+      // Log the current dark mode state
+      console.log("[applyDarkMode] Current darkmode state:", darkmode);
+
+      if (darkmode) {
+        document.documentElement.classList.add("dark");
+        localStorage.setItem("darkmode", "true");
+      } else {
+        document.documentElement.classList.remove("dark");
+        localStorage.setItem("darkmode", "false");
+      }
     },
 
     // Toggle dark mode and update preference in Supabase
@@ -261,6 +269,11 @@ export const useAuthStore = defineStore("auth", {
       const { $supabase } = useNuxtApp();
 
       this.preferences.darkmode = !this.preferences.darkmode;
+      console.log(
+        "[toggleDarkMode] Darkmode toggled to:",
+        this.preferences.darkmode
+      );
+
       this.applyDarkMode();
 
       // Update the preferences in Supabase after the UI update

@@ -12,7 +12,7 @@
           onClick: navigateToSettings,
         },
         {
-          label: 'Add',
+          label: 'Add Collection',
           icon: PlusIcon,
           iconPosition: 'after',
           variant: 'primary',

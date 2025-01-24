@@ -12,7 +12,7 @@
           onClick: manageCollections,
         },
         {
-          label: 'Add',
+          label: 'Add Collection',
           icon: PlusIcon,
           iconPosition: 'after',
           variant: 'primary',
@@ -289,11 +289,7 @@ const saveSettings = async () => {
 
       // Redirect to dashboard
       navigateTo("/dashboard");
-
-      // Refresh the page to update sidebar and other components
-      setTimeout(() => {
-        window.location.reload();
-      }, 100);
+      await collectionsStore.fetchCollectionsForCurrentOrg();
     } else {
       error.value = "Failed to update dashboard preferences.";
     }

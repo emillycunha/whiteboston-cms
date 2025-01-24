@@ -2,6 +2,7 @@
 import {
   ChatBubbleLeftIcon,
   UsersIcon,
+  UserPlusIcon,
   QueueListIcon,
   StarIcon,
   ShoppingCartIcon,
@@ -14,6 +15,10 @@ export const iconMappings = [
   {
     keywords: ["blogs", "posts", "blog", "post"],
     icon: ChatBubbleLeftIcon,
+  },
+  {
+    keywords: ["leads", "lead"],
+    icon: UserPlusIcon,
   },
   {
     keywords: ["leads", "contacts", "lead", "contact", "clients", "client"],

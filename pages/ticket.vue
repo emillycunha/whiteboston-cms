@@ -9,7 +9,6 @@
       :editable="editable"
       @submit="submitTicket"
       @cancel="goBack"
-      @editable="enableEdit"
     />
   </div>
 </template>
@@ -24,7 +23,7 @@ const fields = ref([
     key: "title",
     label: "Title",
     value: "",
-    fullRow: false,
+    halfRow: true,
     isRequired: true,
     attrs: { maxlength: 100 },
     type: "text",
@@ -46,6 +45,8 @@ const fields = ref([
     key: "category",
     label: "Category",
     value: "",
+    halfRow: true,
+
     isRequired: true,
     type: "select",
     options: [
@@ -60,6 +61,8 @@ const fields = ref([
     key: "priority",
     label: "Priority",
     value: "",
+    halfRow: true,
+
     isRequired: true,
     type: "select",
     options: [

@@ -1,5 +1,5 @@
 <template>
-  <header
+  <div
     class="flex flex-col md:flex-row md:items-center md:justify-between mb-4"
   >
     <!-- Title -->
@@ -41,7 +41,7 @@
         />
       </button>
     </div>
-  </header>
+  </div>
 </template>
 
 <script setup>

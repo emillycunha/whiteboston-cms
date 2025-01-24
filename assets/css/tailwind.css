@@ -1,9 +1,7 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+@custom-variant dark (&:where(.dark, .dark *));
 
 body {
   height: 100%;
-  background-color: #e809a5;
   transition: background-color 0.3s ease;
 }

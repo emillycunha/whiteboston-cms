@@ -10,21 +10,31 @@
       @submit="addCollection"
       @cancel="cancelAdd"
     />
+
+    <!-- Error State -->
+    <div v-if="errors.length" class="mt-4 p-2 text-red-500 text-sm">
+      <ul>
+        <li v-for="(error, index) in errors" :key="index">{{ error }}</li>
+      </ul>
+    </div>
   </div>
 </template>
 
 <script setup>
 import { ref, watch } from "vue";
 import { useRouter } from "vue-router";
+
 import { useNotificationStore } from "@/stores/notification";
 import { useCollectionsStore } from "@/stores/collections";
-import { useAuthStore } from "@/stores/auth";
-import BaseForm from "@/components/BaseForm.vue";
+import { usePredefinedCollectionsStore } from "@/stores/collectionTemplates";
+import { useFieldsStore } from "@/stores/fields";
 
-const authStore = useAuthStore();
 const notificationStore = useNotificationStore();
 const collectionsStore = useCollectionsStore();
-const router = useRouter();
+const predefinedCollectionsStore = usePredefinedCollectionsStore();
+const fieldsStore = useFieldsStore();
+
+const errors = ref([]);
 
 const fields = ref([
   {
@@ -42,6 +52,13 @@ const fields = ref([
     isRequired: true,
   },
   {
+    key: "position",
+    label: "Position",
+    type: "number",
+    value: 0,
+    isRequired: false,
+  },
+  {
     key: "description",
     label: "Description",
     type: "textarea",
@@ -49,13 +66,7 @@ const fields = ref([
     value: "",
     isRequired: false,
   },
-  {
-    key: "position",
-    label: "Position",
-    type: "number",
-    value: 0,
-    isRequired: false,
-  },
+
   {
     key: "is_hidden",
     label: "Hidden",
@@ -65,7 +76,6 @@ const fields = ref([
   },
 ]);
 
-// Slugify Helper
 const slugify = (text) =>
   text
     .toString()
@@ -75,7 +85,6 @@ const slugify = (text) =>
     .replace(/[^\w-]+/g, "")
     .replace(/--+/g, "-");
 
-// Watch for name input to auto-generate slug
 watch(
   () => fields.value.find((f) => f.key === "name").value,
   (newName) => {
@@ -87,78 +96,97 @@ watch(
   }
 );
 
+onMounted(() => {
+  predefinedCollectionsStore.initializeCollections();
+});
+
 // Add New Collection
 const addCollection = async () => {
-  // Check if the user has the required permission
-  if (!authStore.canAddCollections) {
-    console.error(
-      "[Save Changes] User does not have permission to add collections."
-    );
-
-    // Show error notification
-    notificationStore.showNotification(
-      "error",
-      "You do not have permission to add collections."
-    );
-
-    return; // Exit early
-  }
+  errors.value = [];
 
   try {
-    // Debugging: Log the fields value
-    console.log("Fields before submission:", fields.value);
-
-    // Check if the slug already exists
     const existingSlug = await collectionsStore.checkSlugExists(
       fields.value.find((f) => f.key === "slug").value
     );
     if (existingSlug) {
-      notificationStore.showNotification(
-        "error",
+      errors.value.push(
         "Collection slug already exists. Please use a unique slug."
       );
       return;
     }
 
-    // Prepare data for submission
-    const dataToSubmit = fields.value.reduce((acc, field) => {
-      acc[field.key] = field.value;
-      return acc;
-    }, {});
-
-    // Debugging: Log the prepared data for submission
-    console.log("Data prepared for submission:", dataToSubmit);
-
-    // Add the collection
+    const dataToSubmit = prepareDataForSubmission(fields.value);
     const success = await collectionsStore.addCollection(dataToSubmit);
 
     if (success) {
-      // Show success notification
-      notificationStore.showNotification(
-        "success",
-        "Collection added successfully!"
-      );
-
-      // Clear the cache and reload the collections after redirect
-      collectionsStore.clearCollections();
-
-      // Redirect to the new collection's edit page
       const newSlug = fields.value.find((f) => f.key === "slug").value;
-      await router.push(`/collections/${newSlug}/add/fields`);
+      handleCollectionSuccess(newSlug);
     } else {
-      console.error("Failed to add collection:", collectionsStore.error);
+      errors.value.push("Failed to add collection. Please try again.");
     }
   } catch (err) {
-    notificationStore.showNotification(
-      "error",
-      "An unexpected error occurred. Please try again."
-    );
-    console.error("Add Collection Error:", err);
+    errors.value.push("An unexpected error occurred. Please try again.");
   }
+};
+
+const prepareDataForSubmission = (fields) => {
+  return fields.reduce((acc, field) => {
+    acc[field.key] = field.value;
+    return acc;
+  }, {});
+};
+
+const handleCollectionSuccess = async (newSlug) => {
+  notificationStore.showNotification(
+    "success",
+    "Collection added successfully!"
+  );
+
+  const predefinedFields =
+    predefinedCollectionsStore.getFieldsForCollection(newSlug);
+
+  if (predefinedFields.length > 0) {
+    await addPredefinedFields(newSlug, predefinedFields);
+  } else {
+    console.log(
+      `[Debug] No predefined fields found for collection "${newSlug}"`
+    );
+  }
+
+  collectionsStore.clearCollectionCache();
+  await collectionRedirect(newSlug);
+};
+
+const addPredefinedFields = async (newSlug, predefinedFields) => {
+  const fieldAddSuccess = await fieldsStore.addNewCollectionFields(
+    newSlug,
+    predefinedFields
+  );
+
+  if (fieldAddSuccess) {
+    console.log(
+      `[Debug] Predefined fields successfully added to collection "${newSlug}"`
+    );
+  } else {
+    console.error(
+      `[Error] Failed to add predefined fields to collection "${newSlug}"`
+    );
+  }
+};
+
+const collectionRedirect = (newSlug) => {
+  navigateTo({
+    path: `/collections/${newSlug}/add/fields`,
+    query: {
+      collection: newSlug,
+    },
+  });
 };
 
 // Cancel Add
 const cancelAdd = () => {
-  router.push("/collections");
+  navigateTo({
+    path: `/collections/`,
+  });
 };
 </script>

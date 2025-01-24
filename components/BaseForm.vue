@@ -12,12 +12,20 @@
               :key="field.key || `fallback_${index}`"
               :class="[
                 'flex flex-col space-y-2 p-2',
-                field.fullRow ? 'w-full' : 'w-1/2',
+                field.fullRow
+                  ? 'w-full'
+                  : field.halfRow
+                  ? 'w-1/2'
+                  : field.thirdRow
+                  ? 'w-1/3'
+                  : field.quarterRow
+                  ? 'w-1/4'
+                  : 'w-auto',
               ]"
             >
               <label
                 :for="field.key"
-                class="font-bold text-gray-700 dark:text-white"
+                class="text-sm font-bold text-gray-700 dark:text-white"
               >
                 {{ field.label }}
                 <span v-if="field.isRequired" class="text-red-500">*</span>
@@ -43,7 +51,7 @@
                   v-bind="field.attrs || {}"
                   :required="field.isRequired"
                   :placeholder="field.placeholder || `Enter ${field.label}`"
-                  class="border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 rounded-md p-2 w-full"
+                  class="text-sm border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 rounded-md p-2 w-full"
                 />
                 <p v-else>{{ field.value }}</p>
               </div>
@@ -57,7 +65,7 @@
                   :rows="field.rows || 4"
                   :required="field.isRequired"
                   :placeholder="field.placeholder || `Enter ${field.label}`"
-                  class="border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 rounded-md p-2 w-full"
+                  class="text-sm border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 rounded-md p-2 w-full"
                 ></textarea>
                 <p v-else>{{ field.value }}</p>
               </div>
@@ -70,7 +78,7 @@
                   :type="field.type"
                   :required="field.isRequired"
                   :placeholder="field.placeholder || `Enter ${field.label}`"
-                  class="border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 rounded-md p-2 w-full"
+                  class="text-sm border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 rounded-md p-2 w-full"
                 />
                 <p v-else>{{ field.value }}</p>
               </div>
@@ -84,7 +92,7 @@
                     :type="showPassword ? 'text' : 'password'"
                     :required="field.isRequired"
                     :placeholder="field.placeholder || `Enter ${field.label}`"
-                    class="border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 rounded-md p-2 w-full"
+                    class="text-sm border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 rounded-md p-2 w-full"
                   />
                   <button
                     type="button"
@@ -109,7 +117,7 @@
                   type="tel"
                   :required="field.isRequired"
                   :placeholder="field.placeholder || `Enter ${field.label}`"
-                  class="border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 rounded-md p-2 w-full"
+                  class="text-sm border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 rounded-md p-2 w-full"
                 />
                 <p v-else>{{ field.value }}</p>
               </div>
@@ -157,7 +165,7 @@
                   :type="field.type"
                   :required="field.isRequired"
                   :placeholder="field.placeholder || `Enter ${field.label}`"
-                  class="border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 rounded-md p-2 w-full"
+                  class="text-sm border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 rounded-md p-2 w-full"
                 />
                 <p v-else>{{ field.value }}</p>
               </div>
@@ -170,7 +178,7 @@
                   :type="field.type"
                   :required="field.isRequired"
                   :placeholder="field.placeholder || `Enter ${field.label}`"
-                  class="border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 rounded-md p-2 w-full"
+                  class="text-sm border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 rounded-md p-2 w-full"
                 />
                 <p v-else>{{ field.value }}</p>
               </div>
@@ -182,7 +190,7 @@
                   :options="field.options"
                   :type="field.type"
                   :required="field.isRequired"
-                  class="w-full border border-gray-300 dark:border-gray-600 rounded-md px-2 py-1"
+                  class="text-sm w-full border border-gray-300 dark:border-gray-600 rounded-md px-2 py-1"
                 />
                 <p v-else>{{ field.value }}</p>
               </div>

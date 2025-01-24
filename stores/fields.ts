@@ -19,15 +19,15 @@ interface Field {
   collection_id?: number;
 }
 
-interface FieldStoreState {
+interface fieldsStoreState {
   fields: Field[];
   error: string | null;
   isLoading: boolean;
   isLoadingBySlug: Record<string, boolean>;
 }
 
-export const useFieldStore = defineStore("field", {
-  state: (): FieldStoreState => ({
+export const useFieldsStore = defineStore("field", {
+  state: (): fieldsStoreState => ({
     fields: [],
     error: null,
     isLoading: false,
@@ -95,25 +95,34 @@ export const useFieldStore = defineStore("field", {
         const { data: fieldsData, error: fieldsError } = await $supabase
           .from("fields")
           .select("*")
-          .eq("collection_id", collectionId);
+          .eq("collection_id", collectionId)
+          .order("position", { ascending: true });
 
         if (fieldsError) {
           console.error("[Field Store] Error fetching fields:", fieldsError);
           throw new Error(`Failed to fetch fields: ${fieldsError.message}`);
         }
 
-        this.fields = fieldsData.map((field) => ({
-          id: field.id || 0,
-          name: field.label || field.name || "Unnamed Field",
-          key: field.key || `field_${Math.random().toString(36).substr(2, 5)}`,
-          label: field.label || "Unnamed Field",
-          type: field.type || "text",
-          value: field.value || "",
-          is_required: field.is_required || false,
-          options: field.options || [],
-          position: field.position || 0,
-          collection_id: field.collection_id || null,
-        }));
+        this.fields = fieldsData
+          .map((field) => ({
+            id: field.id || 0,
+            name: field.label || field.name || "Unnamed Field",
+            key:
+              field.key || `field_${Math.random().toString(36).substr(2, 5)}`,
+            label: field.label || "Unnamed Field",
+            type: field.type || "text",
+            value: field.value || "",
+            is_required: field.is_required || false,
+            options: Array.isArray(field.options) ? field.options : [],
+            optionsString: Array.isArray(field.options)
+              ? field.options
+                  .map((option: { label: string }) => option.label)
+                  .join(", ")
+              : "",
+            position: field.position || 0,
+            collection_id: field.collection_id || null,
+          }))
+          .sort((a, b) => a.position - b.position);
       } catch (err) {
         console.error("[Field Store] Error:", err);
         if (err instanceof Error) {
@@ -157,7 +166,7 @@ export const useFieldStore = defineStore("field", {
             is_required: field.is_required,
             options:
               field.type === "select" && Array.isArray(field.options)
-                ? JSON.stringify(field.options)
+                ? field.options
                 : null,
           })),
 

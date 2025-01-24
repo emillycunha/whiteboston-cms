@@ -12,7 +12,7 @@
           onClick: goToSettings,
         },
         {
-          label: 'Add',
+          label: 'Add User',
           icon: PlusIcon,
           iconPosition: 'after',
           variant: 'primary',

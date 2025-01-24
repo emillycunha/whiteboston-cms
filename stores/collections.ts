@@ -270,7 +270,7 @@ export const useCollectionsStore = defineStore("collections", {
     },
 
     // Clear cache
-    clearCollections() {
+    clearCollectionCache() {
       this.collections = [];
     },
   },

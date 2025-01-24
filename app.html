@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html>
+<html class="">
+
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -13,24 +14,27 @@
       content="Manage your content effortlessly with WhiteBoston CMS."
     />
     <meta property="og:type" content="website" />
-    <meta property="og:url" content="https://your-site.com" />
+    <meta property="og:url" content="https://cms.whiteboston.com" />
     <meta property="og:image" content="https://your-site.com/og-image.png" />
     <link rel="icon" href="/favicon.ico" />
 
     <title>WhiteBoston CMS</title>
     <script>
-      // Apply the dark class dynamically before the app renders
       (function () {
         try {
-          const isDark = localStorage.getItem("darkmode") === "true";
-          document.documentElement.classList.toggle("dark", isDark);
+          const isDark = JSON.parse(localStorage.getItem("darkmode") || "false");
+          if (isDark) {
+            document.documentElement.classList.add("dark");
+          } else {
+            document.documentElement.classList.remove("dark");
+          }
         } catch (e) {
-          console.error("Failed to set theme class:", e);
+          console.error("Failed to initialize dark mode:", e);
         }
       })();
     </script>
   </head>
-  <body>
+  <body">
     <div id="__nuxt" class=""></div>
   </body>
 </html>

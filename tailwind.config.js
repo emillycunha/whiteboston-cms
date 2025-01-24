@@ -8,7 +8,7 @@ export default {
     "./layouts/**/*.{vue,js,ts,jsx,tsx}",
     "./app.vue",
   ],
-  darkMode: "selector",
+  darkMode: "class",
   theme: {
     extend: {},
   },

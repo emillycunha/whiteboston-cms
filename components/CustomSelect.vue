@@ -6,7 +6,9 @@
       class="w-full px-2 py-1 text-left flex justify-between items-center"
       @click="toggleDropdown"
     >
-      <div class="flex-1">{{ selectedOptionLabel || "Select Option" }}</div>
+      <div class="flex-1 text-sm">
+        {{ selectedOptionLabel || "Select Option" }}
+      </div>
       <div><ChevronDownIcon class="w-4 h-4" /></div>
     </button>
 

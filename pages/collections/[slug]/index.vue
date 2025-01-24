@@ -13,7 +13,7 @@
           disabled: selectedItems.length === 0,
         },
         {
-          label: 'Add',
+          label: 'Add Content',
           icon: PlusIcon,
           iconPosition: 'after',
           variant: 'primary',

@@ -21,68 +21,69 @@
         <div class="p-2 sm:p-4">
           <!-- Editable Fields Table -->
           <div class="p-2 sm:p-4">
-            <div>
-              <table class="w-full text-base table-auto">
-                <thead>
-                  <tr
-                    class="text-left text-gray-700 dark:bg-slate-900 dark:text-white border-b border-gray-200 dark:border-slate-700"
-                  >
-                    <th
-                      v-for="column in columns"
-                      :key="column.field"
-                      class="px-4 py-2 text-left text-sm font-semibold"
-                    >
-                      {{ column.label }}
-                    </th>
-                  </tr>
-                </thead>
-                <tbody class="text-sm text-gray-600 dark:text-gray-100">
-                  <tr v-for="(field, index) in fields" :key="field.key">
-                    <td
-                      v-for="column in columns"
-                      :key="column.field"
-                      class="px-4 py-2"
-                    >
-                      <template v-if="column.type === 'text'">
-                        <input
-                          v-model="field[column.field]"
-                          type="text"
-                          class="w-full border border-gray-300 dark:border-gray-600 rounded-md px-2 py-1"
-                        />
-                      </template>
-                      <template v-if="column.type === 'select'">
-                        <CustomSelect
-                          v-model="field[column.field]"
-                          :options="fieldOptions"
-                          class="w-full border border-gray-300 dark:border-gray-600 rounded-md px-2 py-1"
-                        />
-                      </template>
-                      <template v-if="column.type === 'textarea'">
-                        <textarea
-                          v-if="field[column.field]"
-                          v-model="field[column.field]"
-                          placeholder="Comma-separated values"
-                          class="w-full border border-gray-300 dark:border-gray-600 rounded-md px-2 py-1"
-                        ></textarea>
-                      </template>
-                      <template v-if="column.type === 'number'">
-                        <input
-                          v-model="field[column.field]"
-                          type="number"
-                          class="w-full border border-gray-300 dark:border-gray-600 rounded-md px-2 py-1"
-                        />
-                      </template>
-                      <template v-if="column.type === 'checkbox'">
-                        <input
-                          v-model="field[column.field]"
-                          type="checkbox"
-                          class="h-4 w-4 text-violet-500 border-gray-500 rounded focus:ring-violet-500 dark:focus:ring-teal-500 dark:text-teal-500"
-                        />
-                      </template>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
+            <div
+              class="grid grid-cols-[2fr,1fr,2fr,1fr,1fr] gap-4 text-sm font-semibold text-gray-700 border-b border-gray-300 dark:border-gray-600 pb-2 mb-6"
+            >
+              <div>Field Name</div>
+              <div>Type</div>
+              <div>Options</div>
+              <div>Position</div>
+              <div>Required</div>
+            </div>
+            <div
+              v-for="(field, index) in fields"
+              :key="field.key"
+              class="grid grid-cols-[2fr,1fr,2fr,1fr,1fr] gap-4 items-start py-2"
+            >
+              <!-- Field Name -->
+              <div class="mb-2">
+                <input
+                  v-model="field.name"
+                  type="text"
+                  placeholder="Field Name"
+                  required
+                  class="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm"
+                />
+              </div>
+
+              <!-- Type -->
+              <div class="mb-2">
+                <CustomSelect
+                  v-model="field.type"
+                  :options="fieldOptions"
+                  required
+                  class="w-full border border-gray-300 dark:border-gray-600 rounded-md px-2 py-1 text-sm"
+                />
+              </div>
+
+              <!-- Options -->
+              <div class="mb-2">
+                <textarea
+                  v-if="field.type === 'select'"
+                  v-model="field.optionsString"
+                  placeholder="Comma-separated values"
+                  class="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm"
+                ></textarea>
+              </div>
+
+              <!-- Position -->
+              <div class="mb-2">
+                <input
+                  v-model="field.position"
+                  type="number"
+                  placeholder="Position"
+                  class="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm"
+                />
+              </div>
+
+              <!-- Required -->
+              <div class="flex items-center justify-center space-x-2">
+                <input
+                  v-model="field.is_required"
+                  type="checkbox"
+                  class="h-4 w-4 text-violet-500 border-gray-500 rounded"
+                />
+              </div>
             </div>
 
             <!-- Add Field Button -->
@@ -110,7 +111,7 @@
           {
             label: 'Cancel',
             icon: XCircleIcon,
-            iconPosition: 'before',
+            iconPosition: 'after',
             variant: 'secondary',
             onClick: cancelChanges,
             type: 'button',
@@ -129,9 +130,9 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from "vue";
+import { ref, computed, onMounted, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
-import { useFieldStore } from "~/stores/fields";
+import { useFieldsStore } from "~/stores/fields";
 
 import {
   XCircleIcon,
@@ -150,27 +151,14 @@ import {
 
 const notificationStore = useNotificationStore();
 
-// Route and Router
 const route = useRoute();
-const router = useRouter();
 const collectionSlug = route.params.slug;
 
-// State and Store
-const fieldStore = useFieldStore();
+const fieldsStore = useFieldsStore();
 
-// Columns configuration
-const columns = ref([
-  { label: "Field Name", field: "name", type: "text" },
-  { label: "Type", field: "type", type: "select" },
-  { label: "Options", field: "options", type: "textarea" },
-  { label: "Default Value", field: "default_value", type: "text" },
-  { label: "Position", field: "position", type: "number" },
-  { label: "Required", field: "is_required", type: "checkbox" },
-]);
-
-const isLoading = computed(() => fieldStore.isLoading);
+const isLoading = computed(() => fieldsStore.isLoading);
 const errors = ref([]);
-const error = computed(() => fieldStore.error);
+const error = computed(() => fieldsStore.error);
 const collectionName = computed(
   () => collectionSlug.charAt(0).toUpperCase() + collectionSlug.slice(1)
 );
@@ -198,35 +186,27 @@ const fieldOptions = [
   },
 ];
 
-// Options for CustomSelect to manage field position (0 to fields.length)
-const fieldPosition = computed(() => {
-  return [...Array(fields.value.length).keys()].map((i) => ({
-    label: `${i + 1}`,
-    value: i + 1,
-  }));
-});
-
 onMounted(async () => {
   try {
-    // Fetch fields for the collection using the new store
-    await fieldStore.fetchCollectionFields(collectionSlug);
+    await fieldsStore.fetchCollectionFields(collectionSlug);
 
     // Check if fields are available or need to be initialized
-    if (fieldStore.fields.length === 0) {
+    if (fieldsStore.fields.length === 0) {
       fields.value.push({
         key: "new_field_1",
         name: "New Field",
         type: "text",
         position: 1,
         is_required: false,
-        options: null,
+        options: [],
+        optionsString: "",
       });
     } else {
       // Directly assign the fields fetched from the store
-      fields.value = fieldStore.fields;
+      fields.value = fieldsStore.fields;
     }
 
-    console.log("[Initialized Fields]", fields.value);
+    console.log("[Debug] Fields after mapping:", fields.value);
   } catch (err) {
     error.value = "Failed to load fields for collection.";
     console.error(err);
@@ -234,14 +214,14 @@ onMounted(async () => {
 });
 
 const addField = () => {
-  // Create a new field with default values that are editable by the user
   fields.value.push({
     key: `new_field_${fields.value.length}`,
-    name: "New Field", // Default name, can be edited by user
-    type: "text", // Default type, can be selected by user
+    name: "New Field",
+    type: "select",
     position: fields.value.length + 1,
-    is_required: false, // Default is not required, can be toggled by user
-    options: null, // Default options
+    is_required: false,
+    options: [],
+    optionsString: "",
   });
 };
 
@@ -257,9 +237,6 @@ const saveChanges = async () => {
   }
 
   const { updatedFields, newFieldsToInsert } = splitFields(fields.value);
-
-  console.log("Updated Fields:", updatedFields); // Log existing fields being updated
-  console.log("New Fields to Insert:", newFieldsToInsert); // Log new fields being inserted
 
   try {
     const messages = [];
@@ -296,10 +273,12 @@ const splitFields = (fields) => {
   const newFields = fields.filter((field) => !field.id);
   const existingFields = fields.filter((field) => field.id);
 
-  // Ensure new fields have a key before insertion
-  const updatedNewFields = newFields.map((field, index) => ({
+  const updatedNewFields = newFields.map((field) => ({
     ...field,
-    options: field.type === "select" ? handleOptions(field.options) : null,
+    options:
+      field.type === "select" && field.optionsString
+        ? handleOptions(field.optionsString)
+        : [],
   }));
 
   console.log("New fields to insert:", updatedNewFields);
@@ -307,29 +286,45 @@ const splitFields = (fields) => {
   return {
     updatedFields: existingFields.map((field) => ({
       ...field,
-      options: field.type === "select" ? handleOptions(field.options) : null,
+      options:
+        field.type === "select" && field.optionsString // Convert optionsString for 'select' fields
+          ? handleOptions(field.optionsString)
+          : field.options,
     })),
     newFieldsToInsert: updatedNewFields,
   };
 };
 
 const handleOptions = (options) => {
-  if (!options) return null;
-  return options.split(",").map((opt) => ({
-    label: opt.trim(),
-    value: opt.trim().toLowerCase().replace(/\s+/g, "_"),
-  }));
+  if (!options) return null; // Return null if no options provided
+
+  if (typeof options === "string") {
+    // Convert comma-separated string into an array of objects
+    return options.split(",").map((opt) => ({
+      label: opt.trim(),
+      value: opt.trim().toLowerCase().replace(/\s+/g, "_"),
+    }));
+  }
+
+  // Ensure options is returned as an array if it's already in the correct format
+  return Array.isArray(options) ? options : [];
 };
 
 const updateExistingFields = async (fields) => {
   try {
-    console.log("Updating fields:", fields); // Log fields to be updated
+    console.log("Updating fields:", fields);
 
-    const { error } = await fieldStore.updateCollectionFields(
+    // Send the fields directly to Supabase
+    const { error } = await fieldsStore.updateCollectionFields(
       collectionSlug,
-      fields
+      fields.map((field) => ({
+        ...field,
+        options: Array.isArray(field.options) ? field.options : [], // Ensure options is an array
+      }))
     );
+
     if (error) throw error;
+
     return true;
   } catch (err) {
     console.error("Failed to update existing fields:", err);
@@ -341,28 +336,26 @@ const insertNewFields = async (fields) => {
   try {
     console.log("Fields to insert:", fields);
 
-    // Ensure the fields contain 'key' only for frontend use, not in the database
     const fieldsToInsert = fields.map((field) => {
-      // Exclude the key from being inserted into the database
-      const { key, ...fieldWithoutKey } = field;
+      const { key, optionsString, ...fieldWithoutKeyAndOptionsString } = field; // Exclude `key` and `optionsString`
 
       return {
-        ...fieldWithoutKey,
+        ...fieldWithoutKeyAndOptionsString,
+        options: Array.isArray(field.options) ? field.options : [], // Ensure options is an array
         collection_id: collectionData.id, // Ensure collection_id is added
       };
     });
 
-    console.log("Fields to insert without 'key' for DB:", fieldsToInsert); // Log fields before insert
+    console.log("Prepared fields for insertion:", fieldsToInsert);
 
-    const insertSuccess = await fieldStore.addNewCollectionFields(
+    const insertSuccess = await fieldsStore.addNewCollectionFields(
       collectionSlug,
-      fieldsToInsert // Send the fields without the 'key' column to Supabase
+      fieldsToInsert
     );
 
     if (insertSuccess) {
       console.log("New fields added successfully!");
     } else {
-      console.error("Failed to insert new fields.");
       throw new Error("Failed to insert new fields.");
     }
 
@@ -376,14 +369,14 @@ const insertNewFields = async (fields) => {
 const showSuccessNotification = (messages) => {
   const finalMessage = messages.length
     ? messages.join(" ")
-    : "Collection and fields updated successfully.";
+    : "Fields updated successfully.";
   notificationStore.showNotification("success", finalMessage);
 };
 
 // Cancel changes
 const cancelChanges = () => {
   navigateTo({
-    path: `/collections`,
+    path: `/collections/`,
   });
 };
 </script>

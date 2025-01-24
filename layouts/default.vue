@@ -342,13 +342,13 @@ import {
 const { $supabase } = useNuxtApp();
 const authStore = useAuthStore();
 const userRole = computed(() => authStore.role);
-console.log(userRole.value);
 
 const collectionsStore = useCollectionsStore();
 const router = useRouter();
 
 // State for collections
-const collections = ref([]);
+//const collections = ref([]);
+const collections = computed(() => collectionsStore.collections);
 const maxVisibleItems = 3;
 
 // Fetch collections on sidebar load
@@ -368,10 +368,17 @@ onMounted(fetchAndSetCollections);
 
 // Dynamic navigation
 const visibleCollections = computed(() =>
-  collections.value.slice(0, maxVisibleItems)
+  collections.value
+    .filter((collection) => !collection.is_hidden)
+    .sort((a, b) => a.position - b.position)
+    .slice(0, maxVisibleItems)
 );
+
 const extraCollections = computed(() =>
-  collections.value.slice(maxVisibleItems)
+  collections.value
+    .filter((collection) => !collection.is_hidden)
+    .sort((a, b) => a.position - b.position)
+    .slice(maxVisibleItems)
 );
 
 // Dynamic Icon Assignment

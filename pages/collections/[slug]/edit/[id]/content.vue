@@ -93,6 +93,8 @@ onMounted(async () => {
         "richtexthtml",
         "image",
       ].includes(field.type),
+      halfRow: ["text", "select", "email"].includes(field.type),
+      thirdRow: ["number", "date", "boolean"].includes(field.type),
     }));
 
     console.log("[Debug] Fields Loaded:", fields.value);

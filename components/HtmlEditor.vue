@@ -2,7 +2,7 @@
   <div v-if="editor" class="container">
     <EditorHeader :editor="editor" :setLink="setLink" />
 
-    <div class="border border-gray-500">
+    <div class="border border-gray-500 p-4 min-h-60">
       <editor-content :editor="editor" class="prose" />
     </div>
   </div>
