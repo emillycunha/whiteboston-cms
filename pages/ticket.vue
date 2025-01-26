@@ -1,9 +1,7 @@
 <template>
   <div class="px-6 py-4 space-y-6">
-    <!-- Page Header -->
     <PageHeader title="Submit a Ticket" />
 
-    <!-- Ticket Submission Form -->
     <BaseForm
       :fields="fields"
       :editable="editable"
@@ -17,6 +15,7 @@
 import { ref } from "vue";
 
 const { $supabase } = useNuxtApp();
+const notificationStore = useNotificationStore();
 const editable = ref(true);
 const fields = ref([
   {
@@ -76,31 +75,30 @@ const fields = ref([
 ]);
 
 const submitTicket = async () => {
-  // Collect the ticket data
   const ticketData = fields.value.reduce((acc, field) => {
     acc[field.key] = field.value;
     return acc;
   }, {});
 
-  // Add user_id from the logged-in user
   const authStore = useAuthStore();
   ticketData.user_id = authStore.id;
-
-  console.log("Submitting Ticket:", ticketData);
 
   try {
     const { data, error } = await $supabase.from("tickets").insert(ticketData);
 
     if (error) {
-      console.error("Error submitting ticket:", error);
-      alert("Failed to submit the ticket. Please try again.");
+      notificationStore.showNotification(
+        "error",
+        "Failed to submit the ticket. Please try again."
+      );
       return;
     }
 
-    console.log("Ticket Submitted Successfully:", data);
-    alert("Ticket submitted successfully!");
+    notificationStore.showNotification(
+      "success",
+      "Ticket submitted successfully!"
+    );
 
-    // Reset the form after successful submission
     fields.value.forEach((field) => {
       if (field.type !== "select" && !field.attrs?.required) {
         field.value = "";
@@ -110,7 +108,10 @@ const submitTicket = async () => {
     isEditing.value = false;
   } catch (err) {
     console.error("Unexpected error:", err);
-    alert("An unexpected error occurred. Please try again.");
+    notificationStore.showNotification(
+      "error",
+      "An unexpected error occurred. Please try again."
+    );
   }
 };
 

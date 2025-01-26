@@ -148,8 +148,6 @@
 import {
   ChevronLeftIcon,
   CheckCircleIcon,
-  PlusIcon,
-  Cog6ToothIcon,
   ChevronUpIcon,
   ChevronDownIcon,
 } from "@heroicons/vue/24/outline";
@@ -157,13 +155,11 @@ import {
 import { useNotificationStore } from "@/stores/notification";
 const notificationStore = useNotificationStore();
 
-// Store references
 const authStore = useAuthStore();
 const userRole = computed(() => authStore.role);
 
 const collectionsStore = useCollectionsStore();
 
-// Reactive state
 const selectedStats = ref([]);
 const availableCollections = ref([]);
 const collections = ref([]);
@@ -180,27 +176,30 @@ onMounted(async () => {
     return;
   }
 
-  await collectionsStore.fetchCollectionsForCurrentOrg();
-  collections.value = collectionsStore.collections;
+  try {
+    await collectionsStore.fetchCollectionsForCurrentOrg();
+    collections.value = collectionsStore.collections;
 
-  availableCollections.value = collectionsStore
-    .getCollectionsByOrg(orgId)
-    .map((collection) => collection.slug);
+    availableCollections.value = collectionsStore
+      .getCollectionsByOrg(orgId)
+      .map((collection) => collection.slug);
 
-  // Fetch user preferences from authStore
-  console.log("[Mounted] User preferences fetched:", authStore.preferences);
-  const userPreferences = authStore.preferences?.dashboard?.stats || [];
-  selectedStats.value = userPreferences;
+    const userPreferences = authStore.preferences?.dashboard?.stats || [];
+    selectedStats.value = userPreferences;
+    error.value = "";
+  } catch (err) {
+    error.value = "Failed to load collections or preferences.";
+  }
 });
 
-// Handle checkbox changes and enforce max limit
 const handleCheckboxChange = (collection) => {
   if (selectedStats.value.length > 3) {
-    // Prevent exceeding limit
     selectedStats.value = selectedStats.value.filter(
       (item) => item !== collection
     );
-    alert("You can select a maximum of 3 collections.");
+    error.value = "You can select a maximum of 3 collections.";
+  } else {
+    error.value = "";
   }
 };
 
@@ -210,12 +209,10 @@ const moveUp = (index) => {
     const current = collections.value[index];
     const above = collections.value[index - 1];
 
-    // Swap positions
     const temp = current.position;
     current.position = above.position;
     above.position = temp;
 
-    // Reorder the array
     collections.value.splice(index - 1, 2, current, above);
   }
 };
@@ -238,7 +235,6 @@ const moveDown = (index) => {
 
 const saveSettings = async () => {
   try {
-    // Save Positions
     const updatedCollections = collections.value.map((collection, index) => ({
       id: collection.id,
       position: index + 1,
@@ -249,7 +245,6 @@ const saveSettings = async () => {
 
     await collectionsStore.updateCollectionPositions(updatedCollections);
 
-    // Save Preferences to authStore
     const userId = authStore.id;
     if (!userId) {
       error.value = "User not authenticated.";
@@ -261,25 +256,10 @@ const saveSettings = async () => {
       dashboard: { stats: selectedStats.value },
     };
 
-    const success = await authStore.updatePreferences(updatedPreferences);
+    await authStore.updatePreferences(updatedPreferences);
 
-    if (success) {
-      console.log(
-        "[Save Settings] Dashboard preferences updated successfully."
-      );
-
-      // Show success notification
-      notificationStore.showNotification(
-        "success",
-        "Settings saved successfully!"
-      );
-
-      // Redirect to dashboard
-      navigateTo("/dashboard");
-      await collectionsStore.fetchCollectionsForCurrentOrg();
-    } else {
-      error.value = "Failed to update dashboard preferences.";
-    }
+    navigateTo("/dashboard");
+    await collectionsStore.fetchCollectionsForCurrentOrg();
   } catch (err) {
     console.error("[Save Settings] Failed to save settings:", err);
     error.value = "Failed to save settings.";
@@ -288,13 +268,5 @@ const saveSettings = async () => {
 
 const cancelSettings = () => {
   navigateTo("/dashboard");
-};
-
-const addNew = () => {
-  navigateTo({ path: `/collections/new/add/collection` });
-};
-
-const manageCollections = () => {
-  navigateTo({ path: "/collections" });
 };
 </script>

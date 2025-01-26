@@ -1,5 +1,6 @@
 import { defineStore } from "pinia";
 import { useMyPermissionsStore } from "~/stores/permissions";
+import { useNotificationStore } from "~/stores/notification";
 
 type Role = "SuperAdmin" | "admin" | "user" | "viewer";
 
@@ -10,7 +11,7 @@ export const useAuthStore = defineStore("auth", {
     name: null as string | null,
     org_id: null as string | null,
     preferences: {} as Record<string, any>,
-    role: null as Role | null, // "SuperAdmin", "admin", "user", "viewer"
+    role: null as Role | null,
     isAuthenticated: false,
     error: null as string | null,
   }),
@@ -193,58 +194,84 @@ export const useAuthStore = defineStore("auth", {
     },
 
     // Save profile data (name, email, password)
+    // Save profile data (name, email, password)
     async saveProfile(updatedFields: {
       name?: string;
       email?: string;
       password?: string;
     }) {
       const { $supabase } = useNuxtApp();
+      const notificationStore = useNotificationStore();
 
       try {
-        //let { error } = null;
-
         if (updatedFields.name && updatedFields.name !== this.name) {
-          // Update the name in the `users` table
-          const { data, error: nameError } = await $supabase
+          const { error: nameError } = await $supabase
             .from("users")
             .update({ name: updatedFields.name })
             .eq("id", this.id);
+
           if (nameError) {
-            this.error = nameError.message;
+            notificationStore.showNotification(
+              NotificationType.Error,
+              `Error updating name: ${nameError.message}`
+            );
             console.error("Error updating name:", nameError.message);
-            this.error = nameError.message;
             return;
           }
+
           this.name = updatedFields.name;
+          notificationStore.showNotification(
+            NotificationType.Success,
+            "Name updated successfully."
+          );
         }
 
         if (updatedFields.email && updatedFields.email !== this.email) {
-          const { data, error: emailError } = await $supabase.auth.updateUser({
+          const { error: emailError } = await $supabase.auth.updateUser({
             email: updatedFields.email,
           });
-          if (emailError) {
-            console.error("Error updating email:", emailError.message);
 
-            this.error = emailError.message;
+          if (emailError) {
+            notificationStore.showNotification(
+              NotificationType.Error,
+              `Error updating email: ${emailError.message}`
+            );
+            console.error("Error updating email:", emailError.message);
             return;
           }
+
           this.email = updatedFields.email;
+          notificationStore.showNotification(
+            NotificationType.Success,
+            "Email updated successfully."
+          );
         }
 
         if (updatedFields.password) {
           const { error: passwordError } = await $supabase.auth.updateUser({
             password: updatedFields.password,
           });
+
           if (passwordError) {
-            this.error = passwordError.message;
+            notificationStore.showNotification(
+              NotificationType.Error,
+              `Error updating password: ${passwordError.message}`
+            );
+            console.error("Error updating password:", passwordError.message);
             return;
           }
-        }
 
-        this.error = null;
+          notificationStore.showNotification(
+            NotificationType.Success,
+            "Password updated successfully."
+          );
+        }
       } catch (err) {
-        this.error = "An unexpected error occurred.";
-        console.error(err);
+        notificationStore.showNotification(
+          NotificationType.Error,
+          "An unexpected error occurred while updating profile."
+        );
+        console.error("Unexpected error:", err);
       }
     },
 
@@ -294,8 +321,13 @@ export const useAuthStore = defineStore("auth", {
 
     async updatePreferences(updatedPreferences: Record<string, any>) {
       const { $supabase } = useNuxtApp();
+      const notificationStore = useNotificationStore();
 
       if (!this.id) {
+        notificationStore.showNotification(
+          NotificationType.Error,
+          "User ID is missing. Cannot update preferences."
+        );
         console.error(
           "[Auth Store] User ID is missing. Cannot update preferences."
         );
@@ -303,7 +335,6 @@ export const useAuthStore = defineStore("auth", {
       }
 
       try {
-        // Update preferences in the database
         const { data, error } = await $supabase
           .from("users")
           .update({ preferences: updatedPreferences })
@@ -311,16 +342,27 @@ export const useAuthStore = defineStore("auth", {
           .select("*");
 
         if (error) {
+          notificationStore.showNotification(
+            NotificationType.Error,
+            "Failed to update preferences. Please try again."
+          );
           console.error("[Auth Store] Failed to update preferences:", error);
           return false;
         }
 
-        // Update preferences in the local store
         this.preferences = updatedPreferences;
 
+        notificationStore.showNotification(
+          NotificationType.Success,
+          "Preferences updated successfully."
+        );
         console.log("[Auth Store] Preferences updated successfully:", data);
         return true;
       } catch (err) {
+        notificationStore.showNotification(
+          NotificationType.Error,
+          "An unexpected error occurred while updating preferences."
+        );
         console.error("[Auth Store] Error updating preferences:", err);
         return false;
       }

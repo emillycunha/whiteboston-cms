@@ -374,7 +374,6 @@ export const useCollectionsStore = defineStore("collections", {
       }
     },
 
-    // Clear cache
     clearCollectionCache() {
       this.collections = [];
     },
