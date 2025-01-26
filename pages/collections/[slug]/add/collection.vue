@@ -34,7 +34,7 @@ const collectionsStore = useCollectionsStore();
 const predefinedCollectionsStore = usePredefinedCollectionsStore();
 const fieldsStore = useFieldsStore();
 
-const errors = ref([]);
+const errors = ref("");
 
 const fields = ref([
   {
@@ -42,6 +42,7 @@ const fields = ref([
     label: "Collection Name",
     type: "text",
     value: "",
+    halfRow: true,
     isRequired: true,
   },
   {
@@ -49,14 +50,8 @@ const fields = ref([
     label: "Slug",
     type: "text",
     value: "",
+    halfRow: true,
     isRequired: true,
-  },
-  {
-    key: "position",
-    label: "Position",
-    type: "number",
-    value: 0,
-    isRequired: false,
   },
   {
     key: "description",
@@ -66,12 +61,19 @@ const fields = ref([
     value: "",
     isRequired: false,
   },
-
+  {
+    key: "position",
+    label: "Position",
+    type: "number",
+    value: 99,
+    isRequired: false,
+  },
   {
     key: "is_hidden",
     label: "Hidden",
     type: "boolean",
     value: false,
+    fullRow: true,
     isRequired: false,
   },
 ]);

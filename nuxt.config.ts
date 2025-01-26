@@ -7,7 +7,7 @@ export default defineNuxtConfig({
   postcss: {
     plugins: {
       "@tailwindcss/postcss": {},
-      autoprefixer: {},
+      //autoprefixer: {},
     },
   },
   modules: ["@pinia/nuxt", "@nuxt/eslint"],

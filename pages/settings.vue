@@ -1,35 +1,17 @@
 <template>
   <div class="px-6 py-4 space-y-6">
     <!-- Page Header -->
-    <PageHeader
-      title="Settings"
-      :buttons="[
-        {
-          label: 'Manage Collections',
-          icon: Cog6ToothIcon,
-          iconPosition: 'after',
-          variant: 'secondary',
-          onClick: manageCollections,
-        },
-        {
-          label: 'Add Collection',
-          icon: PlusIcon,
-          iconPosition: 'after',
-          variant: 'primary',
-          onClick: addNew,
-        },
-      ]"
-    />
+    <PageHeader title="Settings" />
 
     <div
       class="rounded-md bg-white shadow-sm border border-gray-200 dark:bg-slate-800 dark:border-slate-700"
     >
       <div
         v-if="collections.length > 0"
-        class="p-4 sm:p-8 flex flex-row gap-x-16"
+        class="p-4 sm:p-8 flex flex-col gap-x-16"
       >
         <!-- Sidebar Order -->
-        <div class="p-2">
+        <div v-if="userRole === 'admin'" class="p-2">
           <h3 class="text-base font-semibold">Sidebar Collections Order</h3>
           <p class="text-sm text-gray-600">
             Collections in the sidebar are displayed based on the order below.
@@ -53,19 +35,19 @@
                 <!-- Move Up -->
                 <button
                   :disabled="index === 0"
-                  class="p-1 bg-gray-200 rounded hover:bg-gray-300 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                  class="p-1 bg-violet-500 text-white rounded hover:bg-gray-300 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed"
                   @click="moveUp(index)"
                 >
-                  ▲
+                  <ChevronUpIcon class="h-4 2-4" />
                 </button>
 
                 <!-- Move Down -->
                 <button
                   :disabled="index === collections.length - 1"
-                  class="p-1 bg-gray-200 rounded hover:bg-gray-300 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                  class="p-1 bg-violet-500 text-white rounded hover:bg-gray-300 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed"
                   @click="moveDown(index)"
                 >
-                  ▼
+                  <ChevronDownIcon class="h-4 w-4" />
                 </button>
               </div>
             </li>
@@ -94,18 +76,19 @@
                 :key="collection"
                 class="flex items-center space-x-3"
               >
-                <input
-                  :id="collection"
-                  v-model="selectedStats"
-                  type="checkbox"
-                  :value="collection"
-                  class="h-4 w-4 text-violet-500 border-gray-300 rounded focus:ring-violet-500"
-                  @change="handleCheckboxChange(collection)"
-                />
                 <label
                   :for="collection"
-                  class="text-gray-700 dark:text-white font-medium"
+                  class="text-gray-700 dark:text-white font-medium has-checked:text-violet-500"
                 >
+                  <input
+                    :id="collection"
+                    v-model="selectedStats"
+                    type="checkbox"
+                    :value="collection"
+                    class="h-4 w-4 accent-violet-500 dark:accent-teal-500"
+                    @change="handleCheckboxChange(collection)"
+                  />
+
                   {{ collection }}
                 </label>
               </div>
@@ -167,6 +150,8 @@ import {
   CheckCircleIcon,
   PlusIcon,
   Cog6ToothIcon,
+  ChevronUpIcon,
+  ChevronDownIcon,
 } from "@heroicons/vue/24/outline";
 
 import { useNotificationStore } from "@/stores/notification";
@@ -174,6 +159,8 @@ const notificationStore = useNotificationStore();
 
 // Store references
 const authStore = useAuthStore();
+const userRole = computed(() => authStore.role);
+
 const collectionsStore = useCollectionsStore();
 
 // Reactive state

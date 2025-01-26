@@ -9,6 +9,7 @@
           icon: Cog6ToothIcon,
           iconPosition: 'after',
           variant: 'secondary',
+          requiredRole: ['admin', ''],
           onClick: navigateToSettings,
         },
         {
@@ -16,6 +17,7 @@
           icon: PlusIcon,
           iconPosition: 'after',
           variant: 'primary',
+          requiredRole: ['admin', ''],
           onClick: navigateToAddNewCollection,
         },
       ]"

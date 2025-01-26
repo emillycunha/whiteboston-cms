@@ -3,7 +3,6 @@ import { defineStore } from "pinia";
 export interface User {
   id: string;
   name: string;
-
   created_at?: string;
   preferences?: Record<string, any>;
   role: string;
@@ -12,30 +11,24 @@ export interface User {
 export const useUsersStore = defineStore("users", {
   state: () => ({
     users: [] as User[],
-    error: null as string | null,
     isLoading: false,
   }),
   getters: {
-    // Get a user by ID
     getUserById: (state) => (id: string) =>
       state.users.find((user) => user.id === id),
   },
-
   actions: {
-    // Fetch all users in the organization
     async fetchOrgUsers() {
       const { $supabase } = useNuxtApp();
       const authStore = useAuthStore();
+      const notificationStore = useNotificationStore();
       const organizationId = authStore.org_id;
-      const currentUserId = authStore.id;
 
-      if (authStore.role !== "admin") {
-        this.error = "You do not have permission to view users.";
-        return [];
-      }
-
-      if (!authStore.canManage) {
-        this.error = "You do not have permission to view users.";
+      if (authStore.role !== "admin" || !authStore.canManage) {
+        notificationStore.showNotification(
+          NotificationType.Error,
+          "You do not have permission to view users."
+        );
         return [];
       }
 
@@ -44,9 +37,11 @@ export const useUsersStore = defineStore("users", {
         return this.users;
       }
 
-      // Check if organization ID is available
       if (!organizationId) {
-        this.error = "Organization ID is missing.";
+        notificationStore.showNotification(
+          NotificationType.Error,
+          "Organization ID is missing."
+        );
         return [];
       }
 
@@ -72,7 +67,6 @@ export const useUsersStore = defineStore("users", {
           .select("*")
           .in("id", userIds)
           .order("name", { ascending: true });
-        //.neq("id", currentUserId)
 
         if (usersError) throw usersError;
 
@@ -83,8 +77,11 @@ export const useUsersStore = defineStore("users", {
 
         return this.users;
       } catch (err) {
-        this.error = "Failed to fetch users.";
         console.error("[Debug] Fetch Users Error:", err);
+        notificationStore.showNotification(
+          NotificationType.Error,
+          "Failed to fetch users. Please try again later."
+        );
         return [];
       } finally {
         this.isLoading = false;
@@ -94,11 +91,15 @@ export const useUsersStore = defineStore("users", {
     async fetchUserById(id: string) {
       const { $supabase } = useNuxtApp();
       const authStore = useAuthStore();
+      const notificationStore = useNotificationStore();
       const organizationId = authStore.org_id;
 
       if (!authStore.canManage) {
-        this.error = "You do not have permission to view users.";
-        return [];
+        notificationStore.showNotification(
+          NotificationType.Error,
+          "You do not have permission to view users."
+        );
+        return null;
       }
 
       const cachedUser = this.getUserById(id);
@@ -127,28 +128,31 @@ export const useUsersStore = defineStore("users", {
 
         if (orgMemberData && orgMemberData.organization_id === organizationId) {
           if (data) {
-            // Map the role and created_at (joined date) to the user data
             data.role = orgMemberData.role;
-            data.created_at = orgMemberData.created_at; // Joined date
+            data.created_at = orgMemberData.created_at;
 
-            // Add the user data to the cache
             this.users.push(data);
           }
           return data;
         } else {
-          this.error = `User does not belong to the current organization.`;
+          notificationStore.showNotification(
+            NotificationType.Error,
+            "User does not belong to the current organization."
+          );
           return null;
         }
       } catch (err) {
-        this.error = `Failed to fetch user with ID ${id} in the current organization.`;
         console.error(err);
+        notificationStore.showNotification(
+          NotificationType.Error,
+          `Failed to fetch user with ID ${id}. Please try again later.`
+        );
         return null;
       } finally {
         this.isLoading = false;
       }
     },
 
-    // Clear the users cache (e.g., on logout)
     clearUsers() {
       this.users = [];
     },

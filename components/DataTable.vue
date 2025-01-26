@@ -12,7 +12,7 @@
               <input
                 type="checkbox"
                 :checked="allSelected"
-                class="h-4 w-4 text-violet-500 border-gray-500 rounded focus:ring-violet-500 dark:focus:ring-teal-500 dark:text-teal-500"
+                class="h-4 w-4 accent-violet-500 dark:accent-teal-500"
                 @change="toggleAll"
               />
             </th>
@@ -45,11 +45,15 @@
                 type="checkbox"
                 :value="row.id"
                 :checked="selectedRows.includes(row.id)"
-                class="h-4 w-4 text-violet-500 border-gray-500 rounded focus:ring-violet-500 dark:focus:ring-teal-500 dark:text-teal-500"
+                class="h-4 w-4 accent-violet-500 dark:accent-teal-500"
                 @change="toggleRow(row.id)"
               />
             </td>
-            <td v-for="column in columns" :key="column.key" class="px-4 py-4">
+            <td
+              v-for="column in columns"
+              :key="column.key"
+              class="px-4 py-4 has-checked:text-violet-500"
+            >
               {{
                 column.formatter
                   ? truncateText(column.formatter(row[column.key]))

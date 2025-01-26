@@ -23,16 +23,14 @@ interface ContentItem {
 interface ContentStoreState {
   content: Record<string, ContentItem[]>;
   fields: Record<string, Field[]>;
-  error: string | null;
   isLoading: boolean;
   isLoadingBySlug: Record<string, boolean>;
 }
 
 export const useContentStore = defineStore("content", {
   state: (): ContentStoreState => ({
-    content: {}, // Initialize as an object
-    fields: {}, // Initialize as an object
-    error: null,
+    content: {},
+    fields: {},
     isLoading: false,
     isLoadingBySlug: {},
   }),
@@ -42,17 +40,19 @@ export const useContentStore = defineStore("content", {
       permission: keyof (typeof permissions)["SuperAdmin"]
     ) {
       const authStore = useAuthStore();
+      const notificationStore = useNotificationStore();
+
       const rolePermissions = permissions[authStore.role || "none"];
       const hasPermission = rolePermissions?.[permission];
 
       if (!hasPermission) {
         const message = `You do not have permission to ${permission
+          .replace(/^can/, "")
           .replace(/([A-Z])/g, " $1")
-          .toLowerCase()}.`;
+          .toLowerCase()
+          .trim()}.`;
 
-        const notificationStore = useNotificationStore();
         notificationStore.showNotification(NotificationType.Error, message);
-        this.error = message;
 
         return false;
       }
@@ -63,45 +63,76 @@ export const useContentStore = defineStore("content", {
     async fetchCollectionBySlug(slug: string) {
       const { $supabase } = useNuxtApp();
       const authStore = useAuthStore();
+      const notificationStore = useNotificationStore();
 
-      console.log("[Content Store] Checking collection for slug:", slug);
+      this.isLoading = true;
 
-      const { data: collectionData, error: collectionError } = await $supabase
-        .from("collections")
-        .select("id")
-        .eq("slug", slug)
-        .eq("organization_id", authStore.org_id)
-        .maybeSingle();
+      try {
+        const { data: collectionData, error: collectionError } = await $supabase
+          .from("collections")
+          .select("id")
+          .eq("slug", slug)
+          .eq("organization_id", authStore.org_id)
+          .maybeSingle();
 
-      if (collectionError) {
-        // Handle specific error codes (e.g., PGRST116 for missing rows or other cases)
-        if (collectionError.code === "PGRST116") {
-          console.warn(
-            "[Content Store] No collection found for slug:",
-            slug,
-            "Error details:",
-            collectionError.message
+        if (collectionError) {
+          if (collectionError.code === "PGRST116") {
+            console.warn(
+              "[Content Store] No collection found for slug:",
+              slug,
+              "Error details:",
+              collectionError.message
+            );
+            notificationStore.showNotification(
+              NotificationType.Info,
+              "No collection found for the specified slug."
+            );
+            return null;
+          }
+
+          console.error(
+            "[Content Store] Error fetching collection:",
+            collectionError
           );
-          return null; // Return null or handle as needed
+          notificationStore.showNotification(
+            NotificationType.Error,
+            "Failed to fetch collection. Please try again."
+          );
+          return null;
         }
 
-        console.error(
-          "[Content Store] Error fetching collection:",
-          collectionError
+        if (!collectionData) {
+          console.warn("[Content Store] No collection found for slug:", slug);
+          notificationStore.showNotification(
+            NotificationType.Info,
+            "No collection found for the specified slug."
+          );
+          return null;
+        }
+
+        return collectionData;
+      } catch (err) {
+        console.error("[Content Store] Unexpected error:", err);
+        notificationStore.showNotification(
+          NotificationType.Error,
+          "An unexpected error occurred while fetching the collection."
         );
-        throw new Error("Failed to fetch collection.");
+        return null;
+      } finally {
+        this.isLoading = false;
       }
-
-      if (!collectionData) {
-        console.warn("[Content Store] No collection found for slug:", slug);
-        return null; // Return null if no data is found
-      }
-
-      return collectionData;
     },
 
     async fetchContentAndFields(collectionSlug: string) {
-      if (!this.checkPermissions("canView")) return;
+      const notificationStore = useNotificationStore();
+
+      if (!this.checkPermissions("canView")) {
+        notificationStore.showNotification(
+          NotificationType.Error,
+          "You do not have permission to view this content."
+        );
+        return;
+      }
 
       if (this.isLoadingBySlug[collectionSlug]) {
         console.log("[Content Store] Fetch already in progress. Skipping...");
@@ -126,19 +157,23 @@ export const useContentStore = defineStore("content", {
           console.warn(
             `[Content Store] Collection not found for slug: ${collectionSlug}`
           );
-          throw new Error(`Collection "${collectionSlug}" not found.`);
+          notificationStore.showNotification(
+            NotificationType.Info,
+            `Collection "${collectionSlug}" not found.`
+          );
+          return;
         }
 
         const collectionId = collectionData.id;
 
-        // Fetch fields and content for this collection
-        const [fields, content] = await Promise.all([
-          this.fetchFields(collectionSlug, collectionId),
-          this.fetchContent(collectionSlug, collectionId),
-        ]);
+        // Fetch fields and content for this collection with proper signatures
+        const fieldsPromise = this.fetchFields(collectionId); // Adjusted signature
+        const contentPromise = this.fetchContent(collectionId); // Adjusted signature
 
-        console.log("[Content Store] Fields fetched:", fields);
-        console.log("[Content Store] Content fetched:", content);
+        const [fields, content] = await Promise.all([
+          fieldsPromise,
+          contentPromise,
+        ]);
 
         // Store results in slug-specific keys
         this.fields[collectionSlug] = fields;
@@ -148,20 +183,27 @@ export const useContentStore = defineStore("content", {
           `[Content Store] Error fetching content for ${collectionSlug}:`,
           error
         );
-        throw error;
+        notificationStore.showNotification(
+          NotificationType.Error,
+          `Failed to fetch content for "${collectionSlug}". Please try again later.`
+        );
       } finally {
         this.isLoadingBySlug[collectionSlug] = false;
         this.isLoading = false;
       }
     },
 
-    async fetchFields(
-      collectionSlug: string,
-      collectionId: number
-    ): Promise<Field[]> {
+    async fetchFields(collectionId: number): Promise<Field[]> {
       const { $supabase } = useNuxtApp();
+      const notificationStore = useNotificationStore();
 
-      if (!(await this.checkPermissions("canView"))) return [];
+      if (!(await this.checkPermissions("canView"))) {
+        notificationStore.showNotification(
+          NotificationType.Error,
+          "You do not have permission to view fields."
+        );
+        return [];
+      }
 
       try {
         const { data: fieldsData, error: fieldsError } = await $supabase
@@ -169,9 +211,14 @@ export const useContentStore = defineStore("content", {
           .select("id, name, type, options, position, is_required")
           .eq("collection_id", collectionId);
 
-        if (fieldsError) throw fieldsError;
+        if (fieldsError) {
+          notificationStore.showNotification(
+            NotificationType.Error,
+            "Failed to fetch fields. Please try again later."
+          );
+          return [];
+        }
 
-        // Process and return fields
         return (fieldsData || [])
           .sort((a, b) => (a.position || 99) - (b.position || 99))
           .map((field) => ({
@@ -190,19 +237,26 @@ export const useContentStore = defineStore("content", {
           }));
       } catch (err) {
         console.error("[Content Store] Error fetching fields:", err);
-        this.error = "Failed to fetch fields.";
+        notificationStore.showNotification(
+          NotificationType.Error,
+          "An unexpected error occurred while fetching fields."
+        );
         return [];
       }
     },
 
-    async fetchContent(
-      collectionSlug: string,
-      collectionId: number
-    ): Promise<ContentItem[]> {
+    async fetchContent(collectionId: number): Promise<ContentItem[]> {
       const { $supabase } = useNuxtApp();
       const authStore = useAuthStore();
+      const notificationStore = useNotificationStore();
 
-      if (!(await this.checkPermissions("canView"))) return [];
+      if (!(await this.checkPermissions("canView"))) {
+        notificationStore.showNotification(
+          NotificationType.Error,
+          "You do not have permission to view content."
+        );
+        return [];
+      }
 
       try {
         const query = $supabase
@@ -211,15 +265,16 @@ export const useContentStore = defineStore("content", {
           .eq("collection_id", collectionId)
           .eq("organization_id", authStore.org_id);
 
-        if (authStore.role === "viewer") {
-          query.eq("user_id", authStore.id);
-        }
-
         const { data: contentData, error: contentError } = await query;
 
-        if (contentError) throw contentError;
+        if (contentError) {
+          notificationStore.showNotification(
+            NotificationType.Error,
+            "Failed to fetch content. Please try again later."
+          );
+          return [];
+        }
 
-        // Process and return the content data
         const processedContent = (contentData || []).map((item) => ({
           id: item.id,
           created_at: item.created_at,
@@ -227,19 +282,16 @@ export const useContentStore = defineStore("content", {
           data: item.data,
         }));
 
-        // Store the content data using the collectionSlug key
-        this.content[collectionSlug] = processedContent;
+        this.content[collectionId] = processedContent;
 
-        console.log(
-          `[Content Store] Content fetched for collection "${collectionSlug}":`,
-          this.content[collectionSlug]
-        );
-
-        return processedContent; // Return the processed content
+        return processedContent;
       } catch (err) {
         console.error("[Content Store] Error fetching content:", err);
-        this.error = "Failed to fetch content.";
-        return []; // Return an empty array on error
+        notificationStore.showNotification(
+          NotificationType.Error,
+          "An unexpected error occurred while fetching content."
+        );
+        return [];
       }
     },
 
@@ -249,16 +301,23 @@ export const useContentStore = defineStore("content", {
       updatedData: Record<string, any>
     ) {
       const { $supabase } = useNuxtApp();
-      const authStore = useAuthStore();
       const notificationStore = useNotificationStore();
 
-      if (!(await this.checkPermissions("canAddContent"))) return false;
+      if (!(await this.checkPermissions("canAddContent"))) {
+        notificationStore.showNotification(
+          NotificationType.Error,
+          "You do not have permission to update content."
+        );
+        return false;
+      }
 
       const collectionData = await this.fetchCollectionBySlug(collectionSlug);
 
       if (!collectionData) {
-        console.error("[Content Store] Collection not found.");
-        this.error = "Collection not found.";
+        notificationStore.showNotification(
+          NotificationType.Error,
+          "Collection not found."
+        );
         return false;
       }
 
@@ -271,12 +330,25 @@ export const useContentStore = defineStore("content", {
           .eq("id", itemId)
           .eq("collection_id", collectionId);
 
-        if (error) throw error;
+        if (error) {
+          notificationStore.showNotification(
+            NotificationType.Error,
+            "Failed to update content. Please try again later."
+          );
+          return false;
+        }
 
+        notificationStore.showNotification(
+          NotificationType.Success,
+          "Content item updated successfully."
+        );
         return true;
       } catch (err) {
         console.error("[Content Store] Failed to update item:", err);
-        this.error = "Failed to update item.";
+        notificationStore.showNotification(
+          NotificationType.Error,
+          "An unexpected error occurred while updating the content."
+        );
         return false;
       }
     },
@@ -289,13 +361,21 @@ export const useContentStore = defineStore("content", {
       const authStore = useAuthStore();
       const notificationStore = useNotificationStore();
 
-      if (!(await this.checkPermissions("canAddContent"))) return false;
+      if (!(await this.checkPermissions("canAddContent"))) {
+        notificationStore.showNotification(
+          NotificationType.Error,
+          "You do not have permission to add content."
+        );
+        return false;
+      }
 
       const collectionData = await this.fetchCollectionBySlug(collectionSlug);
 
       if (!collectionData) {
-        console.error("[Content Store] Collection not found.");
-        this.error = "Collection not found.";
+        notificationStore.showNotification(
+          NotificationType.Error,
+          "Collection not found."
+        );
         return false;
       }
 
@@ -311,12 +391,25 @@ export const useContentStore = defineStore("content", {
           updated_at: new Date().toISOString(),
         });
 
-        if (error) throw error;
+        if (error) {
+          notificationStore.showNotification(
+            NotificationType.Error,
+            "Failed to add new content. Please try again later."
+          );
+          return false;
+        }
 
+        notificationStore.showNotification(
+          NotificationType.Success,
+          "Content item added successfully."
+        );
         return true;
       } catch (err) {
         console.error("[Content Store] Failed to add new item:", err);
-        this.error = "Failed to add new item.";
+        notificationStore.showNotification(
+          NotificationType.Error,
+          "An unexpected error occurred while adding the content."
+        );
         return false;
       }
     },
@@ -324,8 +417,15 @@ export const useContentStore = defineStore("content", {
     async fetchContentCount(collectionId: number) {
       const { $supabase } = useNuxtApp();
       const authStore = useAuthStore();
+      const notificationStore = useNotificationStore();
 
-      if (!(await this.checkPermissions("canView"))) return 0;
+      if (!(await this.checkPermissions("canView"))) {
+        notificationStore.showNotification(
+          NotificationType.Error,
+          "You do not have permission to view content count."
+        );
+        return 0;
+      }
 
       try {
         const { count, error } = await $supabase
@@ -334,9 +434,9 @@ export const useContentStore = defineStore("content", {
           .eq("collection_id", collectionId);
 
         if (error) {
-          console.error(
-            "[Content Store] Failed to fetch content count:",
-            error
+          notificationStore.showNotification(
+            NotificationType.Error,
+            "Failed to fetch content count. Please try again later."
           );
           return 0;
         }
@@ -344,6 +444,10 @@ export const useContentStore = defineStore("content", {
         return count || 0;
       } catch (err) {
         console.error("[Content Store] Error fetching content count:", err);
+        notificationStore.showNotification(
+          NotificationType.Error,
+          "An unexpected error occurred while fetching content count."
+        );
         return 0;
       }
     },

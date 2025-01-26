@@ -16,7 +16,6 @@ export interface Collection {
 export const useCollectionsStore = defineStore("collections", {
   state: () => ({
     collections: [] as Collection[],
-    error: null as string | null,
     isLoading: false,
   }),
   getters: {
@@ -32,17 +31,19 @@ export const useCollectionsStore = defineStore("collections", {
       permission: keyof (typeof permissions)["SuperAdmin"]
     ) {
       const authStore = useAuthStore();
+      const notificationStore = useNotificationStore();
+
       const rolePermissions = permissions[authStore.role || "none"];
       const hasPermission = rolePermissions?.[permission];
 
       if (!hasPermission) {
         const message = `You do not have permission to ${permission
+          .replace(/^can/, "")
           .replace(/([A-Z])/g, " $1")
-          .toLowerCase()}.`;
+          .toLowerCase()
+          .trim()}.`;
 
-        const notificationStore = useNotificationStore();
         notificationStore.showNotification(NotificationType.Error, message);
-        this.error = message;
 
         return false;
       }
@@ -53,12 +54,16 @@ export const useCollectionsStore = defineStore("collections", {
     async fetchCollectionsForCurrentOrg() {
       const { $supabase } = useNuxtApp();
       const authStore = useAuthStore();
+      const notificationStore = useNotificationStore();
       const organizationId = authStore.org_id;
 
       if (!(await this.checkPermissions("canView"))) return [];
 
       if (!organizationId) {
-        this.error = "Organization ID is missing.";
+        notificationStore.showNotification(
+          NotificationType.Error,
+          "Organization ID is missing."
+        );
         return [];
       }
 
@@ -75,15 +80,24 @@ export const useCollectionsStore = defineStore("collections", {
           .eq("organization_id", organizationId)
           .order("position", { ascending: true });
 
-        if (error) throw error;
+        if (error) {
+          notificationStore.showNotification(
+            NotificationType.Error,
+            `Failed to fetch collections for organization ${organizationId}. Please try again later.`
+          );
+          return [];
+        }
 
         if (data) {
           this.collections = [...data];
         }
         return data;
       } catch (err) {
-        this.error = `Failed to fetch collections for organization ${organizationId}.`;
         console.error(err);
+        notificationStore.showNotification(
+          NotificationType.Error,
+          `An unexpected error occurred while fetching collections.`
+        );
         return [];
       } finally {
         this.isLoading = false;
@@ -93,12 +107,16 @@ export const useCollectionsStore = defineStore("collections", {
     async fetchCollectionById(id: number) {
       const { $supabase } = useNuxtApp();
       const authStore = useAuthStore();
+      const notificationStore = useNotificationStore();
       const organizationId = authStore.org_id;
 
       if (!(await this.checkPermissions("canView"))) return null;
 
       if (!organizationId) {
-        this.error = "User is not associated with any organization.";
+        notificationStore.showNotification(
+          NotificationType.Error,
+          "User is not associated with any organization."
+        );
         return null;
       }
 
@@ -117,14 +135,24 @@ export const useCollectionsStore = defineStore("collections", {
           .eq("organization_id", authStore.org_id)
           .single();
 
-        if (error) throw error;
+        if (error) {
+          notificationStore.showNotification(
+            NotificationType.Error,
+            `Failed to fetch collection with ID ${id}. Please try again later.`
+          );
+          return null;
+        }
 
         if (data) {
           this.collections.push(data);
         }
         return data;
       } catch (err) {
-        this.error = `Failed to fetch collection with ID ${id}.`;
+        console.error(err);
+        notificationStore.showNotification(
+          NotificationType.Error,
+          `An unexpected error occurred while fetching the collection.`
+        );
         return null;
       } finally {
         this.isLoading = false;
@@ -138,10 +166,17 @@ export const useCollectionsStore = defineStore("collections", {
 
     async updateCollection(updatedCollection: Collection) {
       const { $supabase } = useNuxtApp();
+      const notificationStore = useNotificationStore();
 
       this.isLoading = true;
 
-      if (!(await this.checkPermissions("canEdit"))) return false;
+      if (!(await this.checkPermissions("canEdit"))) {
+        notificationStore.showNotification(
+          NotificationType.Error,
+          "You do not have permission to edit collections."
+        );
+        return false;
+      }
 
       try {
         const { error } = await $supabase
@@ -151,7 +186,13 @@ export const useCollectionsStore = defineStore("collections", {
           })
           .eq("id", updatedCollection.id);
 
-        if (error) throw error;
+        if (error) {
+          notificationStore.showNotification(
+            NotificationType.Error,
+            "Failed to update the collection. Please try again later."
+          );
+          return false;
+        }
 
         const index = this.collections.findIndex(
           (c) => c.id === updatedCollection.id
@@ -160,9 +201,18 @@ export const useCollectionsStore = defineStore("collections", {
           this.collections[index] = updatedCollection;
         }
 
+        notificationStore.showNotification(
+          NotificationType.Success,
+          "Collection updated successfully."
+        );
+
         return true;
       } catch (err) {
-        this.error = "Failed to update collection.";
+        console.error(err);
+        notificationStore.showNotification(
+          NotificationType.Error,
+          "An unexpected error occurred while updating the collection."
+        );
         return false;
       } finally {
         this.isLoading = false;
@@ -178,12 +228,22 @@ export const useCollectionsStore = defineStore("collections", {
     }) {
       const { $supabase } = useNuxtApp();
       const authStore = useAuthStore();
+      const notificationStore = useNotificationStore();
       const organizationId = authStore.org_id;
 
-      if (!(await this.checkPermissions("canAddCollections"))) return false;
+      if (!(await this.checkPermissions("canAddCollections"))) {
+        notificationStore.showNotification(
+          NotificationType.Error,
+          "You do not have permission to add collections."
+        );
+        return false;
+      }
 
       if (!organizationId) {
-        this.error = "Organization ID is missing.";
+        notificationStore.showNotification(
+          NotificationType.Error,
+          "Organization ID is missing."
+        );
         console.error("[Collections Store] Organization ID is missing.");
         return false;
       }
@@ -195,16 +255,27 @@ export const useCollectionsStore = defineStore("collections", {
         });
 
         if (error) {
-          this.error = error.message;
+          notificationStore.showNotification(
+            NotificationType.Error,
+            "Failed to add the collection. Please try again later."
+          );
           return false;
         }
 
         if (data) {
           this.collections.push(data[0]);
+          notificationStore.showNotification(
+            NotificationType.Success,
+            "Collection added successfully."
+          );
         }
         return true;
       } catch (err) {
-        this.error = "An unexpected error occurred.";
+        console.error(err);
+        notificationStore.showNotification(
+          NotificationType.Error,
+          "An unexpected error occurred while adding the collection."
+        );
         return false;
       }
     },
@@ -212,10 +283,14 @@ export const useCollectionsStore = defineStore("collections", {
     async checkSlugExists(slug: string) {
       const { $supabase } = useNuxtApp();
       const authStore = useAuthStore();
+      const notificationStore = useNotificationStore();
       const organizationId = authStore.org_id;
 
-      // Safeguard: Ensure organization ID exists
       if (!organizationId) {
+        notificationStore.showNotification(
+          NotificationType.Error,
+          "Organization ID is missing."
+        );
         return false;
       }
 
@@ -231,22 +306,36 @@ export const useCollectionsStore = defineStore("collections", {
           if (error.code === "PGRST116") {
             return false;
           } else {
-            console.error(error);
-            throw error;
+            notificationStore.showNotification(
+              NotificationType.Error,
+              "Failed to check slug existence. Please try again later."
+            );
+            return false;
           }
         }
 
         return data !== null;
       } catch (err) {
         console.error(err);
+        notificationStore.showNotification(
+          NotificationType.Error,
+          "An unexpected error occurred while checking slug existence."
+        );
         return false;
       }
     },
 
     async updateCollectionPositions(updatedCollections: Collection[]) {
       const { $supabase } = useNuxtApp();
+      const notificationStore = useNotificationStore();
 
-      if (!(await this.checkPermissions("canEdit"))) return false;
+      if (!(await this.checkPermissions("canEdit"))) {
+        notificationStore.showNotification(
+          NotificationType.Error,
+          "You do not have permission to edit collections."
+        );
+        return false;
+      }
 
       try {
         const updates = updatedCollections.map((collection) => ({
@@ -261,11 +350,27 @@ export const useCollectionsStore = defineStore("collections", {
           .from("collections")
           .upsert(updates, { onConflict: "id" });
 
-        if (error) throw error;
+        if (error) {
+          notificationStore.showNotification(
+            NotificationType.Error,
+            "Failed to update collection positions. Please try again later."
+          );
+          return false;
+        }
+
+        notificationStore.showNotification(
+          NotificationType.Success,
+          "Collection positions updated successfully."
+        );
 
         return data;
       } catch (err) {
-        throw err;
+        console.error(err);
+        notificationStore.showNotification(
+          NotificationType.Error,
+          "An unexpected error occurred while updating collection positions."
+        );
+        return false;
       }
     },
 

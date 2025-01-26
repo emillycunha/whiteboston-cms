@@ -21,7 +21,6 @@ interface Field {
 
 interface fieldsStoreState {
   fields: Field[];
-  error: string | null;
   isLoading: boolean;
   isLoadingBySlug: Record<string, boolean>;
 }
@@ -29,7 +28,6 @@ interface fieldsStoreState {
 export const useFieldsStore = defineStore("field", {
   state: (): fieldsStoreState => ({
     fields: [],
-    error: null,
     isLoading: false,
     isLoadingBySlug: {},
   }),
@@ -39,17 +37,19 @@ export const useFieldsStore = defineStore("field", {
       permission: keyof (typeof permissions)["SuperAdmin"]
     ) {
       const authStore = useAuthStore();
+      const notificationStore = useNotificationStore();
+
       const rolePermissions = permissions[authStore.role || "none"];
       const hasPermission = rolePermissions?.[permission];
 
       if (!hasPermission) {
         const message = `You do not have permission to ${permission
+          .replace(/^can/, "")
           .replace(/([A-Z])/g, " $1")
-          .toLowerCase()}.`;
+          .toLowerCase()
+          .trim()}.`;
 
-        const notificationStore = useNotificationStore();
         notificationStore.showNotification(NotificationType.Error, message);
-        this.error = message;
 
         return false;
       }
@@ -60,19 +60,15 @@ export const useFieldsStore = defineStore("field", {
     async fetchCollectionFields(collectionSlug: string) {
       const { $supabase } = useNuxtApp();
       const authStore = useAuthStore();
+      const notificationStore = useNotificationStore();
 
       this.isLoading = true;
-      console.log("[Field Store] Starting to fetch collection fields...");
-
-      if (!(await this.checkPermissions("canView"))) {
-        console.log("[Field Store] Permission check failed.");
-        return false;
-      }
 
       try {
-        console.log(
-          `[Field Store] Fetching collection with slug: ${collectionSlug}`
-        );
+        if (!(await this.checkPermissions("canView"))) {
+          console.log("[Field Store] Permission check failed.");
+          return false;
+        }
 
         const { data: collectionData, error: collectionError } = await $supabase
           .from("collections")
@@ -82,10 +78,6 @@ export const useFieldsStore = defineStore("field", {
           .single();
 
         if (collectionError) {
-          console.error(
-            "[Field Store] Error fetching collection:",
-            collectionError
-          );
           throw new Error(`Collection not found: ${collectionError.message}`);
         }
 
@@ -99,7 +91,6 @@ export const useFieldsStore = defineStore("field", {
           .order("position", { ascending: true });
 
         if (fieldsError) {
-          console.error("[Field Store] Error fetching fields:", fieldsError);
           throw new Error(`Failed to fetch fields: ${fieldsError.message}`);
         }
 
@@ -124,13 +115,13 @@ export const useFieldsStore = defineStore("field", {
           }))
           .sort((a, b) => a.position - b.position);
       } catch (err) {
-        console.error("[Field Store] Error:", err);
-        if (err instanceof Error) {
-          this.error =
-            err.message || "An error occurred while fetching fields.";
-        } else {
-          this.error = "An unknown error occurred.";
-        }
+        const errorMessage =
+          err instanceof Error ? err.message : "An unknown error occurred.";
+        console.error("[Field Store] Error fetching fields:", errorMessage);
+        notificationStore.showNotification(
+          NotificationType.Error,
+          errorMessage
+        );
       } finally {
         this.isLoading = false;
         console.log("[Field Store] Finished fetching fields.");
@@ -142,12 +133,13 @@ export const useFieldsStore = defineStore("field", {
       updatedFields: Field[]
     ) {
       const { $supabase } = useNuxtApp();
+      const notificationStore = useNotificationStore();
 
       this.isLoading = true;
 
-      if (!(await this.checkPermissions("canEdit"))) return false;
-
       try {
+        if (!(await this.checkPermissions("canEdit"))) return false;
+
         const { data: collectionData, error: collectionError } = await $supabase
           .from("collections")
           .select("id")
@@ -175,9 +167,19 @@ export const useFieldsStore = defineStore("field", {
 
         if (error) throw new Error(`Failed to update fields: ${error.message}`);
 
+        notificationStore.showNotification(
+          NotificationType.Success,
+          "Fields updated successfully!"
+        );
         return true;
       } catch (err) {
-        console.error("Failed to update collection fields:", err);
+        const errorMessage =
+          err instanceof Error ? err.message : "An unknown error occurred.";
+        console.error("[Field Store] Error updating fields:", errorMessage);
+        notificationStore.showNotification(
+          NotificationType.Error,
+          errorMessage
+        );
         return false;
       } finally {
         this.isLoading = false;
@@ -187,14 +189,11 @@ export const useFieldsStore = defineStore("field", {
     async addNewCollectionFields(collectionSlug: string, newFields: Field[]) {
       const { $supabase } = useNuxtApp();
       const authStore = useAuthStore();
-
-      if (!(await this.checkPermissions("canAddFields"))) return false;
+      const notificationStore = useNotificationStore();
 
       try {
-        console.log(
-          "Fetching collection ID for collectionSlug:",
-          collectionSlug
-        );
+        if (!(await this.checkPermissions("canAddFields"))) return false;
+
         const { data: collectionData, error: collectionError } = await $supabase
           .from("collections")
           .select("id")
@@ -203,13 +202,9 @@ export const useFieldsStore = defineStore("field", {
           .single();
 
         if (collectionError) {
-          console.error("Error fetching collection data:", collectionError);
           throw new Error(`Collection not found: ${collectionError.message}`);
         }
 
-        console.log("Collection data fetched:", collectionData);
-
-        // Insert fields with the collection_id
         const { error: insertError } = await $supabase.from("fields").insert(
           newFields.map((field) => ({
             ...field,
@@ -218,14 +213,24 @@ export const useFieldsStore = defineStore("field", {
         );
 
         if (insertError) {
-          console.error("Error inserting new fields:", insertError);
           throw new Error(`Failed to add new fields: ${insertError.message}`);
         }
 
+        notificationStore.showNotification(
+          NotificationType.Success,
+          "Fields added successfully!"
+        );
+
         return true;
       } catch (err) {
-        console.error("Failed to add new fields:", err);
-        throw err;
+        const errorMessage =
+          err instanceof Error ? err.message : "An unknown error occurred.";
+        console.error("[Field Store] Error adding new fields:", errorMessage);
+        notificationStore.showNotification(
+          NotificationType.Error,
+          errorMessage
+        );
+        return false;
       }
     },
 

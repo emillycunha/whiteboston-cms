@@ -51,7 +51,7 @@
                   v-bind="field.attrs || {}"
                   :required="field.isRequired"
                   :placeholder="field.placeholder || `Enter ${field.label}`"
-                  class="text-sm border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 rounded-md p-2 w-full"
+                  class="text-sm border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 rounded-md p-2 w-full focus-visible:outline-violet-500"
                 />
                 <p v-else>{{ field.value }}</p>
               </div>
@@ -65,7 +65,7 @@
                   :rows="field.rows || 4"
                   :required="field.isRequired"
                   :placeholder="field.placeholder || `Enter ${field.label}`"
-                  class="text-sm border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 rounded-md p-2 w-full"
+                  class="text-sm border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 rounded-md p-2 w-full focus-visible:outline-violet-500"
                 ></textarea>
                 <p v-else>{{ field.value }}</p>
               </div>
@@ -78,7 +78,7 @@
                   :type="field.type"
                   :required="field.isRequired"
                   :placeholder="field.placeholder || `Enter ${field.label}`"
-                  class="text-sm border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 rounded-md p-2 w-full"
+                  class="text-sm border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 rounded-md p-2 w-full focus-visible:outline-violet-500"
                 />
                 <p v-else>{{ field.value }}</p>
               </div>
@@ -92,7 +92,7 @@
                     :type="showPassword ? 'text' : 'password'"
                     :required="field.isRequired"
                     :placeholder="field.placeholder || `Enter ${field.label}`"
-                    class="text-sm border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 rounded-md p-2 w-full"
+                    class="text-sm border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 rounded-md p-2 w-full focus-visible:outline-violet-500"
                   />
                   <button
                     type="button"
@@ -117,7 +117,7 @@
                   type="tel"
                   :required="field.isRequired"
                   :placeholder="field.placeholder || `Enter ${field.label}`"
-                  class="text-sm border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 rounded-md p-2 w-full"
+                  class="text-sm border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 rounded-md p-2 w-full focus-visible:outline-violet-500"
                 />
                 <p v-else>{{ field.value }}</p>
               </div>
@@ -165,7 +165,7 @@
                   :type="field.type"
                   :required="field.isRequired"
                   :placeholder="field.placeholder || `Enter ${field.label}`"
-                  class="text-sm border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 rounded-md p-2 w-full"
+                  class="text-sm border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 rounded-md p-2 w-full focus-visible:outline-violet-500"
                 />
                 <p v-else>{{ field.value }}</p>
               </div>
@@ -178,7 +178,7 @@
                   :type="field.type"
                   :required="field.isRequired"
                   :placeholder="field.placeholder || `Enter ${field.label}`"
-                  class="text-sm border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 rounded-md p-2 w-full"
+                  class="text-sm border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 rounded-md p-2 w-full focus-visible:outline-violet-500"
                 />
                 <p v-else>{{ field.value }}</p>
               </div>
@@ -202,7 +202,7 @@
                   v-model="field.value"
                   type="checkbox"
                   :required="field.isRequired"
-                  class="h-5 w-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                  class="h-4 w-4 accent-violet-500 dark:accent-teal-500"
                 />
                 <p v-else>{{ field.value }}</p>
               </div>
@@ -216,6 +216,7 @@
       </div>
 
       <PageFooter
+        v-if="editable || showCancel || showBack || showSubmit"
         title=""
         :buttons="[
           {
@@ -259,6 +260,18 @@ const props = defineProps({
     default: () => [],
   },
   editable: {
+    type: Boolean,
+    default: false,
+  },
+  showCancel: {
+    type: Boolean,
+    default: false,
+  },
+  showBack: {
+    type: Boolean,
+    default: false,
+  },
+  showSubmit: {
     type: Boolean,
     default: false,
   },

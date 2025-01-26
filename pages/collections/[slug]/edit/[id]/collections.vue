@@ -1,11 +1,3 @@
-<!-- 
-  Developer Note:
-  This page allows users to manage collections, including:
-  - Updating collection metadata (e.g., name, slug, description).
-  - Adding new fields to the collection.
-  - Editing existing fields in the collection.
--->
-
 <template>
   <div class="px-6 py-4 space-y-6">
     <!-- Page Header -->
@@ -17,6 +9,7 @@
           icon: Cog6ToothIcon,
           iconPosition: 'after',
           variant: 'secondary',
+          requiredRole: ['admin', ''],
           onClick: navigateToSettings,
         },
         {
@@ -24,13 +17,13 @@
           icon: PlusIcon,
           iconPosition: 'after',
           variant: 'primary',
+          requiredRole: ['admin', ''],
           onClick: addFields,
         },
       ]"
     />
 
     <div v-if="isLoading" class="text-center">Loading collection fields...</div>
-    <div v-if="error" class="text-red-500">{{ error }}</div>
     <div v-if="errors" class="text-red-500">{{ errors }}</div>
 
     <BaseForm
@@ -67,7 +60,6 @@ const collection = ref({
 
 const isLoading = computed(() => collectionsStore.isLoading);
 const errors = ref();
-const error = computed(() => collectionsStore.error);
 const collectionName = computed(
   () => collectionSlug.charAt(0).toUpperCase() + collectionSlug.slice(1)
 );

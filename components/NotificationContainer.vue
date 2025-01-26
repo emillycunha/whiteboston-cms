@@ -1,7 +1,7 @@
 <template>
   <div
     aria-live="assertive"
-    class="fixed inset-x-0 bottom-0 flex items-end px-4 py-6 pointer-events-none sm:items-start sm:p-6 z-50"
+    class="fixed inset-x-0 top-0 flex items-end px-4 py-6 pointer-events-none sm:items-start sm:p-6 z-50"
   >
     <div class="w-full flex flex-col space-y-4 items-center sm:items-end">
       <!-- Notification Item -->

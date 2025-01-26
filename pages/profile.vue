@@ -29,6 +29,7 @@ const fields = ref([
     label: "Name",
     type: "text",
     value: authStore.name,
+    fullRow: true,
     originalValue: authStore.name,
     isRequired: true,
     placeholder: "Enter your name",
@@ -38,6 +39,7 @@ const fields = ref([
     label: "Email",
     type: "email",
     value: authStore.email,
+    fullRow: true,
     originalValue: authStore.email,
     isRequired: true,
     placeholder: "Enter your email",
@@ -49,6 +51,7 @@ const fields = ref([
     hint: "Leave blank to keep the same",
     type: "password",
     value: "",
+    fullRow: true,
     originalValue: "",
     isRequired: false,
     placeholder: "Enter your NEW password",
@@ -126,8 +129,3 @@ async function saveProfile() {
   }
 }
 </script>
-
-// Validate required fields const missingFields = fields.value.filter( (field)
-=> field.attrs?.required && (!field.value || field.value.trim() === "") ); if
-(missingFields.length > 0) { alert( `Please fill out the required fields:
-${missingFields .map((f) => f.label) .join(", ")}` ); return; }

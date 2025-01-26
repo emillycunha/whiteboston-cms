@@ -10,7 +10,6 @@ export interface Organization {
 export const useOrganizationsStore = defineStore("organizations", {
   state: () => ({
     organizations: [] as Organization[],
-    error: null as string | null,
     isLoading: false,
   }),
   getters: {
@@ -22,17 +21,19 @@ export const useOrganizationsStore = defineStore("organizations", {
       permission: keyof (typeof permissions)["SuperAdmin"]
     ) {
       const authStore = useAuthStore();
+      const notificationStore = useNotificationStore();
+
       const rolePermissions = permissions[authStore.role || "none"];
       const hasPermission = rolePermissions?.[permission];
 
       if (!hasPermission) {
         const message = `You do not have permission to ${permission
+          .replace(/^can/, "")
           .replace(/([A-Z])/g, " $1")
-          .toLowerCase()}.`;
+          .toLowerCase()
+          .trim()}.`;
 
-        const notificationStore = useNotificationStore();
         notificationStore.showNotification(NotificationType.Error, message);
-        this.error = message;
 
         return false;
       }
@@ -40,11 +41,10 @@ export const useOrganizationsStore = defineStore("organizations", {
       return true;
     },
 
-    // Fetch all organizations (Super Admin access)
     async fetchAllOrganizations() {
       const { $supabase } = useNuxtApp();
+      const notificationStore = useNotificationStore();
 
-      // Avoid fetching if data is already cached
       if (this.organizations.length > 0) {
         return this.organizations;
       }
@@ -54,15 +54,24 @@ export const useOrganizationsStore = defineStore("organizations", {
         const { data, error } = await $supabase
           .from("organizations")
           .select("*");
-        if (error) throw error;
+        if (error) {
+          notificationStore.showNotification(
+            NotificationType.Error,
+            "Failed to fetch organizations. Please try again later."
+          );
+          return [];
+        }
 
         this.organizations = data || [];
         return this.organizations;
       } catch (err) {
-        this.error = "Failed to fetch organizations.";
         console.error(
           "[Organizations Store] Error fetching all organizations:",
           err
+        );
+        notificationStore.showNotification(
+          NotificationType.Error,
+          "An unexpected error occurred while fetching organizations."
         );
         return [];
       } finally {
@@ -70,9 +79,9 @@ export const useOrganizationsStore = defineStore("organizations", {
       }
     },
 
-    // Fetch a single organization by ID
     async fetchOrganizationById(id: string) {
       const { $supabase } = useNuxtApp();
+      const notificationStore = useNotificationStore();
 
       const cachedOrg = this.getOrganizationById(id);
       if (cachedOrg) {
@@ -86,17 +95,26 @@ export const useOrganizationsStore = defineStore("organizations", {
           .select("*")
           .eq("id", id)
           .single();
-        if (error) throw error;
+        if (error) {
+          notificationStore.showNotification(
+            NotificationType.Error,
+            `Failed to fetch organization with ID ${id}. Please try again later.`
+          );
+          return null;
+        }
 
         if (data) {
-          this.organizations.push(data); // Cache the organization
+          this.organizations.push(data);
         }
         return data;
       } catch (err) {
-        this.error = `Failed to fetch organization with ID ${id}.`;
         console.error(
           "[Organizations Store] Error fetching organization by ID:",
           err
+        );
+        notificationStore.showNotification(
+          NotificationType.Error,
+          `An unexpected error occurred while fetching organization with ID ${id}.`
         );
         return null;
       } finally {
@@ -104,7 +122,6 @@ export const useOrganizationsStore = defineStore("organizations", {
       }
     },
 
-    // Clear cache
     clearOrganizations() {
       console.log("[Organizations Store] Clearing organization cache.");
       this.organizations = [];

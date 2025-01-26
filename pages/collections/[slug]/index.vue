@@ -9,6 +9,7 @@
           icon: ArrowDownTrayIcon,
           iconPosition: 'after',
           variant: 'secondary',
+          requiredRole: ['admin', 'editor'],
           onClick: exportSelectedToCSV,
           disabled: selectedItems.length === 0,
         },
@@ -17,6 +18,7 @@
           icon: PlusIcon,
           iconPosition: 'after',
           variant: 'primary',
+          requiredRole: ['admin', 'editor'],
           onClick: addNew,
         },
       ]"

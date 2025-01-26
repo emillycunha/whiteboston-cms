@@ -15,7 +15,7 @@
     <!-- Dropdown menu -->
     <div
       v-if="isOpen"
-      class="absolute z-10 w-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 mt-2 rounded-md shadow-md"
+      class="absolute z-10 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 mt-2 rounded-md shadow-md"
     >
       <ul class="p-2 flex flex-wrap">
         <li

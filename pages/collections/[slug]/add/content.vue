@@ -3,7 +3,7 @@
     <PageHeader :title="`Add Item to ${collectionName}`" />
 
     <div v-if="isLoading" class="text-center">Loading collection fields...</div>
-    <div v-if="error" class="text-red-500">{{ error }}</div>
+    <div v-if="errors" class="text-red-500">{{ errors }}</div>
 
     <!-- No Fields Message -->
     <div v-if="!isLoading && !fields.length" class="text-center">
@@ -45,18 +45,15 @@ const collectionName = computed(
 // State and Store
 const contentStore = useContentStore();
 const isLoading = computed(() => contentStore.isLoading);
-const error = computed(() => contentStore.error);
-const errors = ref({});
+const errors = ref("");
 
 const allFields = computed(() => contentStore.fields[collectionSlug] || []);
 
 const fields = ref([]);
 
-// Map fields to their default values based on type
 onMounted(async () => {
   await contentStore.fetchContentAndFields(collectionSlug);
 
-  // Map fields with the content data
   fields.value = allFields.value.map((field) => ({
     key: field.key,
     label: field.label,
@@ -80,31 +77,22 @@ const addContent = async () => {
 
   console.log("Form data ready for submission:", dataToSubmit);
 
-  try {
-    const success = await contentStore.addContentItem(
-      collectionSlug,
-      dataToSubmit
+  const success = await contentStore.addContentItem(
+    collectionSlug,
+    dataToSubmit
+  );
+  if (success) {
+    notificationStore.showNotification(
+      "success",
+      "Item added successfully to the collection!"
     );
-    if (success) {
-      notificationStore.showNotification(
-        "success",
-        "Item added successfully to the collection!"
-      );
-      router.push(`/collections/${collectionSlug}`);
-    } else {
-      errors.value.general = "Failed to add item. Please try again.";
-    }
-  } catch (err) {
-    errors.value.general = "An unexpected error occurred. Please try again.";
-    console.error("Error while adding item:", err);
+    router.push(`/collections/${collectionSlug}`);
   }
 };
 
-// Cancel Add
 const cancelAdd = () => {
   router.push(`/collections/${collectionSlug}`);
 };
 
-// Edit Fields Link
 const editFieldsLink = `/collections/${collectionSlug}/edit?collection=${collectionSlug}&edit=true`;
 </script>

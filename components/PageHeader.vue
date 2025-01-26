@@ -5,16 +5,16 @@
     <!-- Title -->
     <div>
       <h1
-        class="text-2xl font-semibold text-gray-800 dark:text-white sm:text-4xl"
+        class="text-1xl font-semibold text-gray-800 dark:text-white sm:text-4xl mb-2"
       >
         {{ title }}
       </h1>
     </div>
 
     <!-- Buttons -->
-    <div v-if="buttons.length > 0" class="flex gap-3">
+    <div v-if="filteredButtons.length > 0" class="flex gap-3">
       <button
-        v-for="(button, index) in buttons"
+        v-for="(button, index) in filteredButtons"
         :key="index"
         :disabled="button.disabled"
         :class="[
@@ -44,8 +44,9 @@
 </template>
 
 <script setup>
-// Props for the component
-defineProps({
+import { useAuthStore } from "@/stores/auth";
+
+const { buttons, title } = defineProps({
   title: {
     type: String,
     required: true,
@@ -54,5 +55,22 @@ defineProps({
     type: Array,
     default: () => [],
   },
+});
+
+const authStore = useAuthStore();
+const userRole = computed(() => authStore.role);
+
+const filteredButtons = computed(() => {
+  if (!Array.isArray(buttons)) {
+    console.warn("Buttons prop is not an array:", buttons);
+    return [];
+  }
+
+  const result = buttons.filter(
+    (button) =>
+      !button.requiredRole || button.requiredRole.includes(userRole.value)
+  );
+
+  return result;
 });
 </script>
