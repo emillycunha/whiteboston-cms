@@ -74,41 +74,28 @@
                   <!-- Collections nagivation -->
                   <ul class="space-y-1">
                     <li
-                      v-for="item in visibleCollections"
-                      :key="item.slug"
+                      v-for="item in visibleSidebarItems"
+                      :key="item"
                       class="flex items-center px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 rounded-md hover:bg-violet-50 dark:hover:bg-teal-500"
                     >
                       <NuxtLink
-                        :to="`/collections/${item.slug}`"
+                        :to="`/collections/${item}`"
                         class="flex items-center w-full"
                         @click="sidebarOpen = false"
                       >
                         <component
-                          :is="getIcon(item.name)"
+                          :is="getIcon(item)"
                           class="size-5 mr-2"
                           aria-hidden="true"
                         />
-                        {{ item.name }}
+                        {{ item }}
                       </NuxtLink>
                     </li>
                   </ul>
 
                   <!-- More Collections -->
                   <ul class="space-y-1">
-                    <li v-if="extraCollections.length">
-                      <NuxtLink
-                        to="/collections"
-                        class="flex items-center px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 rounded-md hover:bg-violet-50 dark:hover:bg-teal-500"
-                        @click="sidebarOpen = false"
-                      >
-                        <FolderPlusIcon
-                          class="size-5 mr-2"
-                          aria-hidden="true"
-                        />
-                        See More
-                      </NuxtLink>
-                    </li>
-                    <li v-else>
+                    <li>
                       <NuxtLink
                         to="/collections"
                         class="flex items-center px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 rounded-md hover:bg-violet-50 dark:hover:bg-teal-500"
@@ -141,7 +128,7 @@
                           class="size-5 mr-2"
                           aria-hidden="true"
                         />
-                        {{ item.name }}
+                        {{ capitalizeSlug(item) }}
                       </NuxtLink>
                     </li>
                   </ul>
@@ -217,36 +204,27 @@
           <!-- Collections nagivation -->
           <ul class="space-y-1">
             <li
-              v-for="item in visibleCollections"
-              :key="item.slug"
+              v-for="item in visibleSidebarItems"
+              :key="item"
               class="flex items-center px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 rounded-md hover:bg-violet-50 dark:hover:bg-teal-500"
             >
               <NuxtLink
-                :to="`/collections/${item.slug}`"
+                :to="`/collections/${item}`"
                 class="flex items-center w-full"
               >
                 <component
-                  :is="getIcon(item.name)"
+                  :is="getIcon(item)"
                   class="size-5 mr-2"
                   aria-hidden="true"
                 />
-                {{ item.name }}
+                {{ capitalizeSlug(item) }}
               </NuxtLink>
             </li>
           </ul>
 
           <!-- More Collections -->
           <ul class="space-y-1">
-            <li v-if="extraCollections.length">
-              <NuxtLink
-                to="/collections"
-                class="flex items-center px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 rounded-md hover:bg-violet-50 dark:hover:bg-teal-500"
-              >
-                <FolderPlusIcon class="size-5 mr-2" aria-hidden="true" />
-                See More
-              </NuxtLink>
-            </li>
-            <li v-else>
+            <li>
               <NuxtLink
                 to="/collections"
                 class="flex items-center px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 rounded-md hover:bg-violet-50 dark:hover:bg-teal-500"
@@ -314,7 +292,6 @@
 
 <script setup>
 import { ref } from "vue";
-import { useNuxtApp } from "#app";
 import { useCollectionsStore } from "~/stores/collections";
 import BrandFooter from "~/components/BrandFooter.vue";
 import { getIconForSlug } from "@/utils/iconMappings";
@@ -327,7 +304,6 @@ import {
   XMarkIcon,
   ArrowRightEndOnRectangleIcon,
   Cog6ToothIcon,
-  FolderPlusIcon,
   AdjustmentsHorizontalIcon,
   BuildingOffice2Icon,
 } from "@heroicons/vue/24/outline";
@@ -339,47 +315,33 @@ import {
   TransitionRoot,
 } from "@headlessui/vue";
 
-const { $supabase } = useNuxtApp();
 const authStore = useAuthStore();
 const userRole = computed(() => authStore.role);
 
-const collectionsStore = useCollectionsStore();
-const router = useRouter();
-
-// State for collections
-//const collections = ref([]);
-const collections = computed(() => collectionsStore.collections);
 const maxVisibleItems = 3;
+const sidebarOrder = ref("");
+const error = ref("");
 
-// Fetch collections on sidebar load
-const fetchAndSetCollections = async () => {
-  try {
-    const fetchedCollections =
-      await collectionsStore.fetchCollectionsForCurrentOrg();
-    collections.value = fetchedCollections
-      .filter((collection) => !collection.is_hidden)
-      .sort((a, b) => a.position - b.position);
-  } catch (err) {
-    console.error("Failed to fetch collections for sidebar:", err.message);
-  }
+const capitalizeSlug = (slug) => {
+  return slug.charAt(0).toUpperCase() + slug.slice(1);
 };
 
-onMounted(fetchAndSetCollections);
+onMounted(() => {
+  const userPreferences = authStore.preferences || {};
+  const dashboardPreferences = userPreferences.dashboard || {};
 
-// Dynamic navigation
-const visibleCollections = computed(() =>
-  collections.value
-    .filter((collection) => !collection.is_hidden)
-    .sort((a, b) => a.position - b.position)
-    .slice(0, maxVisibleItems)
-);
+  const cleanedSidebarOrder = (dashboardPreferences.sidebarOrder || []).filter(
+    (slug) => slug !== ""
+  );
+  console.log("[onMounted] Cleaned Sidebar Order:", cleanedSidebarOrder);
 
-const extraCollections = computed(() =>
-  collections.value
-    .filter((collection) => !collection.is_hidden)
-    .sort((a, b) => a.position - b.position)
-    .slice(maxVisibleItems)
-);
+  sidebarOrder.value = cleanedSidebarOrder;
+});
+
+const visibleSidebarItems = computed(() => {
+  const items = sidebarOrder.value.slice(0, maxVisibleItems);
+  return items;
+});
 
 // Dynamic Icon Assignment
 const getIcon = (slug) => {
@@ -387,19 +349,7 @@ const getIcon = (slug) => {
 };
 
 const handleLogout = async () => {
-  try {
-    console.log("Logging out...");
-    const { error } = await $supabase.auth.signOut();
-
-    if (error) {
-      console.error("Logout failed:", error.message);
-    } else {
-      console.log("Logout successful");
-      router.push("/auth/login");
-    }
-  } catch (err) {
-    console.error("Unexpected logout error:", err.message);
-  }
+  await authStore.logout();
 };
 
 const sidebarOpen = ref(false);

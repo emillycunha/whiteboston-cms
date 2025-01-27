@@ -10,7 +10,7 @@
     <BaseForm
       v-if="!isLoading && fields.length"
       :fields="fields"
-      :editable="true"
+      :editable="editable"
       @submit="saveChanges"
       @cancel="cancelEdit"
     />
@@ -28,10 +28,13 @@ const router = useRouter();
 const collectionSlug = route.params.slug;
 const itemId = route.params.id;
 
+const notificationStore = useNotificationStore();
+
 // State and Store
 const contentStore = useContentStore();
 const isLoading = computed(() => contentStore.isLoading);
 
+const editable = ref(true);
 const allFields = computed(() => contentStore.fields[collectionSlug] || []);
 const content = computed(() => contentStore.content[collectionSlug] || []);
 
@@ -79,17 +82,15 @@ const saveChanges = async () => {
   }, {});
 
   try {
-    const success = await contentStore.updateContentItem(
-      collectionSlug,
-      itemId,
-      updatedData
+    notificationStore.showNotification(
+      "info",
+      "Saving changes, please wait..."
     );
+    await new Promise((resolve) => setTimeout(resolve, 2000));
 
-    if (success) {
-      router.push(`/collections/${collectionSlug}/view/${itemId}`);
-    } else {
-      console.error("Failed to save changes.");
-    }
+    router.push(`/collections/${collectionSlug}/view/${itemId}/content`);
+
+    await contentStore.updateContentItem(collectionSlug, itemId, updatedData);
   } catch (err) {
     console.error("Error saving changes:", err);
   }
@@ -97,7 +98,7 @@ const saveChanges = async () => {
 
 const cancelEdit = () => {
   navigateTo({
-    path: `/collections/${collectionSlug}/view/${itemId}`,
+    path: `/collections/${collectionSlug}/view/${itemId}/content`,
     query: {
       collection: collectionSlug,
       edit: "false",

@@ -45,7 +45,6 @@ const fields = ref([
     label: "Category",
     value: "",
     halfRow: true,
-
     isRequired: true,
     type: "select",
     options: [
@@ -61,7 +60,6 @@ const fields = ref([
     label: "Priority",
     value: "",
     halfRow: true,
-
     isRequired: true,
     type: "select",
     options: [

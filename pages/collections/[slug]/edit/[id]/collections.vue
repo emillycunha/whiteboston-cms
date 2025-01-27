@@ -30,7 +30,7 @@
       :fields="fields"
       :editable="editable"
       @submit="saveChanges"
-      @cancel="cancelChanges"
+      @back="goBack"
     />
   </div>
 </template>
@@ -157,7 +157,7 @@ const saveChanges = async () => {
   }
 };
 
-const cancelChanges = () => {
+const goBack = () => {
   navigateTo({
     path: `/collections`,
   });

@@ -102,25 +102,29 @@ const fields = computed(() => {
 });
 
 onMounted(async () => {
-  console.log(
-    `[Content Page] Mounting, fetching data for collection slug: ${collectionSlug}`
-  );
   try {
     if (collectionSlug) {
-      console.log("[Content Page] Fetching content and fields...");
-      await contentStore.fetchContentAndFields(collectionSlug);
-      console.log(
-        `[Content Page] Content and Fields loaded for: ${collectionSlug}`
-      );
+      if (!contentStore.content[collectionSlug]) {
+        console.log("[Content Page] Fetching content and fields...");
+        await contentStore.fetchContentAndFields(collectionSlug);
+        console.log(
+          `[Content Page] Content and Fields loaded for: ${collectionSlug}`
+        );
+      } else {
+        console.log("[Content Page] Using cached content for:", collectionSlug);
+      }
+
+      const cachedContent = contentStore.content[collectionSlug] || [];
+      const cachedFields = contentStore.fields[collectionSlug] || [];
+
+      console.log(`[Content Page] Final content after mount:`, cachedContent);
+      console.log(`[Content Page] Final fields after mount:`, cachedFields);
     } else {
       console.warn("[Content Page] Collection slug not found.");
     }
   } catch (error) {
     console.error("[Content Page] Error fetching content and fields:", error);
   }
-
-  console.log(`[Content Page] Final content after mount:`, content.value);
-  console.log(`[Content Page] Final fields after mount:`, fields.value);
 });
 
 const handleView = (row) => {

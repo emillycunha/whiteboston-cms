@@ -20,7 +20,18 @@ export const useNotificationStore = defineStore("notification", {
   }),
 
   actions: {
-    showNotification(type: NotificationType, message: string, duration = 9000) {
+    showNotification(
+      type: NotificationType,
+      message: string,
+      duration = 9000,
+      clearType?: NotificationType
+    ) {
+      if (clearType) {
+        this.notifications = this.notifications.filter(
+          (n) => n.type !== clearType
+        );
+      }
+
       const id = this.nextId++;
       this.notifications.push({ id, type, message });
 

@@ -165,8 +165,13 @@ export const useAuthStore = defineStore("auth", {
 
         console.log("[Auth Store] Login successful:", user);
 
-        // Fetch additional user metadata
-        await this.fetchUserMetadata();
+        if (this.id) {
+          // Fetch additional user metadata
+          console.log("[Auth Store] Fetching metadata for user ID:", this.id);
+          await this.fetchUserMetadata();
+        } else {
+          console.warn("[Auth Store] No user ID found after login.");
+        }
 
         // Apply dark mode
         this.applyDarkMode();
@@ -193,8 +198,6 @@ export const useAuthStore = defineStore("auth", {
       }
     },
 
-    // Save profile data (name, email, password)
-    // Save profile data (name, email, password)
     async saveProfile(updatedFields: {
       name?: string;
       email?: string;
@@ -275,7 +278,6 @@ export const useAuthStore = defineStore("auth", {
       }
     },
 
-    // Apply dark mode theme
     applyDarkMode() {
       const darkmode = this.preferences?.darkmode ?? false;
 
@@ -291,7 +293,6 @@ export const useAuthStore = defineStore("auth", {
       }
     },
 
-    // Toggle dark mode and update preference in Supabase
     async toggleDarkMode() {
       const { $supabase } = useNuxtApp();
 
@@ -335,6 +336,15 @@ export const useAuthStore = defineStore("auth", {
       }
 
       try {
+        const mergedPreferences = {
+          ...this.preferences,
+          ...updatedPreferences,
+          dashboard: {
+            ...this.preferences.dashboard,
+            ...updatedPreferences.dashboard,
+          },
+        };
+
         const { data, error } = await $supabase
           .from("users")
           .update({ preferences: updatedPreferences })
