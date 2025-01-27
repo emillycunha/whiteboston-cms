@@ -21,7 +21,7 @@
       :fields="fields"
       :editable="true"
       @submit="addContent"
-      @cancel="cancelAdd"
+      @cancel="goBack"
     />
   </div>
 </template>
@@ -75,22 +75,21 @@ const addContent = async () => {
     return acc;
   }, {});
 
-  console.log("Form data ready for submission:", dataToSubmit);
-
-  const success = await contentStore.addContentItem(
-    collectionSlug,
-    dataToSubmit
-  );
-  if (success) {
+  try {
     notificationStore.showNotification(
-      "success",
-      "Item added successfully to the collection!"
+      "info",
+      "Adding content, please wait..."
     );
+    await new Promise((resolve) => setTimeout(resolve, 2000));
     router.push(`/collections/${collectionSlug}`);
+
+    await contentStore.addContentItem(collectionSlug, dataToSubmit);
+  } catch (err) {
+    console.error("Error adding content:", err);
   }
 };
 
-const cancelAdd = () => {
+const goBack = () => {
   router.push(`/collections/${collectionSlug}`);
 };
 

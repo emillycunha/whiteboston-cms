@@ -26,7 +26,7 @@
 
     <!-- Reusable Form to View Item -->
     <BaseForm
-      v-if="!isLoading && !error && fields.length"
+      v-if="!isLoading && fields.length"
       :fields="fields"
       :editable="false"
     />
@@ -50,16 +50,18 @@ const isLoading = computed(() => contentStore.isLoading);
 
 // Computed Fields for the Collection
 const allFields = computed(() => contentStore.fields[collectionSlug] || []);
-const content = computed(() => contentStore.content[collectionSlug] || []);
-
 const fields = ref([]);
 const errors = ref("");
 
 onMounted(async () => {
   try {
-    await contentStore.fetchContentAndFields(collectionSlug);
+    if (!contentStore.content[collectionSlug]) {
+      await contentStore.fetchContentAndFields(collectionSlug);
+    } else {
+      console.log("[View Page] Using cached content for:", collectionSlug);
+    }
 
-    const item = content.value.find(
+    const item = contentStore.content[collectionSlug]?.find(
       (entry) => entry.id === parseInt(itemId, 10)
     );
     if (!item) {

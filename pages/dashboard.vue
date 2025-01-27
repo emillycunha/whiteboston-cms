@@ -33,14 +33,14 @@
 
       <!-- Post Section -->
       <div class="lg:col-start-1 lg:col-span-2 lg:row-span-3 lg:row-start-2">
-        <RecentPosts />
+        <RecentCardOne />
       </div>
 
       <!-- Recent Leads -->
       <div
         class="lg:col-start-3 lg:col-span-1 lg:row-start-3 lg:row-end-6 lg:row-span-2"
       >
-        <RecentLeads />
+        <RecentCardTwo />
       </div>
 
       <!-- Card 5 Quick Links -->
@@ -76,6 +76,7 @@ const selectedStats = ref([]);
 
 onMounted(async () => {
   if (authStore.isAuthenticated) {
+    console.log("[Mounted] User is authenticated.");
     await authStore.fetchUserMetadata();
 
     const dashboardStats = authStore.preferences?.dashboard?.stats || [];

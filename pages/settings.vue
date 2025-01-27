@@ -8,26 +8,30 @@
     >
       <div
         v-if="collections.length > 0"
-        class="p-4 sm:p-8 flex flex-col gap-x-16"
+        class="p-4 sm:p-8 flex flex-col gap-y-6"
       >
         <!-- Sidebar Order -->
-        <div v-if="userRole === 'admin'" class="p-2">
-          <h3 class="text-base font-semibold">Sidebar Collections Order</h3>
+        <div class="p-2">
+          <h3 class="text-base font-semibold">
+            Sidebar Collections Order (Top 3)
+          </h3>
           <p class="text-sm text-gray-600">
-            Collections in the sidebar are displayed based on the order below.
+            Use the arrows to adjust the order of the top 3 collections
+            displayed in the sidebar.
           </p>
+          <p v-if="error" class="text-sm text-red-500 mt-2">{{ error }}</p>
 
-          <!-- Collections List -->
+          <!-- Sidebar Collections List -->
           <ul class="mt-4 space-y-2 border border-gray-200 rounded-md p-4">
             <li
-              v-for="(collection, index) in collections"
-              :key="collection.id"
+              v-for="(collection, index) in sidebarOrder"
+              :key="collection"
               class="flex items-center justify-between bg-white"
             >
               <div>
                 <span class="text-gray-700 dark:text-white font-medium">
-                  {{ index + 1 }}. {{ collection.name }}</span
-                >
+                  {{ index + 1 }}. {{ collection.name }}
+                </span>
               </div>
 
               <!-- Arrow Buttons -->
@@ -36,16 +40,16 @@
                 <button
                   :disabled="index === 0"
                   class="p-1 bg-violet-500 text-white rounded hover:bg-gray-300 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed"
-                  @click="moveUp(index)"
+                  @click="moveSidebarUp(index)"
                 >
-                  <ChevronUpIcon class="h-4 2-4" />
+                  <ChevronUpIcon class="h-4 w-4" />
                 </button>
 
                 <!-- Move Down -->
                 <button
-                  :disabled="index === collections.length - 1"
+                  :disabled="index === sidebarOrder.length - 1"
                   class="p-1 bg-violet-500 text-white rounded hover:bg-gray-300 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed"
-                  @click="moveDown(index)"
+                  @click="moveSidebarDown(index)"
                 >
                   <ChevronDownIcon class="h-4 w-4" />
                 </button>
@@ -53,13 +57,16 @@
             </li>
           </ul>
         </div>
+
         <!-- Dashboard Stats -->
         <div class="p-2">
           <h3 class="font-bold text-base">Select Dashboard Stats</h3>
           <p class="text-sm text-gray-600">
             Choose up to 3 collections to display on the dashboard stats cards.
           </p>
-          <p v-if="error" class="text-red-500 mt-2">{{ error }}</p>
+          <p v-if="errors" class="text-sm text-red-500 mt-2">
+            {{ errors.dashboardStats }}
+          </p>
 
           <div class="flex justify-end">
             <button
@@ -72,7 +79,7 @@
           <div>
             <div class="mt-4 space-y-2 border border-gray-200 rounded-md p-4">
               <div
-                v-for="collection in availableCollections"
+                v-for="collection in dashboardStats"
                 :key="collection"
                 class="flex items-center space-x-3"
               >
@@ -82,15 +89,80 @@
                 >
                   <input
                     :id="collection"
-                    v-model="selectedStats"
                     type="checkbox"
                     :value="collection"
+                    :checked="collection.selected"
                     class="h-4 w-4 accent-violet-500 dark:accent-teal-500"
-                    @change="handleCheckboxChange(collection)"
+                    @change="handleStatsChange(collection)"
                   />
 
-                  {{ collection }}
+                  {{ collection.name }}
                 </label>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Dashboard Recent Cards -->
+        <div class="p-2">
+          <h3 class="font-bold text-base">Select Dashboard Recent Cards</h3>
+          <p class="text-sm text-gray-600">
+            Choose collections for recent cards (Card 1 and Card 2).
+          </p>
+          <p v-if="error" class="text-sm text-red-500 mt-2">{{ error }}</p>
+
+          <div class="flex flex-row grow gap-x-16">
+            <!-- Card One -->
+            <div class="mt-6 flex-1">
+              <h4 class="font-medium text-sm">Card One</h4>
+              <div class="mt-4 space-y-2 border border-gray-200 rounded-md p-4">
+                <div
+                  v-for="collection in recentCards.cardone"
+                  :key="collection.id"
+                  class="flex items-center space-x-3"
+                >
+                  <label
+                    :for="`cardone_${collection.slug}`"
+                    class="text-gray-700 dark:text-white font-medium has-checked:text-violet-500"
+                  >
+                    <input
+                      :id="`cardone_${collection.slug}`"
+                      type="checkbox"
+                      :value="collection"
+                      :checked="collection.checked"
+                      class="h-4 w-4 accent-violet-500 dark:accent-teal-500"
+                      @change="handleCardOneChange(collection)"
+                    />
+                    {{ collection.name }}
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <!-- Card Two -->
+            <div class="mt-6 flex-1">
+              <h4 class="font-medium text-sm">Card Two</h4>
+              <div class="mt-4 space-y-2 border border-gray-200 rounded-md p-4">
+                <div
+                  v-for="collection in recentCards.cardtwo"
+                  :key="collection.id"
+                  class="flex items-center space-x-3"
+                >
+                  <label
+                    :for="`cardtwo_${collection.slug}`"
+                    class="text-gray-700 dark:text-white font-medium has-checked:text-violet-500"
+                  >
+                    <input
+                      :id="`cardtwo_${collection.slug}`"
+                      type="checkbox"
+                      :value="collection"
+                      :checked="collection.checked"
+                      class="h-4 w-4 accent-violet-500 dark:accent-teal-500"
+                      @change="handleCardTwoChange(collection)"
+                    />
+                    {{ collection.name }}
+                  </label>
+                </div>
               </div>
             </div>
           </div>
@@ -143,8 +215,6 @@
 </template>
 
 <script setup>
-//import { ref, onMounted } from "vue";
-
 import {
   ChevronLeftIcon,
   CheckCircleIcon,
@@ -152,121 +222,247 @@ import {
   ChevronDownIcon,
 } from "@heroicons/vue/24/outline";
 
-import { useNotificationStore } from "@/stores/notification";
-const notificationStore = useNotificationStore();
-
 const authStore = useAuthStore();
-const userRole = computed(() => authStore.role);
-
 const collectionsStore = useCollectionsStore();
 
-const selectedStats = ref([]);
-const availableCollections = ref([]);
-const collections = ref([]);
-const error = ref("");
+const sidebarOrder = ref([]);
+const dashboardStats = ref([]);
+const recentCards = ref({
+  cardone: [],
+  cardtwo: [],
+});
 
+const collections = ref([]);
+const selectedStats = ref([]);
+
+const error = ref("");
+const errors = ref({
+  dashboardStats: "",
+});
+const initialPreferences = ref({});
+
+// Clear selections
 const clearSelection = () => {
-  selectedStats.value = [];
+  sidebarOrder.value = [];
   error.value = "";
 };
 
 onMounted(async () => {
-  const orgId = authStore.org_id;
-  if (!orgId) {
-    return;
-  }
-
   try {
-    await collectionsStore.fetchCollectionsForCurrentOrg();
-    collections.value = collectionsStore.collections;
-
-    availableCollections.value = collectionsStore
-      .getCollectionsByOrg(orgId)
-      .map((collection) => collection.slug);
-
-    const userPreferences = authStore.preferences?.dashboard?.stats || [];
-    selectedStats.value = userPreferences;
-    error.value = "";
-  } catch (err) {
-    error.value = "Failed to load collections or preferences.";
-  }
-});
-
-const handleCheckboxChange = (collection) => {
-  if (selectedStats.value.length > 3) {
-    selectedStats.value = selectedStats.value.filter(
-      (item) => item !== collection
-    );
-    error.value = "You can select a maximum of 3 collections.";
-  } else {
-    error.value = "";
-  }
-};
-
-// Move an item up
-const moveUp = (index) => {
-  if (index > 0) {
-    const current = collections.value[index];
-    const above = collections.value[index - 1];
-
-    const temp = current.position;
-    current.position = above.position;
-    above.position = temp;
-
-    collections.value.splice(index - 1, 2, current, above);
-  }
-};
-
-// Move an item down
-const moveDown = (index) => {
-  if (index < collections.value.length - 1) {
-    const current = collections.value[index];
-    const below = collections.value[index + 1];
-
-    // Swap positions
-    const temp = current.position;
-    current.position = below.position;
-    below.position = temp;
-
-    // Reorder the array
-    collections.value.splice(index, 2, below, current);
-  }
-};
-
-const saveSettings = async () => {
-  try {
-    const updatedCollections = collections.value.map((collection, index) => ({
-      id: collection.id,
-      position: index + 1,
-      name: collection.name,
-      slug: collection.slug,
-      organization_id: collection.organization_id,
-    }));
-
-    await collectionsStore.updateCollectionPositions(updatedCollections);
-
-    const userId = authStore.id;
-    if (!userId) {
-      error.value = "User not authenticated.";
+    const orgId = authStore.org_id;
+    if (!orgId) {
       return;
     }
 
-    const updatedPreferences = {
-      ...authStore.preferences,
-      dashboard: { stats: selectedStats.value },
-    };
-
-    await authStore.updatePreferences(updatedPreferences);
-
-    navigateTo("/dashboard");
     await collectionsStore.fetchCollectionsForCurrentOrg();
+    collections.value = collectionsStore.collections;
+
+    // Load user preferences
+    const userPreferences = authStore.preferences || {};
+    const dashboardPreferences = userPreferences.dashboard || {};
+
+    // Clean up blanks in preferences
+    const cleanedSidebarOrder = (
+      dashboardPreferences.sidebarOrder || []
+    ).filter((slug) => slug !== "");
+
+    const cleanedStats = (dashboardPreferences.stats || []).filter(
+      (slug) => slug !== ""
+    );
+
+    const cleanedRecentCardOne = (
+      dashboardPreferences.recentCards?.cardone || []
+    ).filter((slug) => slug !== "");
+
+    const cleanedRecentCardTwo = (
+      dashboardPreferences.recentCards?.cardtwo || []
+    ).filter((slug) => slug !== "");
+
+    // Initialize sidebar order (user preferences first, then remaining collections)
+    sidebarOrder.value = [
+      ...collections.value.filter((collection) =>
+        cleanedSidebarOrder.includes(collection.slug)
+      ),
+      ...collections.value.filter(
+        (collection) => !cleanedSidebarOrder.includes(collection.slug)
+      ),
+    ];
+
+    // Initialize dashboard stats
+    dashboardStats.value = collections.value.map((collection) => ({
+      ...collection,
+      selected: cleanedStats.includes(collection.slug), // Mark as selected if in DB preferences
+    }));
+
+    // Ensure only two stats are selected
+    if (dashboardStats.value.filter((item) => item.selected).length > 2) {
+      let count = 0;
+      dashboardStats.value.forEach((item) => {
+        if (item.selected) {
+          count++;
+          if (count > 2) {
+            item.selected = false; // Unselect extras
+          }
+        }
+      });
+    }
+
+    // Sync selected stats to a separate ref for operations
+    selectedStats.value = dashboardStats.value.filter((item) => item.selected);
+
+    // Initialize recent cards (user preferences first, then all collections)
+    recentCards.value = {
+      cardone: collections.value.map((collection) => ({
+        ...collection,
+        checked: cleanedRecentCardOne.includes(collection.slug),
+      })),
+      cardtwo: collections.value.map((collection) => ({
+        ...collection,
+        checked: cleanedRecentCardTwo.includes(collection.slug),
+      })),
+    };
   } catch (err) {
-    console.error("[Save Settings] Failed to save settings:", err);
-    error.value = "Failed to save settings.";
+    error.value = "Failed to load collections or preferences.";
+    console.error("[onMounted] Error loading data:", err);
+  }
+});
+
+const moveSidebarUp = (index) => {
+  if (index > 0) {
+    const temp = sidebarOrder.value[index];
+    sidebarOrder.value[index] = sidebarOrder.value[index - 1];
+    sidebarOrder.value[index - 1] = temp;
+  }
+};
+
+const moveSidebarDown = (index) => {
+  if (index < sidebarOrder.value.length - 1) {
+    const temp = sidebarOrder.value[index];
+    sidebarOrder.value[index] = sidebarOrder.value[index + 1];
+    sidebarOrder.value[index + 1] = temp;
   }
 };
 
 const cancelSettings = () => {
   navigateTo("/dashboard");
+};
+
+const handleStatsChange = (collection) => {
+  const target = dashboardStats.value.find(
+    (item) => item.slug === collection.slug
+  );
+
+  if (!target) return;
+
+  if (target.selected) {
+    target.selected = false;
+  } else {
+    const selectedCount = dashboardStats.value.filter(
+      (item) => item.selected
+    ).length;
+
+    if (selectedCount >= 2) {
+      errors.value.dashboardStats =
+        "You can select a maximum of 2 collections for stats.";
+      return;
+    }
+
+    target.selected = true;
+  }
+
+  selectedStats.value = dashboardStats.value.filter((item) => item.selected);
+  errors.value.dashboardStats = "";
+};
+
+const handleCardOneChange = (collection) => {
+  recentCards.value.cardone.forEach((item) => {
+    item.checked = item.slug === collection.slug;
+  });
+  console.log(`Selected ${collection.name} for card one`);
+};
+
+const handleCardTwoChange = (collection) => {
+  recentCards.value.cardtwo.forEach((item) => {
+    item.checked = item.slug === collection.slug; // Set true for selected, false for others
+  });
+  console.log(`Selected ${collection.name} for card two`);
+};
+
+const saveSettings = async () => {
+  try {
+    console.log("Extracting preferences to save...");
+
+    // Extract top 3 collections for Sidebar Order
+    const top3Collections = sidebarOrder.value
+      .slice(0, 3)
+      .map((collection) => collection.slug);
+
+    // Extract selected Dashboard Stats
+    const selectedStatsSlugs = selectedStats.value.map(
+      (collection) => collection.slug
+    );
+
+    const cardOneCollections = recentCards.value.cardone
+      .filter((collection) => collection.checked)
+      .map((collection) => collection.slug);
+
+    const cardTwoCollections = recentCards.value.cardtwo
+      .filter((collection) => collection.checked)
+      .map((collection) => collection.slug);
+
+    // Determine if preferences have changed
+    const preferencesChanged =
+      JSON.stringify(initialPreferences.value.sidebarOrder) !==
+        JSON.stringify(top3Collections) ||
+      JSON.stringify(initialPreferences.value.stats) !==
+        JSON.stringify(selectedStatsSlugs) ||
+      JSON.stringify(initialPreferences.value.recentCards?.cardone) !==
+        JSON.stringify(cardOneCollections) ||
+      JSON.stringify(initialPreferences.value.recentCards?.cardtwo) !==
+        JSON.stringify(cardTwoCollections);
+
+    console.log("Preferences changed:", preferencesChanged);
+
+    if (preferencesChanged) {
+      // Build updated preferences
+      const updatedPreferences = {
+        dashboard: {
+          ...authStore.preferences.dashboard,
+          sidebarOrder: top3Collections,
+          stats: selectedStatsSlugs,
+          recentCards: {
+            cardone: cardOneCollections,
+            cardtwo: cardTwoCollections,
+          },
+        },
+      };
+
+      console.log("Saving updated preferences:", updatedPreferences);
+
+      // Save preferences
+      const success = await authStore.updatePreferences(updatedPreferences);
+      if (success) {
+        // Update initial state to reflect saved preferences
+        initialPreferences.value = {
+          sidebarOrder: JSON.parse(JSON.stringify(top3Collections)),
+          stats: JSON.parse(JSON.stringify(selectedStatsSlugs)),
+          recentCards: {
+            cardone: JSON.parse(JSON.stringify(cardOneCollections)),
+            cardtwo: JSON.parse(JSON.stringify(cardTwoCollections)),
+          },
+        };
+
+        console.log(
+          "Preferences saved successfully:",
+          initialPreferences.value
+        );
+      }
+    } else {
+      console.log("No changes detected in preferences.");
+    }
+  } catch (err) {
+    console.error("[Save Settings] Failed to save settings:", err);
+    error.value = "Failed to save settings.";
+  }
 };
 </script>

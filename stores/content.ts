@@ -29,8 +29,8 @@ interface ContentStoreState {
 
 export const useContentStore = defineStore("content", {
   state: (): ContentStoreState => ({
-    content: {},
-    fields: {},
+    content: JSON.parse(localStorage.getItem("content_cache") || "{}"), // Cached content
+    fields: JSON.parse(localStorage.getItem("fields_cache") || "{}"), // Cached fields
     isLoading: false,
     isLoadingBySlug: {},
   }),
@@ -155,29 +155,29 @@ export const useContentStore = defineStore("content", {
 
         if (!collectionData) {
           console.warn(
-            `[Content Store] Collection not found for slug: ${collectionSlug}`
+            `[Content Store] Collection not found or inaccessible: ${collectionSlug}`
           );
           notificationStore.showNotification(
             NotificationType.Info,
-            `Collection "${collectionSlug}" not found.`
+            `Collection "${collectionSlug}" could not be accessed.`
           );
+          this.fields[collectionSlug] = [];
+          this.content[collectionSlug] = [];
           return;
         }
 
         const collectionId = collectionData.id;
 
-        // Fetch fields and content for this collection with proper signatures
-        const fieldsPromise = this.fetchFields(collectionId); // Adjusted signature
-        const contentPromise = this.fetchContent(collectionId); // Adjusted signature
-
         const [fields, content] = await Promise.all([
-          fieldsPromise,
-          contentPromise,
+          this.fetchFields(collectionId),
+          this.fetchContent(collectionId),
         ]);
 
         // Store results in slug-specific keys
         this.fields[collectionSlug] = fields;
         this.content[collectionSlug] = content;
+        localStorage.setItem("fields_cache", JSON.stringify(this.fields));
+        localStorage.setItem("content_cache", JSON.stringify(this.content));
       } catch (error) {
         console.error(
           `[Content Store] Error fetching content for ${collectionSlug}:`,
@@ -275,6 +275,11 @@ export const useContentStore = defineStore("content", {
           return [];
         }
 
+        console.log(
+          "[Content Store] Raw content fetched from Supabase:",
+          contentData
+        );
+
         const processedContent = (contentData || []).map((item) => ({
           id: item.id,
           created_at: item.created_at,
@@ -338,9 +343,21 @@ export const useContentStore = defineStore("content", {
           return false;
         }
 
+        const updatedItemIndex = this.content[collectionSlug]?.findIndex(
+          (item) => item.id === itemId
+        );
+        if (updatedItemIndex !== -1) {
+          this.content[collectionSlug][updatedItemIndex] = {
+            ...this.content[collectionSlug][updatedItemIndex],
+            data: updatedData,
+          };
+        }
+
         notificationStore.showNotification(
           NotificationType.Success,
-          "Content item updated successfully."
+          "Content item updated successfully.",
+          5000,
+          NotificationType.Info
         );
         return true;
       } catch (err) {
@@ -382,14 +399,18 @@ export const useContentStore = defineStore("content", {
       const collectionId = collectionData.id;
 
       try {
-        const { error } = await $supabase.from("content").insert({
-          collection_id: collectionId,
-          organization_id: authStore.org_id,
-          user_id: authStore.id,
-          data: newItemData,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-        });
+        const { data: insertedItem, error } = await $supabase
+          .from("content")
+          .insert({
+            collection_id: collectionId,
+            organization_id: authStore.org_id,
+            user_id: authStore.id,
+            data: newItemData,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+          })
+          .select()
+          .single();
 
         if (error) {
           notificationStore.showNotification(
@@ -399,9 +420,23 @@ export const useContentStore = defineStore("content", {
           return false;
         }
 
+        // Update in-memory content store
+        if (!this.content[collectionSlug]) {
+          this.content[collectionSlug] = [];
+        }
+
+        this.content[collectionSlug].push({
+          id: insertedItem.id,
+          data: newItemData,
+          created_at: insertedItem.created_at,
+          updated_at: insertedItem.updated_at,
+        });
+
         notificationStore.showNotification(
           NotificationType.Success,
-          "Content item added successfully."
+          "Content item added successfully.",
+          5000,
+          NotificationType.Info
         );
         return true;
       } catch (err) {
@@ -452,8 +487,38 @@ export const useContentStore = defineStore("content", {
       }
     },
 
-    clearContent() {
-      this.content = {};
+    clearContent(collectionSlug: string) {
+      if (collectionSlug) {
+        // Clear specific collection data from in-memory store
+        delete this.content[collectionSlug];
+        delete this.fields[collectionSlug];
+
+        // Clear specific collection data from localStorage
+        const fieldsCache = JSON.parse(
+          localStorage.getItem("fields_cache") || "{}"
+        );
+        const contentCache = JSON.parse(
+          localStorage.getItem("content_cache") || "{}"
+        );
+
+        if (fieldsCache[collectionSlug]) {
+          delete fieldsCache[collectionSlug];
+        }
+        if (contentCache[collectionSlug]) {
+          delete contentCache[collectionSlug];
+        }
+
+        localStorage.setItem("fields_cache", JSON.stringify(fieldsCache));
+        localStorage.setItem("content_cache", JSON.stringify(contentCache));
+      } else {
+        // Clear all collections from in-memory store
+        this.content = {};
+        this.fields = {};
+
+        // Clear all collections from localStorage
+        localStorage.removeItem("fields_cache");
+        localStorage.removeItem("content_cache");
+      }
     },
   },
 });

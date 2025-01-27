@@ -62,6 +62,7 @@
                   :id="field.key"
                   v-model="field.value"
                   :type="field.type"
+                  v-bind="field.attrs || {}"
                   :rows="field.rows || 4"
                   :required="field.isRequired"
                   :placeholder="field.placeholder || `Enter ${field.label}`"
@@ -76,6 +77,7 @@
                   :id="field.key"
                   v-model="field.value"
                   :type="field.type"
+                  v-bind="field.attrs || {}"
                   :required="field.isRequired"
                   :placeholder="field.placeholder || `Enter ${field.label}`"
                   class="text-sm border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 rounded-md p-2 w-full focus-visible:outline-violet-500"
@@ -90,6 +92,7 @@
                     :id="field.key"
                     v-model="field.value"
                     :type="showPassword ? 'text' : 'password'"
+                    v-bind="field.attrs || {}"
                     :required="field.isRequired"
                     :placeholder="field.placeholder || `Enter ${field.label}`"
                     class="text-sm border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 rounded-md p-2 w-full focus-visible:outline-violet-500"
@@ -115,6 +118,7 @@
                   :id="field.key"
                   v-model="field.value"
                   type="tel"
+                  v-bind="field.attrs || {}"
                   :required="field.isRequired"
                   :placeholder="field.placeholder || `Enter ${field.label}`"
                   class="text-sm border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 rounded-md p-2 w-full focus-visible:outline-violet-500"
@@ -163,6 +167,7 @@
                   :id="field.key"
                   v-model="field.value"
                   :type="field.type"
+                  v-bind="field.attrs || {}"
                   :required="field.isRequired"
                   :placeholder="field.placeholder || `Enter ${field.label}`"
                   class="text-sm border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 rounded-md p-2 w-full focus-visible:outline-violet-500"
@@ -176,6 +181,7 @@
                   :id="field.key"
                   v-model="field.value"
                   :type="field.type"
+                  v-bind="field.attrs || {}"
                   :required="field.isRequired"
                   :placeholder="field.placeholder || `Enter ${field.label}`"
                   class="text-sm border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 rounded-md p-2 w-full focus-visible:outline-violet-500"
@@ -189,6 +195,7 @@
                   v-model="field.value"
                   :options="field.options"
                   :type="field.type"
+                  v-bind="field.attrs || {}"
                   :required="field.isRequired"
                   class="text-sm w-full border border-gray-300 dark:border-gray-600 rounded-md px-2 py-1"
                 />
@@ -201,6 +208,7 @@
                   :id="field.key"
                   v-model="field.value"
                   type="checkbox"
+                  v-bind="field.attrs || {}"
                   :required="field.isRequired"
                   class="h-4 w-4 accent-violet-500 dark:accent-teal-500"
                 />
@@ -289,13 +297,98 @@ const emit = defineEmits([
   "update:modelValue",
 ]);
 
+const formatPhoneNumber = (value) => {
+  const digits = value.replace(/\D/g, "");
+
+  let formatted = "";
+
+  if (digits.length > 0) {
+    formatted += `${digits.slice(0, 3)}`;
+  }
+  if (digits.length > 3) {
+    formatted += ` ${digits.slice(3, 6)}`;
+  }
+  if (digits.length > 6) {
+    formatted += ` ${digits.slice(6, 10)}`;
+  }
+
+  return formatted.trim();
+};
+
+watch(
+  () => props.fields.find((field) => field.type === "phone")?.value,
+  (newValue, oldValue) => {
+    const phoneField = props.fields.find((field) => field.type === "phone");
+
+    if (phoneField && newValue) {
+      phoneField.value = formatPhoneNumber(newValue);
+    }
+  }
+);
+
 const validateForm = () => {
   let isValid = true;
 
   props.fields.forEach((field) => {
-    if (field.isRequired && !field.value) {
-      field.error = `${field.label} is required.`;
+    const { value, isRequired, label, type } = field;
+
+    // Required Field Validation
+    if (isRequired && !value) {
+      field.error = `${label} is required.`;
       isValid = false;
+
+      // Email Validation
+    } else if (type === "email" && value) {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(value)) {
+        field.error = `${label} must be a valid email address.`;
+        isValid = false;
+      } else {
+        field.error = "";
+      }
+
+      // Phone Number Validation
+    } else if (type === "phone" && value) {
+      const sanitizedValue = value.replace(/\D/g, "");
+      const phoneRegex = /^\d{10}$/; // Matches exactly 10 digits
+      if (!phoneRegex.test(sanitizedValue)) {
+        field.error = `${label} must be a valid phone number with exactly 10 digits.`;
+        isValid = false;
+      } else {
+        field.error = "";
+      }
+
+      // Max Length Validation
+    } else if (field.attrs?.maxlength && value.length > field.attrs.maxlength) {
+      field.error = `${label} cannot exceed ${field.attrs.maxlength} characters.`;
+      isValid = false;
+
+      // Min Length Validation
+    } else if (field.attrs?.minlength && value.length < field.attrs.minlength) {
+      field.error = `${label} must be at least ${field.attrs.minlength} characters long.`;
+      isValid = false;
+
+      // Pattern Validation
+    } else if (field.attrs?.pattern && value) {
+      const patternRegex = new RegExp(field.attrs.pattern);
+      if (!patternRegex.test(value)) {
+        field.error = `${label} does not match the required format.`;
+        isValid = false;
+      } else {
+        field.error = "";
+      }
+
+      // Number Validation (Range)
+    } else if (type === "number" && value) {
+      if (field.attrs?.min !== undefined && value < field.attrs.min) {
+        field.error = `${label} must be at least ${field.attrs.min}.`;
+        isValid = false;
+      } else if (field.attrs?.max !== undefined && value > field.attrs.max) {
+        field.error = `${label} cannot exceed ${field.attrs.max}.`;
+        isValid = false;
+      } else {
+        field.error = "";
+      }
     } else {
       field.error = "";
     }
@@ -329,7 +422,6 @@ const enableEdit = () => {
 
 const showPassword = ref(false);
 
-// Method to toggle password visibility
 const togglePasswordVisibility = () => {
   showPassword.value = !showPassword.value;
 };

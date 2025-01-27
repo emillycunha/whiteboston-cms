@@ -8,7 +8,7 @@
       :fields="fields"
       :editable="true"
       @submit="addCollection"
-      @cancel="cancelAdd"
+      @back="goBack"
     />
 
     <!-- Error State -->
@@ -22,8 +22,6 @@
 
 <script setup>
 import { ref, watch } from "vue";
-import { useRouter } from "vue-router";
-
 import { useNotificationStore } from "@/stores/notification";
 import { useCollectionsStore } from "@/stores/collections";
 import { usePredefinedCollectionsStore } from "@/stores/collectionTemplates";
@@ -186,7 +184,7 @@ const collectionRedirect = (newSlug) => {
 };
 
 // Cancel Add
-const cancelAdd = () => {
+const goBack = () => {
   navigateTo({
     path: `/collections/`,
   });
