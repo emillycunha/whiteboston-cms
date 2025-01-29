@@ -8,3 +8,8 @@
 
 [cache]
   paths = ["node_modules", ".output"]
+
+  [[redirects]]
+  from = "/old-url"
+  to = "/new-url"
+  status = 301
