@@ -12,7 +12,7 @@
             <DialogPanel class="relative flex w-full max-w-xs flex-col">
               <div class="p-4 flex flex-col grow bg-white dark:bg-gray-800 rounded-lg m-4 shadow-sm">
                 <div class="flex items-center justify-end px-4 py-2">
-                  <button class="text-gray-400 hover:text-gray-500 focus:outline-none" @click="sidebarOpen = false">
+                  <button class="text-gray-700 hover:text-gray-500 focus:outline-none" @click="sidebarOpen = false">
                     <XMarkIcon class="h-6 w-6" />
                   </button>
                 </div>
