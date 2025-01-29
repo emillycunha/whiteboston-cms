@@ -2,106 +2,37 @@
   <div class="">
     <!-- Custom Form -->
     <form v-if="fields.length" novalidate @submit.prevent="submitForm">
-      <div
-        class="rounded-md bg-white shadow-sm border border-gray-200 dark:bg-slate-800 dark:border-slate-700 mb-6"
-      >
+      <div class="rounded-md bg-white shadow-sm border border-gray-200 dark:bg-slate-800 dark:border-slate-700 mb-6">
         <div class="p-4 sm:p-8">
           <div class="flex flex-wrap gap-y-4">
-            <div
-              v-for="(field, index) in fields"
-              :key="field.key || `fallback_${index}`"
-              :class="[
-                'flex flex-col space-y-2 p-2',
-                field.fullRow
-                  ? 'w-full'
-                  : field.halfRow
-                  ? 'w-1/2'
-                  : field.thirdRow
-                  ? 'w-1/3'
-                  : field.quarterRow
-                  ? 'w-1/4'
-                  : 'w-auto',
-              ]"
-            >
-              <label
-                :for="field.key"
-                class="text-sm font-bold text-gray-700 dark:text-white"
-              >
+            <div v-for="(field, index) in fields" :key="field.key || `fallback_${index}`" :class="['flex flex-col space-y-2 p-2', field.fullRow ? 'w-full' : field.halfRow ? 'w-full md:w-1/2' : field.thirdRow ? 'w-full md:w-1/3' : field.quarterRow ? 'w-full md:w-1/4' : 'w-auto']">
+              <label :for="field.key" class="text-sm font-bold text-gray-700 dark:text-white">
                 {{ field.label }}
                 <span v-if="field.isRequired" class="text-red-500">*</span>
               </label>
-              <span
-                v-if="field.description && !editable"
-                class="text-sm text-gray-500"
-                >{{ field.description }}</span
-              >
-              <span
-                v-if="field.hint && editable"
-                class="text-sm text-gray-500"
-                >{{ field.hint }}</span
-              >
+              <span v-if="field.description && !editable" class="text-sm text-gray-500">{{ field.description }}</span>
+              <span v-if="field.hint && editable" class="text-sm text-gray-500">{{ field.hint }}</span>
 
               <!-- Dynamic Field Rendering -->
               <div v-if="field.type === 'text'">
-                <input
-                  v-if="editable"
-                  :id="field.key"
-                  v-model="field.value"
-                  :type="field.type"
-                  v-bind="field.attrs || {}"
-                  :required="field.isRequired"
-                  :placeholder="field.placeholder || `Enter ${field.label}`"
-                  class="text-sm border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 rounded-md p-2 w-full focus-visible:outline-violet-500"
-                />
+                <input v-if="editable" :id="field.key" v-model="field.value" :type="field.type" v-bind="field.attrs || {}" :required="field.isRequired" :placeholder="field.placeholder || `Enter ${field.label}`" class="text-sm border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 rounded-md p-2 w-full focus-visible:outline-violet-500" />
                 <p v-else>{{ field.value }}</p>
               </div>
 
               <div v-else-if="field.type === 'textarea'">
-                <textarea
-                  v-if="editable"
-                  :id="field.key"
-                  v-model="field.value"
-                  :type="field.type"
-                  v-bind="field.attrs || {}"
-                  :rows="field.rows || 4"
-                  :required="field.isRequired"
-                  :placeholder="field.placeholder || `Enter ${field.label}`"
-                  class="text-sm border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 rounded-md p-2 w-full focus-visible:outline-violet-500"
-                ></textarea>
+                <textarea v-if="editable" :id="field.key" v-model="field.value" :type="field.type" v-bind="field.attrs || {}" :rows="field.rows || 4" :required="field.isRequired" :placeholder="field.placeholder || `Enter ${field.label}`" class="text-sm border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 rounded-md p-2 w-full focus-visible:outline-violet-500"></textarea>
                 <p v-else>{{ field.value }}</p>
               </div>
 
               <div v-else-if="field.type === 'email'">
-                <input
-                  v-if="editable"
-                  :id="field.key"
-                  v-model="field.value"
-                  :type="field.type"
-                  v-bind="field.attrs || {}"
-                  :required="field.isRequired"
-                  :placeholder="field.placeholder || `Enter ${field.label}`"
-                  class="text-sm border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 rounded-md p-2 w-full focus-visible:outline-violet-500"
-                />
+                <input v-if="editable" :id="field.key" v-model="field.value" :type="field.type" v-bind="field.attrs || {}" :required="field.isRequired" :placeholder="field.placeholder || `Enter ${field.label}`" class="text-sm border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 rounded-md p-2 w-full focus-visible:outline-violet-500" />
                 <p v-else>{{ field.value }}</p>
               </div>
 
               <div v-else-if="field.type === 'password'">
                 <div class="relative">
-                  <input
-                    v-if="editable"
-                    :id="field.key"
-                    v-model="field.value"
-                    :type="showPassword ? 'text' : 'password'"
-                    v-bind="field.attrs || {}"
-                    :required="field.isRequired"
-                    :placeholder="field.placeholder || `Enter ${field.label}`"
-                    class="text-sm border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 rounded-md p-2 w-full focus-visible:outline-violet-500"
-                  />
-                  <button
-                    type="button"
-                    @click="togglePasswordVisibility"
-                    class="absolute inset-y-0 right-3 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-white"
-                  >
+                  <input v-if="editable" :id="field.key" v-model="field.value" :type="showPassword ? 'text' : 'password'" v-bind="field.attrs || {}" :required="field.isRequired" :placeholder="field.placeholder || `Enter ${field.label}`" class="text-sm border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 rounded-md p-2 w-full focus-visible:outline-violet-500" />
+                  <button type="button" @click="togglePasswordVisibility" class="absolute inset-y-0 right-3 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-white">
                     <span v-if="showPassword">
                       <EyeSlashIcon class="h-5 w-5" />
                     </span>
@@ -113,105 +44,42 @@
               </div>
 
               <div v-else-if="field.type === 'phone'">
-                <input
-                  v-if="editable"
-                  :id="field.key"
-                  v-model="field.value"
-                  type="tel"
-                  v-bind="field.attrs || {}"
-                  :required="field.isRequired"
-                  :placeholder="field.placeholder || `Enter ${field.label}`"
-                  class="text-sm border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 rounded-md p-2 w-full focus-visible:outline-violet-500"
-                />
+                <input v-if="editable" :id="field.key" v-model="field.value" type="tel" v-bind="field.attrs || {}" :required="field.isRequired" :placeholder="field.placeholder || `Enter ${field.label}`" class="text-sm border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 rounded-md p-2 w-full focus-visible:outline-violet-500" />
                 <p v-else>{{ field.value }}</p>
               </div>
 
               <div v-else-if="field.type === 'richtexthtml'">
-                <HtmlEditor
-                  v-if="editable"
-                  :id="field.key"
-                  v-model="field.value"
-                  type="textarea"
-                  :required="field.isRequired"
-                  class="border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 rounded-md p-2 w-full"
-                />
+                <HtmlEditor v-if="editable" :id="field.key" v-model="field.value" type="textarea" :required="field.isRequired" class="border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 rounded-md p-2 w-full" />
                 <p v-else>{{ field.value }}</p>
               </div>
 
               <div v-else-if="field.type === 'richtextmarkdown'">
-                <MarkdownEditor
-                  v-if="editable"
-                  :id="field.key"
-                  v-model="field.value"
-                  type="textarea"
-                  :required="field.isRequired"
-                  class="border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 rounded-md p-2 w-full"
-                />
+                <MarkdownEditor v-if="editable" :id="field.key" v-model="field.value" type="textarea" :required="field.isRequired" class="border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 rounded-md p-2 w-full" />
                 <p v-else>{{ field.value }}</p>
               </div>
 
               <div v-else-if="field.type === 'image'">
-                <ImageUpload
-                  v-if="editable"
-                  :id="field.key"
-                  type="file"
-                  :required="field.isRequired"
-                  :type="field.type"
-                />
+                <ImageUpload v-if="editable" :id="field.key" type="file" :required="field.isRequired" :type="field.type" />
                 <p v-else>{{ field.value }}</p>
               </div>
 
               <div v-if="field.type === 'date'">
-                <input
-                  v-if="editable"
-                  :id="field.key"
-                  v-model="field.value"
-                  :type="field.type"
-                  v-bind="field.attrs || {}"
-                  :required="field.isRequired"
-                  :placeholder="field.placeholder || `Enter ${field.label}`"
-                  class="text-sm border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 rounded-md p-2 w-full focus-visible:outline-violet-500"
-                />
+                <input v-if="editable" :id="field.key" v-model="field.value" :type="field.type" v-bind="field.attrs || {}" :required="field.isRequired" :placeholder="field.placeholder || `Enter ${field.label}`" class="text-sm border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 rounded-md p-2 w-full focus-visible:outline-violet-500" />
                 <p v-else>{{ field.value }}</p>
               </div>
 
               <div v-if="field.type === 'number'">
-                <input
-                  v-if="editable"
-                  :id="field.key"
-                  v-model="field.value"
-                  :type="field.type"
-                  v-bind="field.attrs || {}"
-                  :required="field.isRequired"
-                  :placeholder="field.placeholder || `Enter ${field.label}`"
-                  class="text-sm border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 rounded-md p-2 w-full focus-visible:outline-violet-500"
-                />
+                <input v-if="editable" :id="field.key" v-model="field.value" :type="field.type" v-bind="field.attrs || {}" :required="field.isRequired" :placeholder="field.placeholder || `Enter ${field.label}`" class="text-sm border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 rounded-md p-2 w-full focus-visible:outline-violet-500" />
                 <p v-else>{{ field.value }}</p>
               </div>
 
               <div v-if="field.type === 'select'">
-                <CustomSelect
-                  v-if="editable"
-                  v-model="field.value"
-                  :options="field.options"
-                  :type="field.type"
-                  v-bind="field.attrs || {}"
-                  :required="field.isRequired"
-                  class="text-sm w-full border border-gray-300 dark:border-gray-600 rounded-md px-2 py-1"
-                />
+                <CustomSelect v-if="editable" v-model="field.value" :options="field.options" :type="field.type" v-bind="field.attrs || {}" :required="field.isRequired" class="text-sm w-full border border-gray-300 dark:border-gray-600 rounded-md px-2 py-1" />
                 <p v-else>{{ field.value }}</p>
               </div>
 
               <div v-else-if="field.type === 'boolean'">
-                <input
-                  v-if="editable"
-                  :id="field.key"
-                  v-model="field.value"
-                  type="checkbox"
-                  v-bind="field.attrs || {}"
-                  :required="field.isRequired"
-                  class="h-4 w-4 accent-violet-500 dark:accent-teal-500"
-                />
+                <input v-if="editable" :id="field.key" v-model="field.value" type="checkbox" v-bind="field.attrs || {}" :required="field.isRequired" class="h-4 w-4 accent-violet-500 dark:accent-teal-500" />
                 <p v-else>{{ field.value }}</p>
               </div>
 
@@ -251,14 +119,7 @@
 import PageFooter from "@/components/PageFooter.vue";
 import ImageUpload from "@/components/ImageUpload.vue";
 import MarkdownEditor from "@/components/MarkdownEditor.vue";
-import {
-  XCircleIcon,
-  CheckCircleIcon,
-  PencilSquareIcon,
-  ChevronLeftIcon,
-  EyeSlashIcon,
-  EyeIcon,
-} from "@heroicons/vue/24/outline";
+import { XCircleIcon, CheckCircleIcon, PencilSquareIcon, ChevronLeftIcon, EyeSlashIcon, EyeIcon } from "@heroicons/vue/24/outline";
 
 const model = defineModel();
 const props = defineProps({
@@ -289,13 +150,7 @@ const props = defineProps({
   },
 });
 
-const emit = defineEmits([
-  "submit",
-  "cancel",
-  "editable",
-  "back",
-  "update:modelValue",
-]);
+const emit = defineEmits(["submit", "cancel", "editable", "back", "update:modelValue"]);
 
 const formatPhoneNumber = (value) => {
   const digits = value.replace(/\D/g, "");

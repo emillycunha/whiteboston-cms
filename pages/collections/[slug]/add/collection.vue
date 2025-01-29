@@ -1,15 +1,10 @@
 <template>
-  <div class="px-6 py-4 space-y-6">
+  <div class="px-1 md:px-6 py-4 space-y-6">
     <!-- Page Header -->
     <PageHeader title="Add New Collection" />
 
     <!-- Add Collection Form -->
-    <BaseForm
-      :fields="fields"
-      :editable="true"
-      @submit="addCollection"
-      @back="goBack"
-    />
+    <BaseForm :fields="fields" :editable="true" @submit="addCollection" @back="goBack" />
 
     <!-- Error State -->
     <div v-if="errors.length" class="mt-4 p-2 text-red-500 text-sm">
@@ -105,13 +100,9 @@ const addCollection = async () => {
   errors.value = [];
 
   try {
-    const existingSlug = await collectionsStore.checkSlugExists(
-      fields.value.find((f) => f.key === "slug").value
-    );
+    const existingSlug = await collectionsStore.checkSlugExists(fields.value.find((f) => f.key === "slug").value);
     if (existingSlug) {
-      errors.value.push(
-        "Collection slug already exists. Please use a unique slug."
-      );
+      errors.value.push("Collection slug already exists. Please use a unique slug.");
       return;
     }
 
@@ -137,20 +128,14 @@ const prepareDataForSubmission = (fields) => {
 };
 
 const handleCollectionSuccess = async (newSlug) => {
-  notificationStore.showNotification(
-    "success",
-    "Collection added successfully!"
-  );
+  notificationStore.showNotification("success", "Collection added successfully!");
 
-  const predefinedFields =
-    predefinedCollectionsStore.getFieldsForCollection(newSlug);
+  const predefinedFields = predefinedCollectionsStore.getFieldsForCollection(newSlug);
 
   if (predefinedFields.length > 0) {
     await addPredefinedFields(newSlug, predefinedFields);
   } else {
-    console.log(
-      `[Debug] No predefined fields found for collection "${newSlug}"`
-    );
+    console.log(`[Debug] No predefined fields found for collection "${newSlug}"`);
   }
 
   collectionsStore.clearCollectionCache();
@@ -158,19 +143,12 @@ const handleCollectionSuccess = async (newSlug) => {
 };
 
 const addPredefinedFields = async (newSlug, predefinedFields) => {
-  const fieldAddSuccess = await fieldsStore.addNewCollectionFields(
-    newSlug,
-    predefinedFields
-  );
+  const fieldAddSuccess = await fieldsStore.addNewCollectionFields(newSlug, predefinedFields);
 
   if (fieldAddSuccess) {
-    console.log(
-      `[Debug] Predefined fields successfully added to collection "${newSlug}"`
-    );
+    console.log(`[Debug] Predefined fields successfully added to collection "${newSlug}"`);
   } else {
-    console.error(
-      `[Error] Failed to add predefined fields to collection "${newSlug}"`
-    );
+    console.error(`[Error] Failed to add predefined fields to collection "${newSlug}"`);
   }
 };
 

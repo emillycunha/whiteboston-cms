@@ -1,31 +1,12 @@
 <template>
   <div class="p-2">
     <div class="border border-dashed border-gray-300 rounded-sm px-4 py-8 mb-4">
-      <div
-        class="flex flex-row justify-center gap-x-4 items-center mb-2"
-        :class="{ 'is-dragover': isDragOver }"
-        @drop="onDrop"
-        @dragover.prevent
-        @dragenter.prevent
-      >
-        <p class="text-base font-medium text-gray-800">Drag image here</p>
-        <p class="text-sm text-gray-600">or</p>
-        <button
-          type="button"
-          class="bg-violet-200 text-gray-800 px-2 py-1 rounded-lg text-sm"
-          @click="triggerFileInput"
-        >
-          Choose File
-        </button>
+      <div class="flex flex-row justify-center gap-x-4 items-center mb-2" :class="{ 'is-dragover': isDragOver }" @drop="onDrop" @dragover.prevent @dragenter.prevent>
+        <p class="text-base font-medium text-gray-700">Drag image here</p>
+        <p class="text-sm text-gray-700">or</p>
+        <button type="button" class="bg-violet-200 text-gray-700 px-2 py-1 rounded-lg text-sm" @click="triggerFileInput">Choose File</button>
 
-        <input
-          type="file"
-          ref="fileInput"
-          accept="image/jpeg, image/jpg, image/png, image/webp"
-          class="file-input"
-          hidden
-          @change="onFileChange"
-        />
+        <input type="file" ref="fileInput" accept="image/jpeg, image/jpg, image/png, image/webp" class="file-input" hidden @change="onFileChange" />
       </div>
 
       <!-- Display the file name (if any) after the file is selected -->
@@ -44,10 +25,7 @@
       </div>
 
       <!-- Display success message if uploaded successfully -->
-      <div
-        v-if="successMessage"
-        class="text-violet-500 italic text-sm text-center"
-      >
+      <div v-if="successMessage" class="text-violet-500 italic text-sm text-center">
         <p>{{ successMessage }}</p>
       </div>
     </div>
@@ -129,9 +107,7 @@ const uploadImage = async () => {
     const fileName = `public/${Date.now()}_${file.value.name}`;
 
     // Upload the image to Supabase storage
-    const { data, error } = await $supabase.storage
-      .from("whiteboston-cms-media")
-      .upload(fileName, file.value);
+    const { data, error } = await $supabase.storage.from("whiteboston-cms-media").upload(fileName, file.value);
 
     if (error) {
       errorMessage.value = "Error uploading file.";
@@ -153,9 +129,7 @@ const fetchPublicUrl = async (fileName) => {
 
   try {
     // Fetch the public URL of the image from Supabase
-    const { data, error } = await $supabase.storage
-      .from("whiteboston-cms-media")
-      .getPublicUrl(fileName);
+    const { data, error } = await $supabase.storage.from("whiteboston-cms-media").getPublicUrl(fileName);
 
     if (error) {
       errorMessage.value = "Error fetching public URL.";

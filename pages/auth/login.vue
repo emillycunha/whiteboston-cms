@@ -1,40 +1,17 @@
 <template>
   <div class="font-mono">
-    <div
-      class="bg-gray-100 dark:bg-gray-900 p-20 flex flex-col items-center justify-center"
-    >
+    <div class="bg-gray-100 dark:bg-gray-900 p-20 flex flex-col items-center justify-center">
       <div class="text-center mb-4">
-        <h1 class="text-xl font-bold text-gray-800 dark:text-white">
-          Hi There!
-        </h1>
-        <h3 class="text-gray-800 dark:text-white">Login to your account</h3>
+        <h1 class="text-xl font-bold text-gray-700 dark:text-white">Hi There!</h1>
+        <h3 class="text-gray-700 dark:text-white">Login to your account</h3>
       </div>
-      <div
-        class="max-w-lg w-full mx-auto sm:p-10 lg:p-12 rounded-lg shadow bg-white"
-      >
-        <form
-          class="flex flex-col space-y-6 p-10"
-          novalidate
-          @submit.prevent="handleLogin"
-        >
+      <div class="max-w-lg w-full mx-auto sm:p-10 lg:p-12 rounded-lg shadow bg-white">
+        <form class="flex flex-col space-y-6 p-10" novalidate @submit.prevent="handleLogin">
           <!-- Email -->
           <div class="flex flex-col space-y-2">
             <label class="block" for="email">Email</label>
-            <input
-              id="email"
-              v-model="email"
-              type="email"
-              name="email"
-              placeholder="enter your email"
-              required
-              aria-describedby="email-error"
-              class="border border-gray-500 focus:ring-violet-500 rounded-md p-2 w-full placeholder:text-gray-500"
-            />
-            <p
-              v-if="error && errorField === 'email'"
-              id="email-error"
-              class="text-xs text-red-500 mt-1"
-            >
+            <input id="email" v-model="email" type="email" name="email" placeholder="enter your email" required aria-describedby="email-error" class="border border-gray-500 focus:ring-violet-500 rounded-md p-2 w-full placeholder:text-gray-500" />
+            <p v-if="error && errorField === 'email'" id="email-error" class="text-xs text-red-500 mt-1">
               {{ error }}
             </p>
           </div>
@@ -43,21 +20,8 @@
           <div class="flex flex-col space-y-2">
             <label class="block" for="password">Password</label>
             <div class="relative">
-              <input
-                id="password"
-                v-model="password"
-                :type="showPassword ? 'text' : 'password'"
-                name="password"
-                placeholder="enter your password"
-                required
-                aria-describedby="password-error"
-                class="border border-gray-500 focus:ring-violet-500 rounded-md p-2 pr-10 w-full placeholder:text-gray-500"
-              />
-              <button
-                type="button"
-                class="absolute inset-y-0 right-3 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-white"
-                @click="togglePasswordVisibility"
-              >
+              <input id="password" v-model="password" :type="showPassword ? 'text' : 'password'" name="password" placeholder="enter your password" required aria-describedby="password-error" class="border border-gray-500 focus:ring-violet-500 rounded-md p-2 pr-10 w-full placeholder:text-gray-500" />
+              <button type="button" class="absolute inset-y-0 right-3 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-white" @click="togglePasswordVisibility">
                 <template v-if="showPassword">
                   <!-- Eye-off Icon -->
                   <EyeIcon class="h-5 w-5" />
@@ -68,35 +32,19 @@
                 </template>
               </button>
             </div>
-            <p
-              v-if="error && errorField === 'password'"
-              id="password-error"
-              class="text-xs text-red-500 mt-1"
-            >
+            <p v-if="error && errorField === 'password'" id="password-error" class="text-xs text-red-500 mt-1">
               {{ error }}
             </p>
           </div>
 
           <!-- Forgot password -->
           <div class="flex items-center justify-end">
-            <a
-              href="/auth/forgot-password"
-              class="text-xs text-violet-500 hover:underline"
-            >
-              Forgot password?
-            </a>
+            <a href="/auth/forgot-password" class="text-xs text-violet-500 hover:underline">Forgot password?</a>
           </div>
 
           <!-- Submit button -->
           <div class="flex items-center justify-center space-x-2">
-            <button
-              :class="[
-                'flex w-full items-center justify-center py-2 px-4 text-sm font-medium rounded-lg shadow-sm text-white bg-violet-500 hover:bg-violet-600 dark:bg-teal-500 dark:hover:bg-teal-600',
-                loading ? '!bg-gray-400 cursor-not-allowed' : '',
-              ]"
-              type="submit"
-              :disabled="loading"
-            >
+            <button :class="['flex w-full items-center justify-center py-2 px-4 text-sm font-medium rounded-lg shadow-sm text-white bg-violet-500 hover:bg-violet-600 dark:bg-teal-500 dark:hover:bg-teal-600', loading ? '!bg-gray-400 cursor-not-allowed' : '']" type="submit" :disabled="loading">
               <span v-if="loading" class="loader mr-2"></span>
               {{ loading ? "Logging in..." : "Login" }}
             </button>

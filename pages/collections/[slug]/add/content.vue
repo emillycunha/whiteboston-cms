@@ -1,5 +1,5 @@
 <template>
-  <div class="px-6 py-4 space-y-6">
+  <div class="px-1 md:px-6 py-4 space-y-6">
     <PageHeader :title="`Add Item to ${collectionName}`" />
 
     <div v-if="isLoading" class="text-center">Loading collection fields...</div>
@@ -7,22 +7,16 @@
 
     <!-- No Fields Message -->
     <div v-if="!isLoading && !fields.length" class="text-center">
-      <p class="text-gray-600 dark:text-gray-200">
-        This collection currently has no fields.<br />
+      <p class="text-gray-700 dark:text-gray-200">
+        This collection currently has no fields.
+        <br />
         You can add fields to this collection by clicking
-        <a :href="editFieldsLink" class="text-violet-500 hover:underline"
-          >here</a
-        >.
+        <a :href="editFieldsLink" class="text-violet-500 hover:underline">here</a>
+        .
       </p>
     </div>
 
-    <BaseForm
-      v-if="!isLoading && fields.length"
-      :fields="fields"
-      :editable="true"
-      @submit="addContent"
-      @cancel="goBack"
-    />
+    <BaseForm v-if="!isLoading && fields.length" :fields="fields" :editable="true" @submit="addContent" @cancel="goBack" />
   </div>
 </template>
 
@@ -38,9 +32,7 @@ const notificationStore = useNotificationStore();
 const route = useRoute();
 const router = useRouter();
 const collectionSlug = route.params.slug;
-const collectionName = computed(
-  () => collectionSlug.charAt(0).toUpperCase() + collectionSlug.slice(1)
-);
+const collectionName = computed(() => collectionSlug.charAt(0).toUpperCase() + collectionSlug.slice(1));
 
 // State and Store
 const contentStore = useContentStore();
@@ -61,9 +53,7 @@ onMounted(async () => {
     value: "",
     options: field.options || [],
     isRequired: field.is_required,
-    fullRow: ["textarea", "richtextmarkdown", "richtexthtml", "image"].includes(
-      field.type
-    ),
+    fullRow: ["textarea", "richtextmarkdown", "richtexthtml", "image"].includes(field.type),
     halfRow: ["text", "select", "email"].includes(field.type),
     thirdRow: ["number", "date", "boolean"].includes(field.type),
   }));
@@ -76,10 +66,7 @@ const addContent = async () => {
   }, {});
 
   try {
-    notificationStore.showNotification(
-      "info",
-      "Adding content, please wait..."
-    );
+    notificationStore.showNotification("info", "Adding content, please wait...");
     await new Promise((resolve) => setTimeout(resolve, 2000));
     router.push(`/collections/${collectionSlug}`);
 

@@ -1,11 +1,7 @@
 <template>
   <div ref="dropdownContainer" class="relative">
     <!-- Button to trigger dropdown -->
-    <button
-      type="button"
-      class="w-full px-2 py-1 text-left flex justify-between items-center"
-      @click="toggleDropdown"
-    >
+    <button type="button" class="w-full px-2 py-1 text-left flex justify-between items-center dark:text-white" @click="toggleDropdown">
       <div class="flex-1 text-sm">
         {{ selectedOptionLabel || "Select Option" }}
       </div>
@@ -13,18 +9,9 @@
     </button>
 
     <!-- Dropdown menu -->
-    <div
-      v-if="isOpen"
-      class="absolute z-10 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 mt-2 rounded-md shadow-md"
-    >
+    <div v-if="isOpen" class="absolute z-10 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 mt-2 rounded-md shadow-md">
       <ul class="p-2 flex flex-wrap">
-        <li
-          v-for="(option, index) in options"
-          :key="index"
-          class="px-2 py-1 cursor-pointer rounded-md m-1 hover:bg-gray-300 dark:hover:bg-gray-700 flex flex-row text-sm items-center align-middle"
-          @click="selectOption(option)"
-          :class="['bg-gray-200', option.optionClass || '']"
-        >
+        <li v-for="(option, index) in options" :key="index" class="px-2 py-1 cursor-pointer rounded-md m-1 hover:bg-gray-300 dark:hover:bg-gray-700 flex flex-row text-sm items-center align-middle" @click="selectOption(option)" :class="['bg-gray-200', option.optionClass || '']">
           <div v-if="option.icon" class="mr-2">
             <component :is="option.icon" class="w-4 h-4" />
           </div>
@@ -58,9 +45,7 @@ const isOpen = ref(false);
 const selectedOption = ref(model);
 
 const selectedOptionLabel = computed(() => {
-  const selectedOptionObj = props.options.find(
-    (option) => option.value === selectedOption.value
-  );
+  const selectedOptionObj = props.options.find((option) => option.value === selectedOption.value);
   return selectedOptionObj ? selectedOptionObj.label : null;
 });
 

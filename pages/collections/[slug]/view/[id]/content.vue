@@ -1,5 +1,5 @@
 <template>
-  <div class="px-6 py-4 space-y-6">
+  <div class="px-1 md:px-6 py-4 space-y-6">
     <PageHeader
       :title="`Viewing Details`"
       :buttons="[
@@ -25,11 +25,7 @@
     <div v-if="errors" class="text-red-500">{{ errors }}</div>
 
     <!-- Reusable Form to View Item -->
-    <BaseForm
-      v-if="!isLoading && fields.length"
-      :fields="fields"
-      :editable="false"
-    />
+    <BaseForm v-if="!isLoading && fields.length" :fields="fields" :editable="false" />
   </div>
 </template>
 
@@ -61,9 +57,7 @@ onMounted(async () => {
       console.log("[View Page] Using cached content for:", collectionSlug);
     }
 
-    const item = contentStore.content[collectionSlug]?.find(
-      (entry) => entry.id === parseInt(itemId, 10)
-    );
+    const item = contentStore.content[collectionSlug]?.find((entry) => entry.id === parseInt(itemId, 10));
     if (!item) {
       throw new Error("Item not found");
     }
@@ -75,12 +69,7 @@ onMounted(async () => {
       value: item.data[field.key] || "",
       options: field.options || [],
       isRequired: field.is_required,
-      fullRow: [
-        "textarea",
-        "richtextmarkdown",
-        "richtexthtml",
-        "image",
-      ].includes(field.type),
+      fullRow: ["textarea", "richtextmarkdown", "richtexthtml", "image"].includes(field.type),
       halfRow: ["text", "select", "email"].includes(field.type),
       thirdRow: ["number", "date", "boolean"].includes(field.type),
     }));

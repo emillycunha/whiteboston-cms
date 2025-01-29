@@ -1,5 +1,5 @@
 <template>
-  <div class="px-6 py-4 space-y-6">
+  <div class="px-1 md:px-6 py-4 space-y-6">
     <!-- Page Header -->
     <PageHeader
       :title="`Adding Fields: ${collectionName}`"
@@ -26,81 +26,42 @@
     <div v-if="isLoading" class="text-center">Loading collection fields...</div>
 
     <form v-if="!isLoading" novalidate @submit.prevent="saveChanges">
-      <div
-        class="rounded-md bg-white shadow-sm border border-gray-200 dark:bg-slate-800 dark:border-slate-700 mb-6"
-      >
+      <div class="rounded-md bg-white shadow-sm border border-gray-200 dark:bg-slate-800 dark:border-slate-700 mb-6">
         <div class="p-2 sm:p-4">
           <!-- Editable Fields Table -->
           <div class="p-2 sm:p-4">
-            <div
-              class="grid grid-cols-6 gap-4 text-sm font-semibold text-gray-700 border-b border-gray-300 dark:border-gray-600 pb-2 mb-6"
-            >
+            <div class="grid grid-cols-6 gap-4 text-sm font-semibold text-gray-700 border-b border-gray-300 dark:border-gray-600 pb-2 mb-6">
               <div class="col-span-2">Field Name</div>
               <div class="col-span-2">Type</div>
               <div>Position</div>
               <div class="text-center">Required</div>
             </div>
-            <div
-              v-for="(field, index) in fields"
-              :key="field.key"
-              class="grid grid-cols-6 gap-4 items-start py-2"
-            >
+            <div v-for="(field, index) in fields" :key="field.key" class="grid grid-cols-6 gap-4 items-start py-2">
               <!-- Field Name -->
               <div class="col-span-2 mb-2">
-                <input
-                  v-model="field.name"
-                  type="text"
-                  placeholder="Field Name"
-                  required
-                  class="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm"
-                />
+                <input v-model="field.name" type="text" placeholder="Field Name" required class="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm" />
               </div>
 
               <!-- Type -->
               <div class="col-span-2 mb-2">
-                <CustomSelect
-                  v-model="field.type"
-                  :options="fieldOptions"
-                  required
-                  class="w-full border border-gray-300 dark:border-gray-600 rounded-md px-2 py-1 text-sm"
-                />
+                <CustomSelect v-model="field.type" :options="fieldOptions" required class="w-full border border-gray-300 dark:border-gray-600 rounded-md px-2 py-1 text-sm" />
 
-                <textarea
-                  v-if="field.type === 'select'"
-                  v-model="field.optionsString"
-                  placeholder="Comma-separated values"
-                  class="mt-2 w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm"
-                ></textarea>
+                <textarea v-if="field.type === 'select'" v-model="field.optionsString" placeholder="Comma-separated values" class="mt-2 w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm"></textarea>
               </div>
 
               <!-- Position -->
               <div class="mb-2">
-                <input
-                  v-model="field.position"
-                  type="number"
-                  placeholder="Position"
-                  class="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm"
-                />
+                <input v-model="field.position" type="number" placeholder="Position" class="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm" />
               </div>
 
               <!-- Required -->
               <div class="flex items-center justify-center space-x-2">
-                <input
-                  v-model="field.is_required"
-                  type="checkbox"
-                  class="h-4 w-4 accent-violet-500 dark:accent-teal-500"
-                />
+                <input v-model="field.is_required" type="checkbox" class="h-4 w-4 accent-violet-500 dark:accent-teal-500" />
               </div>
             </div>
 
             <!-- Add Field Button -->
-            <button
-              type="button"
-              class="mt-2 ml-3 px-3 py-1 bg-violet-500 text-white text-sm rounded-md"
-              @click="addField"
-            >
-              Add New Field -- DELETE THIS BUTTON
-            </button>
+            <button type="button" class="mt-2 ml-3 px-3 py-1 bg-violet-500 text-white text-sm rounded-md" @click="addField">Add New Field -- DELETE THIS BUTTON</button>
             <!-- Error -->
             <div>
               <div v-if="errors.length" class="mt-4 p-2 text-red-500 text-sm">
@@ -141,31 +102,14 @@ import { ref, computed, onMounted, watch } from "vue";
 import { useRoute } from "vue-router";
 import { useFieldsStore } from "~/stores/fields";
 
-import {
-  XCircleIcon,
-  CheckCircleIcon,
-  DocumentTextIcon,
-  BoldIcon,
-  HashtagIcon,
-  CalendarIcon,
-  QueueListIcon,
-  StopIcon,
-  PencilSquareIcon,
-  EnvelopeIcon,
-  PhoneIcon,
-  PhotoIcon,
-  PlusIcon,
-  Cog6ToothIcon,
-} from "@heroicons/vue/24/outline";
+import { XCircleIcon, CheckCircleIcon, DocumentTextIcon, BoldIcon, HashtagIcon, CalendarIcon, QueueListIcon, StopIcon, PencilSquareIcon, EnvelopeIcon, PhoneIcon, PhotoIcon, PlusIcon, Cog6ToothIcon } from "@heroicons/vue/24/outline";
 
 const notificationStore = useNotificationStore();
 
 const route = useRoute();
 const fieldsStore = useFieldsStore();
 const collectionSlug = route.params.slug;
-const collectionName = computed(
-  () => collectionSlug.charAt(0).toUpperCase() + collectionSlug.slice(1)
-);
+const collectionName = computed(() => collectionSlug.charAt(0).toUpperCase() + collectionSlug.slice(1));
 
 const isLoading = computed(() => fieldsStore.isLoading);
 const errors = ref([]);
@@ -233,8 +177,7 @@ const saveChanges = async () => {
   errors.value = "";
 
   if (fieldsHaveInvalidNames()) {
-    errors.value =
-      "Please rename all fields with the default name ('New Field') before saving.";
+    errors.value = "Please rename all fields with the default name ('New Field') before saving.";
     showErrorNotification(errors.value);
     return;
   }
@@ -271,19 +214,13 @@ const splitFields = (fields) => {
 
   const updatedNewFields = newFields.map((field) => ({
     ...field,
-    options:
-      field.type === "select" && field.optionsString
-        ? handleOptions(field.optionsString)
-        : [],
+    options: field.type === "select" && field.optionsString ? handleOptions(field.optionsString) : [],
   }));
 
   return {
     updatedFields: existingFields.map((field) => ({
       ...field,
-      options:
-        field.type === "select" && field.optionsString
-          ? handleOptions(field.optionsString)
-          : field.options,
+      options: field.type === "select" && field.optionsString ? handleOptions(field.optionsString) : field.options,
     })),
     newFieldsToInsert: updatedNewFields,
   };
@@ -332,10 +269,7 @@ const insertNewFields = async (fields) => {
       };
     });
 
-    const insertSuccess = await fieldsStore.addNewCollectionFields(
-      collectionSlug,
-      fieldsToInsert
-    );
+    const insertSuccess = await fieldsStore.addNewCollectionFields(collectionSlug, fieldsToInsert);
 
     return insertSuccess;
   } catch (err) {

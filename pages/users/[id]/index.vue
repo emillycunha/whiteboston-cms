@@ -1,17 +1,10 @@
 <template>
-  <div class="px-6 py-4 space-y-6">
+  <div class="px-1 md:px-6 py-4 space-y-6">
     <!-- Page Header -->
     <PageHeader title="Profile" />
 
     <!-- Form for Profile -->
-    <BaseForm
-      :fields="fields"
-      :editable="editable"
-      @submit="saveUser"
-      @cancel="cancelEdit"
-      @back="goBack"
-      @editable="enableEdit"
-    />
+    <BaseForm :fields="fields" :editable="editable" @submit="saveUser" @cancel="cancelEdit" @back="goBack" @editable="enableEdit" />
   </div>
 </template>
 
