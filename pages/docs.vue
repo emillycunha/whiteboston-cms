@@ -7,7 +7,7 @@
 -->
 
 <template>
-  <div class="px-6 py-4 space-y-6">
+  <div class="px-1 md:px-6 py-4 space-y-6">
     <!-- Page Header -->
     <PageHeader :title="`Adding Fields: ${collectionName}`" />
 
@@ -15,74 +15,36 @@
     <div v-if="error" class="text-red-500">{{ error }}</div>
 
     <form v-if="!isLoading" novalidate @submit.prevent="saveChanges">
-      <div
-        class="rounded-md bg-white shadow-sm border border-gray-200 dark:bg-slate-800 dark:border-slate-700 mb-6"
-      >
+      <div class="rounded-md bg-white shadow-sm border border-gray-200 dark:bg-slate-800 dark:border-slate-700 mb-6">
         <div class="p-2 sm:p-4">
           <!-- Editable Fields Table -->
           <div class="p-2 sm:p-4">
             <div>
               <table class="w-full text-base table-auto">
                 <thead>
-                  <tr
-                    class="text-left text-gray-700 dark:bg-slate-900 dark:text-white border-b border-gray-200 dark:border-slate-700"
-                  >
-                    <th
-                      v-for="column in columns"
-                      :key="column.field"
-                      class="px-4 py-2 text-left text-sm font-semibold"
-                    >
+                  <tr class="text-left text-gray-700 dark:bg-slate-900 dark:text-white border-b border-gray-200 dark:border-slate-700">
+                    <th v-for="column in columns" :key="column.field" class="px-4 py-2 text-left text-sm font-semibold">
                       {{ column.label }}
                     </th>
                   </tr>
                 </thead>
-                <tbody class="text-sm text-gray-600 dark:text-gray-100">
+                <tbody class="text-sm text-gray-700 dark:text-gray-100">
                   <tr v-for="(field, index) in fields" :key="field.key">
-                    <td
-                      v-for="column in columns"
-                      :key="column.field"
-                      class="px-4 py-2"
-                    >
+                    <td v-for="column in columns" :key="column.field" class="px-4 py-2">
                       <template v-if="column.type === 'text'">
-                        <input
-                          v-model="field[column.field]"
-                          type="text"
-                          class="w-full border border-gray-300 dark:border-gray-600 rounded-md px-2 py-1"
-                        />
+                        <input v-model="field[column.field]" type="text" class="w-full border border-gray-300 dark:border-gray-600 rounded-md px-2 py-1" />
                       </template>
                       <template v-if="column.type === 'select'">
-                        <CustomSelect
-                          v-model="field[column.field]"
-                          :options="fieldOptions"
-                          class="w-full border border-gray-300 dark:border-gray-600 rounded-md px-2 py-1"
-                        />
+                        <CustomSelect v-model="field[column.field]" :options="fieldOptions" class="w-full border border-gray-300 dark:border-gray-600 rounded-md px-2 py-1" />
                       </template>
-                      <template
-                        v-if="
-                          column.field === 'options' && field.type === 'select'
-                        "
-                      >
-                        <textarea
-                          v-if="field[column.field]"
-                          v-model="optionsString"
-                          placeholder="Comma-separated values"
-                          class="w-full border border-gray-300 dark:border-gray-600 rounded-md px-2 py-1"
-                        >
-                        </textarea>
+                      <template v-if="column.field === 'options' && field.type === 'select'">
+                        <textarea v-if="field[column.field]" v-model="optionsString" placeholder="Comma-separated values" class="w-full border border-gray-300 dark:border-gray-600 rounded-md px-2 py-1"></textarea>
                       </template>
                       <template v-if="column.type === 'number'">
-                        <input
-                          v-model="field[column.field]"
-                          type="number"
-                          class="w-full border border-gray-300 dark:border-gray-600 rounded-md px-2 py-1"
-                        />
+                        <input v-model="field[column.field]" type="number" class="w-full border border-gray-300 dark:border-gray-600 rounded-md px-2 py-1" />
                       </template>
                       <template v-if="column.type === 'checkbox'">
-                        <input
-                          v-model="field[column.field]"
-                          type="checkbox"
-                          class="h-4 w-4 text-violet-500 border-gray-500 rounded focus:ring-violet-500 dark:focus:ring-teal-500 dark:text-teal-500"
-                        />
+                        <input v-model="field[column.field]" type="checkbox" class="h-4 w-4 text-violet-500 border-gray-500 rounded focus:ring-violet-500 dark:focus:ring-teal-500 dark:text-teal-500" />
                       </template>
                     </td>
                   </tr>
@@ -91,13 +53,7 @@
             </div>
 
             <!-- Add Field Button -->
-            <button
-              type="button"
-              class="mt-2 ml-3 px-3 py-1 bg-violet-500 text-white text-sm rounded-md"
-              @click="addField"
-            >
-              Add New Field
-            </button>
+            <button type="button" class="mt-2 ml-3 px-3 py-1 bg-violet-500 text-white text-sm rounded-md" @click="addField">Add New Field</button>
             <!-- Error and Success Messages -->
             <div>
               <div v-if="errors.length" class="mt-4 p-2 text-red-500 text-sm">
@@ -138,20 +94,7 @@ import { ref, computed, onMounted, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useFieldsStore } from "~/stores/fields";
 
-import {
-  XCircleIcon,
-  CheckCircleIcon,
-  DocumentTextIcon,
-  BoldIcon,
-  HashtagIcon,
-  CalendarIcon,
-  QueueListIcon,
-  StopIcon,
-  PencilSquareIcon,
-  EnvelopeIcon,
-  PhoneIcon,
-  PhotoIcon,
-} from "@heroicons/vue/24/outline";
+import { XCircleIcon, CheckCircleIcon, DocumentTextIcon, BoldIcon, HashtagIcon, CalendarIcon, QueueListIcon, StopIcon, PencilSquareIcon, EnvelopeIcon, PhoneIcon, PhotoIcon } from "@heroicons/vue/24/outline";
 
 const notificationStore = useNotificationStore();
 
@@ -175,9 +118,7 @@ const columns = ref([
 const isLoading = computed(() => fieldsStore.isLoading);
 const errors = ref([]);
 const error = computed(() => fieldsStore.error);
-const collectionName = computed(
-  () => collectionSlug.charAt(0).toUpperCase() + collectionSlug.slice(1)
-);
+const collectionName = computed(() => collectionSlug.charAt(0).toUpperCase() + collectionSlug.slice(1));
 
 // Editable Fields
 const fields = ref([]);
@@ -204,9 +145,7 @@ const fieldOptions = [
 
 // Compute optionsString dynamically for any field of type 'textarea' or 'select'
 const optionsString = computed(() => {
-  const targetFields = fieldsStore.fields.filter(
-    (field) => field.type === "textarea" || field.type === "select"
-  );
+  const targetFields = fieldsStore.fields.filter((field) => field.type === "textarea" || field.type === "select");
 
   // Create a string for each field options
   return targetFields
@@ -263,9 +202,7 @@ const saveChanges = async () => {
   errors.value = "";
 
   if (hasInvalidFieldNames()) {
-    handleError(
-      "Please rename all fields with the default name ('New Field') before saving."
-    );
+    handleError("Please rename all fields with the default name ('New Field') before saving.");
     return;
   }
 
@@ -300,9 +237,7 @@ const handleError = (message) => {
 };
 
 const hasInvalidFieldNames = () => {
-  return fields.value.some(
-    (field) => field.name === "New Field" || field.name.trim() === ""
-  );
+  return fields.value.some((field) => field.name === "New Field" || field.name.trim() === "");
 };
 
 const splitFields = (fields) => {
@@ -338,10 +273,7 @@ const updateExistingFields = async (fields) => {
   try {
     console.log("Updating fields:", fields); // Log fields to be updated
 
-    const { error } = await fieldsStore.updateCollectionFields(
-      collectionSlug,
-      fields
-    );
+    const { error } = await fieldsStore.updateCollectionFields(collectionSlug, fields);
     if (error) throw error;
     return true;
   } catch (err) {
@@ -365,10 +297,7 @@ const insertNewFields = async (fields) => {
 
     console.log("Fields to insert without 'key' for DB:", fieldsToInsert);
 
-    const insertSuccess = await fieldsStore.addNewCollectionFields(
-      collectionSlug,
-      fieldsToInsert
-    );
+    const insertSuccess = await fieldsStore.addNewCollectionFields(collectionSlug, fieldsToInsert);
 
     if (insertSuccess) {
       console.log("New fields added successfully!");
@@ -385,9 +314,7 @@ const insertNewFields = async (fields) => {
 };
 
 const showSuccessNotification = (messages) => {
-  const finalMessage = messages.length
-    ? messages.join(" ")
-    : "Fields updated successfully.";
+  const finalMessage = messages.length ? messages.join(" ") : "Fields updated successfully.";
   notificationStore.showNotification("success", finalMessage);
 };
 

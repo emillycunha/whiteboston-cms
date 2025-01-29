@@ -1,13 +1,8 @@
 <template>
-  <div class="px-6 py-4 space-y-6">
+  <div class="px-1 md:px-6 py-4 space-y-6">
     <PageHeader title="Submit a Ticket" />
 
-    <BaseForm
-      :fields="fields"
-      :editable="editable"
-      @submit="submitTicket"
-      @cancel="goBack"
-    />
+    <BaseForm :fields="fields" :editable="editable" @submit="submitTicket" @cancel="goBack" />
   </div>
 </template>
 
@@ -85,17 +80,11 @@ const submitTicket = async () => {
     const { data, error } = await $supabase.from("tickets").insert(ticketData);
 
     if (error) {
-      notificationStore.showNotification(
-        "error",
-        "Failed to submit the ticket. Please try again."
-      );
+      notificationStore.showNotification("error", "Failed to submit the ticket. Please try again.");
       return;
     }
 
-    notificationStore.showNotification(
-      "success",
-      "Ticket submitted successfully!"
-    );
+    notificationStore.showNotification("success", "Ticket submitted successfully!");
 
     fields.value.forEach((field) => {
       if (field.type !== "select" && !field.attrs?.required) {
@@ -106,10 +95,7 @@ const submitTicket = async () => {
     isEditing.value = false;
   } catch (err) {
     console.error("Unexpected error:", err);
-    notificationStore.showNotification(
-      "error",
-      "An unexpected error occurred. Please try again."
-    );
+    notificationStore.showNotification("error", "An unexpected error occurred. Please try again.");
   }
 };
 

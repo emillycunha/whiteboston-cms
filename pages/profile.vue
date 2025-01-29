@@ -1,23 +1,37 @@
 <template>
-  <div class="px-6 py-4 space-y-6">
+  <div class="px-1 md:px-6 py-4 space-y-6">
     <!-- Page Header -->
-    <PageHeader title="Profile" />
+    <PageHeader v-if="editable === true" title="Profile" />
+    <PageHeader
+      v-if="editable === false"
+      title="Profile"
+      :buttons="[
+        {
+          label: 'Back',
+          icon: ChevronLeftIcon,
+          iconPosition: 'before',
+          variant: 'secondary',
+          onClick: goBack,
+        },
+        {
+          label: 'Edit',
+          icon: PencilSquareIcon,
+          iconPosition: 'after',
+          variant: 'primary',
+          onClick: enableEdit,
+        },
+      ]"
+    />
 
     <!-- Form for Profile -->
-    <BaseForm
-      :fields="fields"
-      :editable="editable"
-      @submit="saveProfile"
-      @cancel="cancelEdit"
-      @back="goBack"
-      @editable="enableEdit"
-    />
+    <BaseForm :fields="fields" :editable="editable" @submit="saveProfile" @cancel="cancelEdit" @back="goBack" @editable="enableEdit" />
   </div>
 </template>
 
 <script setup>
 import { ref, onMounted } from "vue";
 import { useAuthStore } from "~/stores/auth";
+import { ChevronLeftIcon, PencilSquareIcon } from "@heroicons/vue/24/outline";
 
 const authStore = useAuthStore();
 const editable = ref(false);
@@ -86,9 +100,7 @@ const enableEdit = () => {
 async function saveProfile() {
   const newName = fields.value.find((field) => field.key === "name").value;
   const newEmail = fields.value.find((field) => field.key === "email").value;
-  const newPassword = fields.value.find(
-    (field) => field.key === "password"
-  ).value;
+  const newPassword = fields.value.find((field) => field.key === "password").value;
 
   const updatedFields = {};
 
@@ -115,10 +127,7 @@ async function saveProfile() {
 
     // Show success notification
     const notificationStore = useNotificationStore();
-    notificationStore.showNotification(
-      "success",
-      "Profile updated successfully!"
-    );
+    notificationStore.showNotification("success", "Profile updated successfully!");
 
     editable.value = false;
   } else {

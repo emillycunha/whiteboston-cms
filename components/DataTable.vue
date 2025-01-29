@@ -1,33 +1,16 @@
 <template>
-  <div
-    class="rounded-md bg-white shadow-sm border border-gray-200 dark:bg-slate-800 dark:border-slate-700"
-  >
+  <div class="rounded-md bg-white shadow-sm border border-gray-200 dark:bg-slate-800 dark:border-slate-700">
     <div class="p-2 sm:p-4">
       <table class="w-full text-sm table-auto">
         <thead>
-          <tr
-            class="bg-gray-100 text-left text-gray-700 dark:bg-slate-900 dark:text-white text-sm whitespace-nowrap"
-          >
+          <tr class="bg-gray-100 text-left text-gray-700 dark:bg-slate-900 dark:text-white text-sm whitespace-nowrap hidden md:table-row">
             <th v-if="enableCheckbox" class="px-4 py-2 w-8">
-              <input
-                type="checkbox"
-                :checked="allSelected"
-                class="h-4 w-4 accent-violet-500 dark:accent-teal-500"
-                @change="toggleAll"
-              />
+              <input type="checkbox" :checked="allSelected" class="h-4 w-4 accent-violet-500 dark:accent-teal-500" @change="toggleAll" />
             </th>
-            <th
-              v-for="column in columns"
-              :key="column.key"
-              class="px-4 py-2 cursor-pointer"
-              @click="handleSort(column.key)"
-            >
+            <th v-for="column in columns" :key="column.key" class="px-4 py-2 cursor-pointer" @click="handleSort(column.key)">
               {{ column.label }}
               <span v-if="activeSortKey === column.key">
-                <BarsArrowUpIcon
-                  v-if="activeSortOrder === 'asc'"
-                  class="w-4 h-4 inline-block"
-                />
+                <BarsArrowUpIcon v-if="activeSortOrder === 'asc'" class="w-4 h-4 inline-block" />
                 <BarsArrowDownIcon v-else class="w-4 h-4 inline-block" />
               </span>
             </th>
@@ -35,56 +18,21 @@
           </tr>
         </thead>
         <tbody class="text-sm text-gray-700 dark:text-gray-100">
-          <tr
-            v-for="row in paginatedAndSortedData"
-            :key="row.id"
-            class="even:bg-gray-50 dark:even:bg-slate-700"
-          >
-            <td v-if="enableCheckbox" class="px-4 py-4">
-              <input
-                type="checkbox"
-                :value="row.id"
-                :checked="selectedRows.includes(row.id)"
-                class="h-4 w-4 accent-violet-500 dark:accent-teal-500"
-                @change="toggleRow(row.id)"
-              />
+          <tr v-for="row in paginatedAndSortedData" :key="row.id" class="even:bg-gray-100 dark:even:bg-slate-700">
+            <td v-if="enableCheckbox" class="p-2 md:p-4 md:table-cell flex">
+              <input type="checkbox" :value="row.id" :checked="selectedRows.includes(row.id)" class="h-4 w-4 accent-violet-500 dark:accent-teal-500" @change="toggleRow(row.id)" />
             </td>
-            <td
-              v-for="column in columns"
-              :key="column.key"
-              class="px-4 py-4 has-checked:text-violet-500"
-            >
-              {{
-                column.formatter
-                  ? truncateText(column.formatter(row[column.key]))
-                  : truncateText(row[column.key])
-              }}
+            <td v-for="column in columns" :key="column.key" class="p-2 md:p-4 has-checked:text-violet-500 md:table-cell flex">
+              <span class="font-semibold pr-2 md:hidden">{{ column.label }}:</span>
+              {{ column.formatter ? truncateText(column.formatter(row[column.key])) : truncateText(row[column.key]) }}
             </td>
-            <td v-if="actionType !== 'none'" class="px-4 py-2">
-              <button
-                v-if="actionType === 'view' || actionType === 'both'"
-                class="px-3 py-1 font-semibold text-violet-600 dark:text-teal-500"
-                @click="onView(row)"
-              >
-                View
-              </button>
-              <button
-                v-if="actionType === 'edit' || actionType === 'both'"
-                class="px-3 py-1 font-semibold text-violet-600 dark:text-teal-500"
-                @click="onEdit(row)"
-              >
-                Edit
-              </button>
+            <td v-if="actionType !== 'none'" class="px-2 md:px-4 py-2 md:table-cell flex flex-row justify-end">
+              <button v-if="actionType === 'view' || actionType === 'both'" class="px-3 py-1 font-semibold text-violet-600 dark:text-teal-500" @click="onView(row)">View</button>
+              <button v-if="actionType === 'edit' || actionType === 'both'" class="px-3 py-1 font-semibold text-violet-600 dark:text-teal-500" @click="onEdit(row)">Edit</button>
             </td>
           </tr>
-          <tr
-            v-if="
-              !paginatedAndSortedData || paginatedAndSortedData.length === 0
-            "
-          >
-            <td :colspan="columns.length" class="text-center py-4">
-              No data available.
-            </td>
+          <tr v-if="!paginatedAndSortedData || paginatedAndSortedData.length === 0">
+            <td :colspan="columns.length" class="text-center py-4">No data available.</td>
           </tr>
         </tbody>
       </table>
@@ -93,23 +41,9 @@
 
   <!-- Pagination -->
   <div class="flex justify-between items-center px-2">
-    <button
-      class="px-4 py-2 text-sm text-violet-500 dark:text-teal-500 disabled:text-gray-500 dark:disabled:text-gray-300"
-      :disabled="currentPage === 1"
-      @click="prevPage"
-    >
-      Previous
-    </button>
-    <span class="text-sm text-gray-600 dark:text-gray-200">
-      Page {{ currentPage }} of {{ totalPages }}
-    </span>
-    <button
-      class="px-4 py-2 text-sm text-violet-500 dark:text-teal-500 disabled:text-gray-500 dark:disabled:text-gray-300"
-      :disabled="currentPage === totalPages"
-      @click="nextPage"
-    >
-      Next
-    </button>
+    <button class="px-4 py-2 text-sm text-violet-500 dark:text-teal-500 disabled:text-gray-500 dark:disabled:text-gray-300" :disabled="currentPage === 1" @click="prevPage">Previous</button>
+    <span class="text-sm text-gray-700 dark:text-gray-200">Page {{ currentPage }} of {{ totalPages }}</span>
+    <button class="px-4 py-2 text-sm text-violet-500 dark:text-teal-500 disabled:text-gray-500 dark:disabled:text-gray-300" :disabled="currentPage === totalPages" @click="nextPage">Next</button>
   </div>
 </template>
 
@@ -157,12 +91,7 @@ const totalPages = computed(() => {
 });
 
 const allSelected = computed(() => {
-  return (
-    paginatedAndSortedData.value.length > 0 &&
-    paginatedAndSortedData.value.every((row) =>
-      selectedRows.value.includes(row.id)
-    )
-  );
+  return paginatedAndSortedData.value.length > 0 && paginatedAndSortedData.value.every((row) => selectedRows.value.includes(row.id));
 });
 
 const paginatedAndSortedData = computed(() => {

@@ -1,5 +1,5 @@
 <template>
-  <h2 class="text-gray-700 text-xl">
+  <h2 class="text-gray-700 dark:text-white text-xl">
     {{ greeting }},
     <span v-if="isHydrated">{{ name }}</span>
     <span v-else></span>

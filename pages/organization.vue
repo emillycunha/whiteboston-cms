@@ -1,8 +1,8 @@
 <template>
-  <div class="px-6 py-4 space-y-6">
+  <div class="px-1 md:px-1 md:px-6 py-4 space-y-6">
     <!-- Header Section -->
     <PageHeader
-      title="Organizations"
+      title="Organization"
       :buttons="[
         {
           label: 'Settings',
@@ -28,20 +28,10 @@
     <div v-if="error" class="text-red-500">{{ error }}</div>
 
     <!-- List of Users -->
-    <DataTable
-      v-if="!isLoading && !error && users.length"
-      :data="users"
-      :columns="columns"
-      :rowsPerPage="5"
-      :actionType="'both'"
-      @view="handleView"
-      @edit="handleEdit"
-    />
+    <DataTable v-if="!isLoading && !error && users.length" :data="users" :columns="columns" :rowsPerPage="5" :actionType="'both'" @view="handleView" @edit="handleEdit" />
 
     <!-- Empty State -->
-    <div v-else-if="!isLoading && !error && !users.length" class="text-center">
-      No users found.
-    </div>
+    <div v-else-if="!isLoading && !error && !users.length" class="text-center">No users found.</div>
   </div>
 </template>
 

@@ -1,5 +1,5 @@
 <template>
-  <div class="px-6 py-4 space-y-6">
+  <div class="px-1 md:px-6 py-4 space-y-6">
     <!-- Page Header -->
     <PageHeader
       :title="`Editing: ${collectionName}`"
@@ -26,12 +26,7 @@
     <div v-if="isLoading" class="text-center">Loading collection fields...</div>
     <div v-if="errors" class="text-red-500">{{ errors }}</div>
 
-    <BaseForm
-      :fields="fields"
-      :editable="editable"
-      @submit="saveChanges"
-      @back="goBack"
-    />
+    <BaseForm :fields="fields" :editable="editable" @submit="saveChanges" @back="goBack" />
   </div>
 </template>
 
@@ -60,9 +55,7 @@ const collection = ref({
 
 const isLoading = computed(() => collectionsStore.isLoading);
 const errors = ref();
-const collectionName = computed(
-  () => collectionSlug.charAt(0).toUpperCase() + collectionSlug.slice(1)
-);
+const collectionName = computed(() => collectionSlug.charAt(0).toUpperCase() + collectionSlug.slice(1));
 
 const fields = ref([]);
 let originalSlug = "";
@@ -70,9 +63,7 @@ const editable = ref(true);
 
 onMounted(async () => {
   try {
-    const collectionData = await collectionsStore.fetchCollectionById(
-      collectionId
-    );
+    const collectionData = await collectionsStore.fetchCollectionById(collectionId);
 
     if (collectionData) {
       const editableFields = [
@@ -102,10 +93,7 @@ onMounted(async () => {
 
       fields.value = editableFields.map((field) => ({
         ...field,
-        value:
-          collectionData[field.key] !== undefined
-            ? collectionData[field.key]
-            : "",
+        value: collectionData[field.key] !== undefined ? collectionData[field.key] : "",
       }));
     }
   } catch (err) {
@@ -117,12 +105,9 @@ const saveChanges = async () => {
   errors.value = "";
 
   if (collection.value.slug !== originalSlug) {
-    const slugExists = await collectionsStore.checkSlugExists(
-      collection.value.slug
-    );
+    const slugExists = await collectionsStore.checkSlugExists(collection.value.slug);
     if (slugExists) {
-      errors.value =
-        "The slug is already in use by another collection. Please choose a different one.";
+      errors.value = "The slug is already in use by another collection. Please choose a different one.";
       notificationStore.showNotification("error", errors.value);
       return;
     }
@@ -143,9 +128,7 @@ const saveChanges = async () => {
     if (metadataError) throw metadataError;
     messages.push("Collection metadata updated successfully.");
 
-    const finalMessage = messages.length
-      ? messages.join(" ")
-      : "Collection updated successfully.";
+    const finalMessage = messages.length ? messages.join(" ") : "Collection updated successfully.";
     notificationStore.showNotification("success", finalMessage);
 
     router.push(`/collections`);

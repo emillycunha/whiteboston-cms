@@ -1,31 +1,19 @@
 <template>
-  <section class="bg-white shadow rounded-md overflow-hidden h-full p-4">
+  <section class="bg-white dark:bg-slate-800 shadow rounded-md overflow-hidden h-full p-4">
     <div>
-      <h2 class="mx-4 py-2 border-b border-gray-200 font-bold text-gray-800">
-        Recent {{ collectionName }}
-      </h2>
+      <h2 class="mx-4 py-2 border-b border-gray-200 font-bold text-gray-700 dark:text-white">Recent {{ collectionName }}</h2>
       <ul v-if="latestContent.length > 0" class="mt-2 p-4 space-y-8">
-        <li
-          v-for="item in latestContent"
-          :key="item.id"
-          class="text-sm text-gray-800"
-        >
+        <li v-for="item in latestContent" :key="item.id" class="text-sm text-gray-700 dark:text-white">
           <div class="flex items-top">
             <div class="mr-4 bg-teal-500 rounded-lg p-2 flex items-center">
-              <component
-                :is="getIcon(collectionSlug)"
-                class="size-6 text-white"
-                aria-hidden="true"
-              />
+              <component :is="getIcon(collectionSlug)" class="size-6 text-white" aria-hidden="true" />
             </div>
             <div class="flex flex-col wrap">
               <!-- Dynamically Render Top 2 Fields -->
               <template v-for="(field, index) in topFields">
-                <span class="font-semibold" v-if="index === 0"
-                  >{{ extractField(item, field) || "Untitled" }} |
-                  <span class="text-xs text-teal-500">{{
-                    formatDate(item.created_at)
-                  }}</span>
+                <span class="font-semibold" v-if="index === 0">
+                  {{ extractField(item, field) || "Untitled" }} |
+                  <span class="text-xs text-teal-500">{{ formatDate(item.created_at) }}</span>
                 </span>
                 <span v-else>{{ extractField(item, field) || "N/A" }}</span>
               </template>
@@ -34,10 +22,7 @@
         </li>
       </ul>
       <!-- No Collections Note -->
-      <div
-        v-else
-        class="mt-4 p-4 rounded-md text-center text-gray-600 dark:text-gray-300"
-      >
+      <div v-else class="mt-4 p-4 rounded-md text-center text-gray-700 dark:text-gray-300">
         <p>No data available.</p>
       </div>
     </div>
@@ -55,9 +40,7 @@ const fields = ref([]);
 const topFields = ref([]);
 const collectionSlug = ref("");
 const collectionName = computed(() => {
-  return (
-    collectionSlug.value.charAt(0).toUpperCase() + collectionSlug.value.slice(1)
-  );
+  return collectionSlug.value.charAt(0).toUpperCase() + collectionSlug.value.slice(1);
 });
 
 // Fetch content on mount

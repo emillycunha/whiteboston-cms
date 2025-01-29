@@ -1,5 +1,5 @@
 <template>
-  <div class="px-6 py-4 space-y-6">
+  <div class="px-1 md:px-6 py-4 space-y-6">
     <!-- Header Section -->
     <PageHeader
       :title="`${collectionName}`"
@@ -31,20 +31,10 @@
     <div v-else-if="error" class="text-red-500">{{ error }}</div>
 
     <!-- Reusable Table -->
-    <DataTable
-      v-else-if="!isLoading && !error && content.length"
-      :data="tableData"
-      :columns="fields"
-      :enableCheckbox="true"
-      :actionType="'both'"
-      :rowsPerPage="10"
-      @view="handleView"
-      @edit="handleEdit"
-      @selection-change="updateSelectedItems"
-    />
+    <DataTable v-else-if="!isLoading && !error && content.length" :data="tableData" :columns="fields" :enableCheckbox="true" :actionType="'both'" :rowsPerPage="10" @view="handleView" @edit="handleEdit" @selection-change="updateSelectedItems" />
 
     <!-- Empty State -->
-    <div v-else class="text-center text-gray-600 dark:text-gray-300">
+    <div v-else class="text-center text-gray-700 dark:text-gray-300">
       <p>No data found for this collection.</p>
       <p>
         Add content by clicking
@@ -64,9 +54,7 @@ import { ArrowDownTrayIcon, PlusIcon } from "@heroicons/vue/24/outline";
 // Dynamic Route Params
 const route = useRoute();
 const collectionSlug = route.params.slug;
-const collectionName = computed(
-  () => collectionSlug.charAt(0).toUpperCase() + collectionSlug.slice(1)
-);
+const collectionName = computed(() => collectionSlug.charAt(0).toUpperCase() + collectionSlug.slice(1));
 
 // Content Store
 const contentStore = useContentStore();
@@ -95,10 +83,9 @@ const selectedItems = ref([]);
 
 const fields = computed(() => {
   return allFields.value
-    .filter(
-      (field) => typeof field.position === "number" && field.position >= 0
-    )
-    .sort((a, b) => a.position - b.position);
+    .filter((field) => typeof field.position === "number" && field.position >= 0)
+    .sort((a, b) => a.position - b.position)
+    .slice(0, 4);
 });
 
 onMounted(async () => {
@@ -107,9 +94,7 @@ onMounted(async () => {
       if (!contentStore.content[collectionSlug]) {
         console.log("[Content Page] Fetching content and fields...");
         await contentStore.fetchContentAndFields(collectionSlug);
-        console.log(
-          `[Content Page] Content and Fields loaded for: ${collectionSlug}`
-        );
+        console.log(`[Content Page] Content and Fields loaded for: ${collectionSlug}`);
       } else {
         console.log("[Content Page] Using cached content for:", collectionSlug);
       }
@@ -167,10 +152,7 @@ const exportSelectedToCSV = () => {
   });
 
   // Generate CSV Content
-  const csvContent = [
-    headers.join(","),
-    ...rows.map((row) => row.join(",")),
-  ].join("\n");
+  const csvContent = [headers.join(","), ...rows.map((row) => row.join(","))].join("\n");
 
   // Trigger Download
   const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });

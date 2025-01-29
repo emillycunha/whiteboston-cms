@@ -1,5 +1,5 @@
 <template>
-  <div class="px-6 py-4 space-y-6">
+  <div class="px-1 md:px-6 py-4 space-y-6">
     <!-- Header Section -->
     <PageHeader :title="`Editing`" />
 
@@ -7,13 +7,7 @@
     <div v-if="errors" class="text-red-500">{{ errors }}</div>
 
     <!-- Custom Form -->
-    <BaseForm
-      v-if="!isLoading && fields.length"
-      :fields="fields"
-      :editable="editable"
-      @submit="saveChanges"
-      @cancel="cancelEdit"
-    />
+    <BaseForm v-if="!isLoading && fields.length" :fields="fields" :editable="editable" @submit="saveChanges" @cancel="cancelEdit" />
   </div>
 </template>
 
@@ -45,9 +39,7 @@ onMounted(async () => {
   try {
     await contentStore.fetchContentAndFields(collectionSlug);
 
-    const item = content.value.find(
-      (entry) => entry.id === parseInt(itemId, 10)
-    );
+    const item = content.value.find((entry) => entry.id === parseInt(itemId, 10));
     if (!item) {
       throw new Error("Item not found");
     }
@@ -59,12 +51,7 @@ onMounted(async () => {
       value: item.data[field.key] || "",
       options: field.options || [],
       isRequired: field.is_required,
-      fullRow: [
-        "textarea",
-        "richtextmarkdown",
-        "richtexthtml",
-        "image",
-      ].includes(field.type),
+      fullRow: ["textarea", "richtextmarkdown", "richtexthtml", "image"].includes(field.type),
       halfRow: ["text", "select", "email"].includes(field.type),
       thirdRow: ["number", "date", "boolean"].includes(field.type),
     }));
@@ -82,10 +69,7 @@ const saveChanges = async () => {
   }, {});
 
   try {
-    notificationStore.showNotification(
-      "info",
-      "Saving changes, please wait..."
-    );
+    notificationStore.showNotification("info", "Saving changes, please wait...");
     await new Promise((resolve) => setTimeout(resolve, 2000));
 
     router.push(`/collections/${collectionSlug}/view/${itemId}/content`);

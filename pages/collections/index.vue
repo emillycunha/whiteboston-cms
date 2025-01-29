@@ -1,5 +1,5 @@
 <template>
-  <div class="px-6 py-4 space-y-6">
+  <div class="px-1 md:px-6 py-4 space-y-6">
     <!-- Header Section -->
     <PageHeader
       title="Collections"
@@ -30,24 +30,11 @@
     <div v-else-if="error" class="text-red-500">{{ error }}</div>
 
     <!-- List of Collections -->
-    <DataTable
-      v-else-if="!isLoading && !error && collections.length"
-      :data="collections"
-      :columns="columns"
-      :rowsPerPage="5"
-      :actionType="'both'"
-      @view="handleView"
-      @edit="handleEdit"
-    />
+    <DataTable v-else-if="!isLoading && !error && collections.length" :data="collections" :columns="columns" :rowsPerPage="5" :actionType="'both'" @view="handleView" @edit="handleEdit" />
 
     <!-- No Collections Note -->
-    <div
-      v-else
-      class="rounded-md bg-white shadow-sm border border-gray-200 dark:bg-slate-800 dark:border-slate-700"
-    >
-      <div
-        class="mt-4 p-4 rounded-md text-center text-gray-600 dark:text-gray-300"
-      >
+    <div v-else class="rounded-md bg-white shadow-sm border border-gray-200 dark:bg-slate-800 dark:border-slate-700">
+      <div class="mt-4 p-4 rounded-md text-center text-gray-700 dark:text-gray-300">
         <p>No collections available.</p>
         <p>Click the "Add" button to create a new collection.</p>
       </div>
