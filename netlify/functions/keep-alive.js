@@ -63,4 +63,4 @@ const sendDiscordNotification = async (message) => {
 };
 
 // ✅ Export the scheduled function correctly
-export const handler = schedule("@weekly", keepAliveFunction);
+export const handler = schedule("@daily", keepAliveFunction);
