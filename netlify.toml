@@ -4,7 +4,12 @@
   environment = { NUXT_TELEMETRY_DISABLED = "1" }
 
 [functions]
-  node_bundler = "esbuild"
+directory = "netlify/functions"
+node_bundler = "esbuild"
 
 [cache]
   paths = ["node_modules", ".output"]
+
+
+[functions.keep-alive]
+  schedule = "@weekly" 

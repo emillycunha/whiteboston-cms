@@ -23,3 +23,5 @@ gitguide.md
 
 # Local env files
 .env
+# Local Netlify folder
+.netlify
