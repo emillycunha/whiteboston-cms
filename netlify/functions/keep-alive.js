@@ -8,46 +8,59 @@ const discordWebhookUrl = process.env.DISCORD_WEBHOOK_URL;
 console.log("🔄 Starting keep-alive function...");
 console.log("🔑 Supabase URL:", supabaseUrl ? "✅ Set" : "❌ MISSING");
 console.log("🔑 Service Role Key:", supabaseServiceRoleKey ? "✅ Set" : "❌ MISSING");
+console.log("🔔 Discord Webhook:", discordWebhookUrl ? "✅ Set" : "❌ MISSING");
 
 const supabase = createClient(supabaseUrl, supabaseServiceRoleKey);
 
+// ✅ Rename the function to avoid redeclaration issues
 const keepAliveFunction = async function () {
   console.log("🔄 Running weekly keep-alive function...");
 
   try {
-    // ✅ Perform a simple query to keep Supabase active
+    console.log(`🔑 Supabase URL: ${supabaseUrl ? "✅ Set" : "❌ Not Set"}`);
+    console.log(`🔑 Service Role Key: ${supabaseServiceRoleKey ? "✅ Set" : "❌ Not Set"}`);
+
+    // ✅ Perform a simple query to check if Supabase is alive
     const { data, error } = await supabase.from("users").select("id").limit(1);
 
     if (error) {
-      console.error("❌ Supabase Query Error:", error.message);
-      await sendDiscordMessage("❌ Supabase Query Error: " + error.message);
-      return { statusCode: 500, body: JSON.stringify({ error: "Failed to keep Supabase active." }) };
+      console.error("❌ Supabase Query Error:", error);
+      await sendDiscordNotification(`❌ **Supabase Error:** ${error.message}`);
+      return { statusCode: 500, body: JSON.stringify({ error: "Failed to keep Supabase active.", details: error }) };
     }
 
     console.log("✅ Supabase is active!", data);
-    await sendDiscordMessage("✅ Supabase Keep-Alive Function ran successfully!");
+    await sendDiscordNotification("✅ **Supabase Keep-Alive Check Passed!** Supabase is active.");
 
     return { statusCode: 200, body: JSON.stringify({ message: "Keep-alive check completed." }) };
   } catch (err) {
-    console.error("❌ Unexpected Error:", err.message);
-    await sendDiscordMessage("❌ Unexpected Error: " + err.message);
-    return { statusCode: 500, body: JSON.stringify({ error: "Unexpected error occurred." }) };
+    console.error("❌ Unexpected Error:", err);
+    await sendDiscordNotification(`❌ **Unexpected Error:** ${err.message}`);
+    return {
+      statusCode: 500,
+      body: JSON.stringify({ error: "Unexpected error occurred.", details: err.message }),
+    };
   }
 };
 
-// ✅ Function to Send Message to Discord
-async function sendDiscordMessage(message) {
+// ✅ Function to send a message to Discord
+const sendDiscordNotification = async (message) => {
   if (!discordWebhookUrl) {
-    console.error("❌ Discord Webhook URL is missing!");
+    console.warn("⚠️ Discord Webhook URL is missing. Skipping notification.");
     return;
   }
 
-  await fetch(discordWebhookUrl, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ content: message }),
-  }).catch((err) => console.error("❌ Error sending Discord message:", err.message));
-}
+  try {
+    await fetch(discordWebhookUrl, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ content: message }),
+    });
+    console.log("✅ Discord notification sent!");
+  } catch (error) {
+    console.error("❌ Failed to send Discord notification:", error);
+  }
+};
 
-// ✅ Export the function correctly
-export const handler = schedule("0 0 * * 0", keepAliveFunction);
+// ✅ Export the scheduled function correctly
+export const handler = schedule("@weekly", keepAliveFunction);

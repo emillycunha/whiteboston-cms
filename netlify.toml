@@ -10,6 +10,5 @@ node_bundler = "esbuild"
 [cache]
   paths = ["node_modules", ".output"]
 
-
 [functions.keep-alive]
   schedule = "@weekly" 
