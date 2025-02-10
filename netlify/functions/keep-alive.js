@@ -5,6 +5,10 @@ const supabaseUrl = process.env.NUXT_SUPABASE_URL;
 const supabaseServiceRoleKey = process.env.NUXT_SERVICE_ROLE_KEY;
 const discordWebhookUrl = process.env.DISCORD_WEBHOOK_URL;
 
+console.log("🔄 Starting keep-alive function...");
+console.log("🔑 Supabase URL:", supabaseUrl ? "✅ Set" : "❌ MISSING");
+console.log("🔑 Service Role Key:", supabaseServiceRoleKey ? "✅ Set" : "❌ MISSING");
+
 const supabase = createClient(supabaseUrl, supabaseServiceRoleKey);
 
 const keepAliveFunction = async function () {
