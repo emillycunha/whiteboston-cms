@@ -16,7 +16,7 @@ const keepAliveFunction = async function () {
 
   try {
     // ✅ Perform a simple query to keep Supabase active
-    const { data, error } = await supabase.from("user_list").select("id").limit(1);
+    const { data, error } = await supabase.from("users").select("id").limit(1);
 
     if (error) {
       console.error("❌ Supabase Query Error:", error.message);
